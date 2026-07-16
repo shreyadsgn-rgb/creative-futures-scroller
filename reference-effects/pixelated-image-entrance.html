@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pixelated Image Entrance — Reference Demo</title>
+<style>
+  /* ============================================
+     PIXELATED IMAGE ENTRANCE — how it works
+     ============================================
+     Two versions of the SAME image sit exactly on top
+     of each other (same size, same position). The
+     pixelated one starts fully visible; the clear one
+     starts invisible (opacity: 0). When the image
+     scrolls into view, JS adds a class that flips the
+     clear image's opacity to 1, and it fades in over
+     the blocky one — same idea as the CMS example you
+     found, just with your own reusable class.
+  ============================================ */
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #0d1b1e; /* placeholder — swap for your style guide's CSS variables */
+    color: #f4f4f0;
+  }
+
+  .spacer {
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    opacity: 0.6;
+  }
+
+  /* --- The reusable piece: one class, drop it on any image wrapper --- */
+
+  .pixel-entrance {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .pixel-entrance img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The pixelated layer sits on the bottom, fully visible by default */
+  .pixel-entrance .img-pixelated {
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 1.2s ease;
+  }
+
+  /* The clear layer sits on top, invisible until triggered */
+  .pixel-entrance .img-clear {
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+
+  /* THIS is the class the scroll-trigger JS adds/removes.
+     Everything about "what the animation looks like" lives
+     here — the JS below only ever toggles this one class. */
+  .pixel-entrance.in-view .img-clear {
+    opacity: 1;
+  }
+
+  .pixel-entrance.in-view .img-pixelated {
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+  <div class="spacer">Scroll down ↓</div>
+
+  <div class="pixel-entrance">
+    <img class="img-pixelated" src="images/photo-pixelated.jpg" alt="">
+    <img class="img-clear" src="images/photo-clear.jpg" alt="A synthetic placeholder photo">
+  </div>
+
+  <div class="spacer">Scroll further for a second one ↓</div>
+
+  <div class="pixel-entrance">
+    <img class="img-pixelated" src="images/photo-pixelated.jpg" alt="">
+    <img class="img-clear" src="images/photo-clear.jpg" alt="A synthetic placeholder photo">
+  </div>
+
+  <div class="spacer">End of demo</div>
+
+  <script>
+    /* ============================================
+       THE REUSABLE TRIGGER
+       ============================================
+       This watches every ".pixel-entrance" element on the
+       page and adds "in-view" the moment it scrolls into
+       the viewport — same pattern you'll reuse for every
+       other scroll effect, just swapping which class gets
+       added.
+    ============================================ */
+
+    const targets = document.querySelectorAll('.pixel-entrance');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          // Stop watching once it's played — remove this line
+          // if you want it to re-trigger on scrolling back up.
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.4 // triggers once 40% of the image is visible
+    });
+
+    targets.forEach((el) => observer.observe(el));
+  </script>
+
+  <!--
+    HOW TO USE YOUR OWN IMAGES:
+    1. Save a low-res/pixelated version and a full-res version
+       of the same photo into your /images folder.
+    2. Point img-pixelated's src at the low-res one, and
+       img-clear's src at the full-res one.
+    3. To MAKE a pixelated version from an existing photo,
+       shrink it way down (e.g. to 30-40px wide) in any image
+       editor, then scale it back up to full size without
+       smoothing/resampling — that blockiness is the effect.
+  -->
+
+</body>
+</html>

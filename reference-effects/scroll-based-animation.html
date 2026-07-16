@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scroll Based Animation — Reference (source: CodePen)</title>
+<!--
+  Original: "Trigger a css animation on scroll" by johnson5409
+  https://codepen.io/johnson5409/pen/gOPeWPe
+  Saved for personal reference / learning, not redistributed as-is.
+  No stated license on the pen — treat as reference material to learn
+  from and adapt, not to publish verbatim in the final site.
+
+  WHAT IT DOES: a fixed full-screen "movie poster" style panel sits
+  behind three scrollable spacer sections. As each spacer scrolls into
+  the middle of the viewport, a "step-N" class gets added to the panel,
+  which triggers CSS transitions (image zooms out, title fades/scales
+  in, cast list fades/scales in). This is the exact technique behind
+  your "items move backward and fade out slightly while a new item is
+  revealed in front" effect.
+
+  Intended use per your spreadsheet: the "people have always dreamed
+  of..." part of your History section.
+
+  NOTES ON THIS COPY:
+  - Uses jQuery (kept via CDN to match the original exactly).
+  - Original had a placeholder image URL from a random wallpaper site —
+    replaced below with a CSS gradient placeholder; swap in your own
+    sourced image.
+  - The JS has some Chinese-language comments in the original explaining
+    scroll direction logic — translated to English below for clarity.
+-->
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+ul, li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scroll-wrap {
+  position: relative;
+}
+body::-webkit-scrollbar {
+  display: none;
+}
+.scroll-wrap li {
+  height: 100vh;
+}
+.movie {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  background: #111;
+}
+.movie .bg {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #2a1a3a, #0f2340);
+  background-size: cover;
+}
+.movie .bg img {
+  transform: scale(1.2);
+  transition: 1s;
+}
+.movie.step-2 .bg img { transform: scale(1.1); }
+.movie.step-3 .bg img { transform: scale(1); }
+
+.story, .actor {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  opacity: 0;
+  transition: 1s;
+}
+.story:before, .actor:before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: bottom;
+}
+.story-content, .actor ul {
+  display: inline-block;
+  text-align: left;
+  margin-bottom: 10%;
+  width: 600px;
+  max-width: 90vw;
+  transform: scale(2);
+  transition: 1s;
+}
+.actor ul { margin-bottom: 20%; }
+.actor ul li { display: inline-block; vertical-align: top; }
+.actor ul li + li { margin-left: 40px; }
+
+.movie.step-2 .story,
+.movie.step-3 .story { opacity: 1; }
+.movie.step-2 .story-content { transform: scale(1); }
+.movie.step-3 .story-content { transform: scale(0.5); }
+.movie.step-3 .actor { opacity: 1; }
+.movie.step-3 .actor ul { transform: scale(1); }
+</style>
+</head>
+<body>
+
+<div class="movie">
+  <div class="bg"><img src="" alt="" style="display:none"></div>
+  <div class="story">
+    <div class="story-content">
+      <h2>Replace with your section title</h2>
+      <h4>Replace with your section body copy — this scales down and moves back as the reader keeps scrolling, making room for the next layer of content.</h4>
+    </div>
+  </div>
+  <div class="actor">
+    <ul>
+      <li><h2>Label</h2><h4>Value</h4></li>
+      <li><h2>Label</h2><h4>Value</h4></li>
+      <li><h2>Label</h2><h4>Value</h4></li>
+    </ul>
+  </div>
+</div>
+
+<ul class="scroll-wrap">
+  <li></li>
+  <li></li>
+  <li></li>
+</ul>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+var lasScrTop = 0;
+$(window).scroll(function () {
+  var winTop = $(this).scrollTop();
+  var winMid = $(window).height() / 2 + winTop;
+  var winBot = $(window).height() + winTop;
+
+  $(".scroll-wrap li").each(function () {
+    var liHei = $(this).height();
+    var liOff = $(this).offset();
+    var liTop = liOff.top;
+    var liBot = liTop + liHei;
+
+    if (liBot <= winMid || liTop >= winBot) {
+      // scrolled out of view — remove active state
+      $(this).removeClass("inView");
+    } else if (liTop <= winMid) {
+      // scrolled to the middle — mark active
+      $(this).addClass("inView");
+    }
+
+    var inViewEq = $(".inView").index() + 1;
+    $(".movie")
+      .attr("class", "")
+      .addClass("movie step-" + inViewEq);
+  });
+
+  // (originally tracked scroll direction here — not used by the
+  // current effect, kept as a hook if you want direction-aware logic)
+  lasScrTop = winTop;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History — Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     Tunable variables — the dev panel writes these live.
+     Once you like a set of values, paste the panel's "Save" output
+     over this block.
+     ============================================================ */
+  :root {
+    --section-gap: 220vh;      /* scroll distance of each pinned (scrubbed) section */
+    --anim-duration: 0.6s;     /* entry animation duration for flow sections */
+    --anim-delay: 0.1s;        /* entry animation delay */
+    --stagger: 150ms;          /* per-item offset in the dataset gallery */
+
+    --bg: #050A0A;
+    --ink: #FFFFFF;
+    --ink-dim: rgba(255, 255, 255, 0.55);
+    --teal: #0097A7;           /* cold / data / systemic */
+    --warm: #EBFE9B;           /* warm / human / reflective */
+    --card-bg: #0C1414;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ---------- shared layout ---------- */
+  .copy-col { padding-left: 12vw; max-width: calc(12vw + 480px); }
+
+  .lede { font-size: 17px; font-weight: 400; max-width: 30em; }
+  .subtext { font-size: 13.5px; color: var(--ink-dim); max-width: 34em; }
+
+  /* ---------- pinned scrub sections ----------
+     JS writes --p (0 → 1) onto each [data-scrub] as it scrolls through. */
+  [data-scrub] { position: relative; height: var(--section-gap); --p: 0; }
+  [data-scrub] .pin {
+    position: sticky; top: 0; height: 100vh; overflow: hidden;
+    display: grid; align-content: center;
+  }
+
+  /* ---------- flow sections (animate once on viewport entry) ---------- */
+  .flow { padding-block: calc(var(--section-gap) / 5); }
+  .flow p + p { margin-top: 3vh; }
+  [data-reveal] {
+    opacity: 0; transform: translateY(24px);
+    transition:
+      opacity var(--anim-duration) ease var(--anim-delay),
+      transform var(--anim-duration) ease var(--anim-delay);
+  }
+  [data-reveal].is-visible { opacity: 1; transform: none; }
+
+  /* ---------- scroll-linked reveal (vs. [data-reveal]'s fixed-duration transition) ----------
+     [data-reveal]'s opacity plays over a fixed time (--anim-duration) once triggered, so a fast
+     scroll can outrun it. [data-scroll-reveal] instead maps opacity/transform straight off --rp
+     (written per-element in JS from the element's own scroll position), same idiom as the
+     .s-dreams .intro .lede "stuck" fade — it can't be scrolled past faster than it reveals,
+     because there's no fixed duration to outrun. */
+  [data-scroll-reveal] {
+    opacity: var(--rp, 0);
+    transform: translateY(calc((1 - var(--rp, 0)) * 24px));
+  }
+
+  /* ---------- placeholder boxes ---------- */
+  .ph {
+    width: 100%; height: 100%;
+    display: grid; place-items: center; text-align: center; padding: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ink-dim);
+    font: 500 10px/1.5 ui-monospace, Menlo, monospace;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .ph::before { content: "placeholder — " attr(data-label); }
+
+  /* ============================================================
+     0 · ARRIVAL — 3D zoom field, words + image placeholders
+     Adapted from reference-effects/3d-spatial-zoom.html, but driven
+     by the shared JS --p engine below (not animation-timeline:
+     scroll()) so it also animates in Safari.
+     Each [data-zoom-item] carries a "inStart,inEnd,outStart,outEnd"
+     range (fractions of the section's --p); JS turns that into
+     --z/--op/--blur per frame. Regular items have inEnd == outStart
+     (a quick pass-through); the center sentence has a gap between
+     them, so it holds in place for several scroll-ticks before
+     receding.
+     ============================================================ */
+  .s-intro { height: calc(var(--section-gap) * 1.5); }
+  .s-intro .zoom-field {
+    position: relative; width: 100%; height: 100%;
+    /* keep the field pinned to the viewport width — otherwise nowrap words +
+       out-of-range grid-columns inflate its min-content, shifting its 50% off-screen */
+    min-width: 0; max-width: 100%;
+    perspective: 1000px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    place-items: center;
+  }
+  .zoom-item {
+    transform-style: preserve-3d;
+    transform: translateZ(var(--z, -1000px));
+    opacity: var(--op, 0);
+    filter: blur(var(--blur, 5px));
+    will-change: transform, opacity, filter;
+  }
+  .zoom-item.word {
+    font-size: clamp(15px, 1.8vw, 21px); font-weight: 300;
+    color: var(--ink-dim); white-space: nowrap;
+  }
+  .zoom-item.center-hold {
+    /* pulled out of the grid and centered with symmetric auto margins, so it sits
+       at the true center of the field at any width (no left:50% shrink-to-fit quirk) */
+    position: absolute; inset: 0; margin: auto;
+    width: max-content; height: max-content;
+    max-width: min(26ch, 90vw);
+    transform: translateZ(var(--z, -1000px));
+    font-size: clamp(18px, 2.4vw, 26px); font-weight: 400;
+    color: var(--ink); text-align: center;
+  }
+  .zoom-item.img .ph { width: 100%; height: 100%; }
+  .zoom-item.img.size-lg { width: min(15vw, 190px); aspect-ratio: 2 / 3; }
+  .zoom-item.img.size-md { width: min(11vw, 140px); aspect-ratio: 3 / 4; }
+  .zoom-item.img.size-sm { width: min(6vw, 80px); aspect-ratio: 1 / 1; }
+
+  /* ============================================================
+     1 · OLD DREAMS — 4-step fade-forward sequence
+     (Figma 143:2159: Grammatizator → Za'irajah → Golem → Golem sidenote)
+     The intro holds alone for the first --lead of the scrub; --t then runs
+     0 → 3 across the steps zone, each .step peaking at --t == --k; --exit
+     then carries the *last* step's own fade-out (0→1) through the exit
+     zone (since t is pinned at 3 by then, d = t-k would otherwise stay 0
+     forever); the outro line only starts fading in once --exit finishes.
+     Outgoing images recede toward the top-right (per Figma ghosts).
+     ============================================================ */
+  .s-dreams {
+    height: calc(var(--section-gap) * 2);
+    --lead: 0.28;                     /* front slice reserved for the intro alone, before the steps start */
+    --steps-end: 0.84;                /* --t reaches 3 (last step fully in) by this point */
+    --exit-end: 0.94;                 /* last step finishes receding by this point */
+    /* only cap the upper bound at 3 — must stay negative (not clamped to 0) while
+       p < lead, otherwise step 0's d = t - k would hit 0 immediately and it'd
+       appear at full opacity before the lead-in finishes */
+    --t: min(3, calc((var(--p) - var(--lead)) / (var(--steps-end) - var(--lead)) * 3));
+    --exit: clamp(0, calc((var(--p) - var(--steps-end)) / (var(--exit-end) - var(--steps-end))), 1);
+  }
+  .s-dreams .intro {
+    position: absolute; top: 12vh; left: 12vw; z-index: 2;
+  }
+  .s-dreams .intro .lede {
+    /* appears first: fade + rise in over the lead, then holds in place (stuck) */
+    --in: clamp(0, var(--p) / 0.06, 1);
+    opacity: var(--in);
+    transform: translateY(calc((1 - var(--in)) * 24px));
+  }
+  .s-dreams .intro .outro {
+    margin-top: 3vh;
+    color: var(--ink-dim);
+    /* appears last: only once the last step has fully faded out (--exit reaches 1) */
+    --in: clamp(0, (var(--p) - var(--exit-end)) / (1 - var(--exit-end)), 1);
+    opacity: var(--in);
+    transform: translateY(calc((1 - var(--in)) * 24px));
+  }
+  .step {
+    position: absolute; inset: 0;
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+    align-items: center; gap: 4vw; padding: 0 8vw 12vh 12vw;
+    /* + --exit only ever moves the *last* step (t-k==0 there once --t is pinned at 3);
+       earlier steps are already fully exited (d > 1) by the time --exit turns on. */
+    --d: calc(var(--t) - var(--k) + var(--exit));
+    --out: clamp(0, var(--d), 1);          /* 0→1 as the step exits */
+    --in: clamp(0, 0 - var(--d), 1);       /* 1→0 as the step enters */
+    /* ×1.8 sharpens the crossfade so two text blocks never overlap legibly */
+    opacity: clamp(0, 1 - max(var(--d), 0 - var(--d)) * 1.8, 1);
+    pointer-events: none;                  /* .is-front (set by JS) takes clicks */
+  }
+  .step.is-front { pointer-events: auto; }
+  .step .copy { align-self: end; max-width: 430px; }
+  .step h3 { font-size: 17px; font-weight: 500; margin-bottom: 10px; }
+  .step .media {
+    height: min(58vh, 520px);
+    transform:
+      translate(calc(var(--out) * 14%), calc(var(--out) * -16%))
+      scale(calc(1 - 0.3 * var(--out) + 0.08 * var(--in)));
+  }
+  .step .media .ph { height: 100%; }
+  .sidenote { margin-top: 24px; }
+  .sidenote h4 { font-size: 13px; font-weight: 500; color: var(--warm); margin-bottom: 6px; }
+
+  /* ============================================================
+     2 · FIRST PROPOSAL — plain intro text on the left; below it, a
+     focus slot that surfaces each quote's real crop (assets/pdfs/
+     quotes/) plus a .prompt discussion question, typed out letter by
+     letter. On the right, the *actual* PDF pages (assets/pdfs/pages/)
+     scroll continuously — except while a prompt is typing, when the
+     PDF holds still, resuming once that line finishes forming.
+     Each quote now carries 4 breakpoints (--in-start/--type-start/
+     --type-end/--out-end) instead of a plain --start/--end pair:
+       inStart → typeStart : crop fades into focus
+       typeStart → typeEnd : held in focus, letters type out
+       typeEnd → outEnd    : crop fades back out
+     --fp (crop/frame opacity) is built from two clamped ramps
+     (fade-in, fade-out) combined with min() — a "hold" shape, same
+     idiom as the s-dreams outro/--exit, just done in one step here.
+     --typeProgress (0→1 across typeStart..typeEnd) drives the
+     per-character reveal on .prompt (JS only splits the text into
+     indexed <span class="c">s — same trick as the existing
+     [data-highlight] word-splitter, just per-character).
+     The PDF's "pause while typing" is --pdf-p: --p with each quote's
+     typing-window dwell time subtracted back out, so it freezes for
+     exactly the width of that window and resumes seamlessly after —
+     all five subtracted in one calc(), no JS required for this part.
+     ============================================================ */
+  .s-proposal { height: calc(var(--section-gap) * 3.4); }
+  .s-proposal .proposal-layout {
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center; gap: 5vw;
+    width: 100%; padding-inline: 12vw 8vw;
+  }
+  .s-proposal .copy-col { padding-left: 0; max-width: none; }
+  .s-proposal {
+    --pdf-p: calc(
+      var(--p)
+      - clamp(0, var(--p) - 0.06, 0.09)
+      - clamp(0, var(--p) - 0.265, 0.09)
+      - clamp(0, var(--p) - 0.47, 0.09)
+      - clamp(0, var(--p) - 0.675, 0.09)
+      - clamp(0, var(--p) - 0.88, 0.09)
+    );
+  }
+
+  /* -- left: intro + crop/prompt focus slot -- */
+  .prompt-stack { position: relative; height: clamp(170px, 22vh, 240px); margin-top: 36px; }
+  .prompt-block {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; gap: 14px;
+    --fade-in: clamp(0, calc((var(--p) - var(--in-start)) / (var(--type-start) - var(--in-start))), 1);
+    --fade-out: clamp(0, calc((var(--out-end) - var(--p)) / (var(--out-end) - var(--type-end))), 1);
+    --fp: min(var(--fade-in), var(--fade-out));
+    --typeProgress: clamp(0, calc((var(--p) - var(--type-start)) / (var(--type-end) - var(--type-start))), 1);
+    opacity: var(--fp);
+    transform: translateY(calc((1 - var(--fp)) * 10px));
+  }
+  .prompt-block .frame {
+    display: block; border-radius: 2px;
+    box-shadow: 0 0 0 calc(var(--fp) * 5px) color-mix(in srgb, var(--teal) calc(var(--fp) * 45%), transparent);
+  }
+  .prompt-block img {
+    display: block; width: 100%; height: auto; border-radius: 2px;
+    filter: grayscale(calc(1 - var(--fp))) brightness(calc(0.85 + 0.15 * var(--fp)));
+  }
+  /* new text category: a dim, reflective discussion question (vs. .subtext's neutral caption tone),
+     typed out in a typewriter face — each .c is one character, revealed near-instantly (steep
+     multiplier) once --typeProgress * charCount passes its index, so it reads as keystrokes. */
+  .prompt {
+    font-family: 'Courier Prime', ui-monospace, Menlo, monospace;
+    font-size: 14.5px; line-height: 1.7; color: var(--ink-dim); max-width: 32em;
+  }
+  .prompt .c { opacity: clamp(0, (var(--typeProgress) * var(--n) - var(--i)) * 40, 1); }
+  .prompt::after {
+    content: '|'; color: var(--teal); margin-left: 1px;
+    opacity: calc(1 - clamp(0, (var(--typeProgress) - 0.995) * 200, 1));
+  }
+
+  /* -- right: the actual PDF — pauses (via --pdf-p) while a prompt is mid-type -- */
+  .pdf-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .pdf-viewport {
+    position: relative; height: min(64vh, 640px); overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: var(--card-bg); border-radius: 4px;
+    padding: 3vh 2vw;
+  }
+  .pdf-scroll {
+    min-height: 150vh;
+    display: flex; flex-direction: column; gap: 6vh;
+    transform: translateY(calc(var(--pdf-p) * -160vh));
+  }
+  .pdf-page-item img { display: block; width: 100%; height: auto; border-radius: 2px; }
+  .pdf-page-item .cap {
+    display: block; margin-top: 6px; text-align: center;
+    font: 500 10px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .pdf-caption { font-size: 12px; color: var(--ink-dim); }
+  .pdf-caption a { color: var(--teal); }
+
+  /* ============================================================
+     3 · RULES — three worked IF/AND/THEN examples, one at a time.
+     .rule-block reuses the s-proposal .prompt-block envelope idiom:
+     --in-start/--type-start/--type-end/--out-end → --fp via
+     min(fade-in, fade-out) (a hold shape, 0→1→0). Within that
+     envelope, each .rline and .rule-frame has its own small --ls/--le
+     fade-in window, min()'d against the block's --fp as --lp — so
+     lines and frames stagger in individually (one at a time, per the
+     reference) but the whole block fades out together at the end.
+     Frames carry a translateY tied to (1 - --lp), so they drift up
+     into place as they fade in (and drift further up as the block
+     exits, since --lp falls back toward 0 with --fp).
+     ============================================================ */
+  .s-rules { height: calc(var(--section-gap) * 2.2); }
+  .s-rules .intro {
+    padding-left: 12vw; margin-bottom: 6vh;
+    --in: clamp(0, var(--p) / 0.03, 1);
+    opacity: var(--in);
+    transform: translateY(calc((1 - var(--in)) * 16px));
+  }
+  .rules-field { position: relative; width: 100%; height: 56vh; }
+  .rule-block {
+    position: absolute; inset: 0;
+    --fade-in: clamp(0, calc((var(--p) - var(--in-start)) / (var(--type-start) - var(--in-start))), 1);
+    --fade-out: clamp(0, calc((var(--out-end) - var(--p)) / (var(--out-end) - var(--type-end))), 1);
+    --fp: min(var(--fade-in), var(--fade-out));
+  }
+  .rule-lines { padding-left: 12vw; max-width: 34em; display: flex; flex-direction: column; gap: 48px; }
+  .rline {
+    font-size: clamp(21px, 2.8vw, 32px); font-weight: 400; line-height: 1.4;
+    --fadeIn: clamp(0, calc((var(--p) - var(--ls)) / (var(--le) - var(--ls))), 1);
+    --lp: min(var(--fadeIn), var(--fp));
+    opacity: var(--lp);
+    transform: translateY(calc((1 - var(--lp)) * 14px));
+  }
+  .rline .kw { color: var(--warm); font-weight: 500; }
+  .rule-frame {
+    position: absolute; width: min(15vw, 190px); aspect-ratio: 1;
+    --fadeIn: clamp(0, calc((var(--p) - var(--ls)) / (var(--le) - var(--ls))), 1);
+    --lp: min(var(--fadeIn), var(--fp));
+    /* opacity still follows the fade-in/hold/fade-out envelope above, but position is its own
+       continuous climb across the frame's whole lifetime (--ls → the block's --out-end) — so it
+       keeps drifting upward the entire time, rather than settling once fully faded in, and has
+       fully exited (off the top) by the time the block hands off to the next IF statement. */
+    --drift: clamp(0, calc((var(--p) - var(--ls)) / (var(--out-end) - var(--ls))), 1);
+    opacity: var(--lp);
+    transform: translateY(calc(50px - var(--drift) * 220px));
+  }
+  .rule-frame .ph { width: 100%; height: 100%; }
+
+  /* ============================================================
+     5 · DATASETS — staggered placeholder gallery
+     ============================================================ */
+  .gallery {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px;
+    margin-block: 7vh; padding-right: 8vw;
+  }
+  .gallery figure { display: flex; flex-direction: column; gap: 8px; }
+  .gallery .ph { aspect-ratio: 4 / 3; }
+  .gallery figcaption { font-size: 12px; color: var(--ink-dim); }
+  /* children inherit the reveal transition but offset by --stagger */
+  [data-reveal].gallery figure {
+    opacity: 0; transform: translateY(24px);
+    transition:
+      opacity var(--anim-duration) ease calc(var(--anim-delay) + var(--i) * var(--stagger)),
+      transform var(--anim-duration) ease calc(var(--anim-delay) + var(--i) * var(--stagger));
+  }
+  [data-reveal].gallery.is-visible figure { opacity: 1; transform: none; }
+  [data-reveal].gallery { opacity: 1; transform: none; } /* parent is just a trigger */
+
+  /* ---------- top / bottom framing ---------- */
+  .frame-note {
+    min-height: 60vh; display: grid; align-content: center;
+    font: 500 11px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+  }
+
+  @media (max-width: 800px) {
+    .s-intro .zoom-field { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(7, 1fr); }
+    .copy-col { padding-inline: 7vw; max-width: none; }
+    .s-dreams .intro { left: 7vw; right: 7vw; }
+    .step { grid-template-columns: 1fr; gap: 20px; padding: 22vh 7vw 8vh; align-items: end; }
+    .step .media { height: 32vh; order: -1; }
+    .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-right: 7vw; }
+    .s-rules .intro, .rule-lines { padding-left: 7vw; }
+    .rule-frame { width: 22vw; }
+    .s-proposal .proposal-layout { grid-template-columns: 1fr; padding-inline: 7vw; gap: 4vh; }
+    .pdf-viewport { height: 44vh; padding: 3vh 5vw; }
+  }
+</style>
+</head>
+<body>
+
+<header class="frame-note copy-col">History · sandbox — scroll ↓</header>
+
+<!-- 0 · Arrival: 3D zoom field mixing words + image placeholders -->
+<section id="s-intro" class="s-intro" data-scrub>
+  <div class="pin">
+    <div class="zoom-field">
+      <!-- items are grouped into 7 "waves" (comments below); within a wave, 2-3 items
+           overlap in time but sit in scattered grid cells and are offset ~0.035 from
+           each other, so at any moment they're at different fade phases (= different
+           apparent z-depth) and different x/y — not one at a time. -->
+      <!-- wave 1 (~0.10–0.24) -->
+      <div class="zoom-item img size-lg" style="grid-row: 1; grid-column: 1;" data-zoom-item="0.020,0.080,0.110,0.170">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 1"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 4; grid-column: 3;" data-zoom-item="0.055,0.115,0.145,0.205" data-editable>recommendation engines</div>
+      <div class="zoom-item img size-md" style="grid-row: 2; grid-column: 5;" data-zoom-item="0.090,0.150,0.180,0.240">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 2"></div>
+      </div>
+      <!-- wave 2 (~0.22–0.37) -->
+      <div class="zoom-item word" style="grid-row: 5; grid-column: 2;" data-zoom-item="0.150,0.210,0.240,0.300" data-editable>voice assistants</div>
+      <div class="zoom-item img size-sm" style="grid-row: 1; grid-column: 4;" data-zoom-item="0.185,0.245,0.275,0.335">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 3"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 3; grid-column: 1;" data-zoom-item="0.220,0.280,0.310,0.370" data-editable>predictive text</div>
+      <!-- wave 3 (~0.35–0.50) -->
+      <div class="zoom-item img size-lg" style="grid-row: 2; grid-column: 2;" data-zoom-item="0.280,0.340,0.370,0.430">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 4"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 4; grid-column: 5;" data-zoom-item="0.315,0.375,0.405,0.465" data-editable>deepfakes</div>
+      <div class="zoom-item img size-md" style="grid-row: 1; grid-column: 3;" data-zoom-item="0.350,0.410,0.440,0.500">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 5"></div>
+      </div>
+      <!-- wave 4 (~0.48–0.63) -->
+      <div class="zoom-item word" style="grid-row: 5; grid-column: 4;" data-zoom-item="0.410,0.470,0.500,0.560" data-editable>chatbots</div>
+      <div class="zoom-item img size-sm" style="grid-row: 3; grid-column: 2;" data-zoom-item="0.445,0.505,0.535,0.595">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 6"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 2; grid-column: 4;" data-zoom-item="0.480,0.540,0.570,0.630" data-editable>facial recognition</div>
+      <p class="zoom-item center-hold" data-zoom-item="0.38,0.48,1,1" data-editable>Lately, it feels like AI is suddenly appearing everywhere.</p>
+      <!-- wave 5 (~0.61–0.76) -->
+      <div class="zoom-item img size-lg" style="grid-row: 1; grid-column: 2;" data-zoom-item="0.540,0.600,0.630,0.690">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 7"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 4; grid-column: 1;" data-zoom-item="0.575,0.635,0.665,0.725" data-editable>spam filters</div>
+      <div class="zoom-item img size-md" style="grid-row: 5; grid-column: 5;" data-zoom-item="0.610,0.670,0.700,0.760">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 8"></div>
+      </div>
+      <!-- wave 6 (~0.74–0.89) -->
+      <div class="zoom-item word" style="grid-row: 2; grid-column: 1;" data-zoom-item="0.670,0.730,0.760,0.820" data-editable>autocomplete</div>
+      <div class="zoom-item img size-sm" style="grid-row: 1; grid-column: 5;" data-zoom-item="0.705,0.765,0.795,0.855">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 9"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 4; grid-column: 4;" data-zoom-item="0.740,0.800,0.830,0.890" data-editable>self-driving cars</div>
+      <!-- wave 7 (~0.86–0.99, only 2 items) -->
+      <div class="zoom-item img size-lg" style="grid-row: 5; grid-column: 1;" data-zoom-item="0.805,0.865,0.895,0.955">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 10"></div>
+      </div>
+      <div class="zoom-item word" style="grid-row: 2; grid-column: 3;" data-zoom-item="0.845,0.905,0.935,0.995" data-editable>AI-generated art</div>
+    </div>
+  </div>
+</section>
+
+<!-- Explosion lead-in: flow text, appears once between the zoom field and Old Dreams -->
+<section id="s-explosion" class="flow copy-col">
+  <p class="lede" data-scroll-reveal data-editable>You may wonder where this explosion of technology came from.</p>
+  <p class="lede" data-scroll-reveal data-editable>Ideas about the possibilities of artificial intelligence are in fact older than you think.</p>
+</section>
+
+<!-- 1 · Old dreams: 4-step fade-forward (Figma 143:2159) -->
+<section id="s-dreams" class="s-dreams" data-scrub>
+  <div class="pin">
+    <div class="intro">
+      <p class="lede" data-editable>Long before computers, cultures around the world imagined artificial beings, mechanical minds, and machines that could speak, write, or serve.</p>
+      <p class="lede outro" data-editable>These stories did not predict modern AI exactly, but they created many of the ideas we still associate with intelligence, automation, authorship, and the risks of making nonhuman agents.</p>
+    </div>
+
+    <div class="step" style="--k: 0;">
+      <div class="copy">
+        <h3 data-editable>The Great Automatic Grammatizator (1953)</h3>
+        <p class="subtext" data-editable>A mechanically minded man reasons that the rules of grammar are fixed by certain, almost mathematical principles. By exploiting this idea, he is able to create a mammoth machine that can write a prize-winning novel in roughly fifteen minutes. The story ends on a fearful note, as more and more of the world&#8217;s writers are forced into licensing their names&#8212;and all hope of human creativity&#8212;to the machine.</p>
+      </div>
+      <div class="media"><div class="ph" data-img-slot data-label="Roald Dahl book cover / Grammatizator collage"></div></div>
+    </div>
+
+    <div class="step" style="--k: 1;">
+      <div class="copy">
+        <h3 data-editable>Za&#8217;irajah paper machines (~14th Century)</h3>
+        <p class="subtext" data-editable>Long before computers, medieval Arab scholars built a device called the Za&#8217;irajah: a paper machine designed to generate answers to questions through a system of rotating circles, letter values, and mathematical rules. People could pose a question, and the machine would combine the numerical values of the Arabic letters in your words with astrological categories to produce an answer in the form of a new arrangement of letters. It wasn&#8217;t AI but similar to early AI models, it acted as a rule-based system for producing meaning from patterns.</p>
+      </div>
+      <div class="media"><div class="ph" data-img-slot data-label="Za'irajah manuscript diagram"></div></div>
+    </div>
+
+    <div class="step" style="--k: 2;">
+      <div class="copy">
+        <h3 data-editable>The Golem of Prague (16th century)</h3>
+        <p class="subtext" data-editable>In 16th-century Prague, Rabbi Judah Loew ben Bezalel was said to have shaped a figure from river clay and brought it to life by placing a piece of paper inscribed with a sacred word into its mouth. The golem couldn&#8217;t speak or think; it could only follow instructions, serving as a protector for a Jewish community living under threat of persecution. Every Friday before the Sabbath, the rabbi would remove the shem to deactivate it, until one week he forgot, and the golem became uncontrollable. The rabbi eventually stopped it, and legend says its remains still sit in the attic of Prague&#8217;s Old New Synagogue, waiting.</p>
+      </div>
+      <div class="media"><div class="ph" data-img-slot data-label="Golem of Prague illustration"></div></div>
+    </div>
+
+    <div class="step" style="--k: 3;">
+      <div class="copy">
+        <h3 data-editable>The Golem of Prague (16th century)</h3>
+        <p class="subtext" data-editable>The golem couldn&#8217;t speak or think; it could only follow instructions &#8212; a being run entirely on rules.</p>
+        <div class="sidenote">
+          <h4 data-editable>And Other Golems</h4>
+          <p class="subtext" data-editable>One popular reference to the golem is Minecraft&#8217;s Iron Golem: a silent, powerful figure that protects a village and follows rules while also being deadly.</p>
+        </div>
+      </div>
+      <div class="media"><div class="ph" data-img-slot data-label="Minecraft Iron Golem screenshot"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Proposal lead-in: flow text, same scroll-linked reveal as s-explosion -->
+<section id="s-proposal-lead" class="flow copy-col">
+  <p class="lede" data-scroll-reveal data-editable>The AI that we know and talk about today has been in the making since the 1950s.</p>
+  <p class="lede" data-scroll-reveal data-editable>The term &#8220;Artificial Intelligence&#8221; was first used in 1955.</p>
+</section>
+
+<!-- 2 · First proposal: plain intro + crossfading quote/prompt focus, real PDF scrolling alongside -->
+<section id="s-proposal" class="s-proposal" data-scrub>
+  <div class="pin">
+    <div class="proposal-layout">
+      <div class="copy-col">
+        <p class="lede" data-editable>The first research proposal for AI outlined a plan for what researchers wanted to use AI for.</p>
+
+        <div class="prompt-stack">
+          <div class="prompt-block" style="--in-start: 0.03; --type-start: 0.06; --type-end: 0.15; --out-end: 0.18;">
+            <span class="frame"><img src="../assets/pdfs/quotes/quote1.png" alt="every aspect of learning or any other feature of intelligence can in principle be so precisely described that a machine can be made to simulate it"></span>
+            <p class="prompt" data-typewriter data-editable>Do you think every aspect of human creativity can be described precisely enough for a machine to simulate it?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.235; --type-start: 0.265; --type-end: 0.355; --out-end: 0.385;">
+            <span class="frame"><img src="../assets/pdfs/quotes/quote2.png" alt="a large part of human thought consists of manipulating words according to rules of reasoning and rules of conjecture"></span>
+            <p class="prompt" data-typewriter data-editable>If writing captions or crafting stories is just rules to be replicated, what does that mean for your own creative process?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.44; --type-start: 0.47; --type-end: 0.56; --out-end: 0.59;">
+            <span class="frame"><img src="../assets/pdfs/quotes/quote3.png" alt="the difference between creative thinking and unimaginative competent thinking lies in the injection of some randomness"></span>
+            <p class="prompt" data-typewriter data-editable>Is creativity just controlled randomness? Is that all it is when AI does it &#8212; is that all it is when you do it?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.645; --type-start: 0.675; --type-end: 0.765; --out-end: 0.795;">
+            <span class="frame"><img src="../assets/pdfs/quotes/quote4.png" alt="one ordinarily provides the machine with a set of rules to cover each contingency which may arise&#8230; One expects the machine to follow this set of rules slavishly and to exhibit no originality or common sense"></span>
+            <p class="prompt" data-typewriter data-editable>Does a machine that follows rules &#8220;slavishly,&#8221; with no originality or common sense, sound like any AI tool you&#8217;ve used?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.85; --type-start: 0.88; --type-end: 0.97; --out-end: 1;">
+            <span class="frame"><img src="../assets/pdfs/quotes/quote5.png" alt="I propose to study the relation of language to intelligence&#8230; The human mind apparently uses language as its means of handling complicated phenomena"></span>
+            <p class="prompt" data-typewriter data-editable>The people who decided what AI should do didn&#8217;t look like most of the people it would affect &#8212; what does that leave out?</p>
+          </div>
+        </div>
+      </div>
+      <div class="pdf-panel">
+        <div class="pdf-viewport">
+          <div class="pdf-scroll">
+            <div class="pdf-page-item">
+              <img src="../assets/pdfs/pages/page-02.png" alt="Dartmouth proposal, page 2 &#8212; the conjecture, language, and randomness sections">
+              <span class="cap">p. 2</span>
+            </div>
+            <div class="pdf-page-item">
+              <img src="../assets/pdfs/pages/page-07.png" alt="Dartmouth proposal, page 7 &#8212; Rochester's Originality in Machine Performance">
+              <span class="cap">p. 7</span>
+            </div>
+            <div class="pdf-page-item">
+              <img src="../assets/pdfs/pages/page-10.png" alt="Dartmouth proposal, page 10 &#8212; McCarthy's language proposal">
+              <span class="cap">p. 10</span>
+            </div>
+          </div>
+        </div>
+        <p class="pdf-caption">Source: <a href="../assets/pdfs/dartmouth_aifoundations.pdf" target="_blank" rel="noopener">dartmouth_aifoundations.pdf</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Rules: three worked IF/AND/THEN examples, one at a time -->
+<section id="s-rules" class="s-rules" data-scrub>
+  <div class="pin">
+    <p class="lede intro" data-editable>Early AI was designed to follow rules;</p>
+
+    <div class="rules-field">
+      <div class="rule-block" style="--in-start: 0; --type-start: 0.01; --type-end: 0.24; --out-end: 0.28;">
+        <div class="rule-lines">
+          <p class="rline" style="--ls: 0.01; --le: 0.04;"><span class="kw">IF</span> opponent&#8217;s queen is unprotected</p>
+          <p class="rline" style="--ls: 0.06; --le: 0.09;"><span class="kw">AND</span> my rook can reach it in one move</p>
+          <p class="rline" style="--ls: 0.11; --le: 0.14;"><span class="kw">THEN</span> take the queen</p>
+        </div>
+        <div class="rule-frame" style="--ls: 0.03; --le: 0.10; top: 18%; right: 22%;">
+          <div class="ph" data-img-slot data-label="chess board &#8212; queen exposed to rook"></div>
+        </div>
+        <div class="rule-frame" style="--ls: 0.09; --le: 0.16; top: 60%; right: 6%;">
+          <div class="ph" data-img-slot data-label="chess move &#8212; rook captures queen"></div>
+        </div>
+      </div>
+
+      <div class="rule-block" style="--in-start: 0.35; --type-start: 0.36; --type-end: 0.59; --out-end: 0.63;">
+        <div class="rule-lines">
+          <p class="rline" style="--ls: 0.36; --le: 0.39;"><span class="kw">IF</span> user watched a scary movie</p>
+          <p class="rline" style="--ls: 0.41; --le: 0.44;"><span class="kw">AND</span> gave it 5 stars</p>
+          <p class="rline" style="--ls: 0.46; --le: 0.49;"><span class="kw">THEN</span> show more horror movies</p>
+        </div>
+        <div class="rule-frame" style="--ls: 0.38; --le: 0.45; top: 18%; right: 22%;">
+          <div class="ph" data-img-slot data-label="horror movie poster"></div>
+        </div>
+        <div class="rule-frame" style="--ls: 0.44; --le: 0.51; top: 60%; right: 6%;">
+          <div class="ph" data-img-slot data-label="horror movie poster"></div>
+        </div>
+      </div>
+
+      <div class="rule-block" style="--in-start: 0.70; --type-start: 0.71; --type-end: 0.94; --out-end: 0.98;">
+        <div class="rule-lines">
+          <p class="rline" style="--ls: 0.71; --le: 0.74;"><span class="kw">IF</span> oval shape detected</p>
+          <p class="rline" style="--ls: 0.76; --le: 0.79;"><span class="kw">AND</span> two small circles found inside</p>
+          <p class="rline" style="--ls: 0.81; --le: 0.84;"><span class="kw">THEN</span> label area as &#8220;face&#8221;</p>
+        </div>
+        <div class="rule-frame" style="--ls: 0.73; --le: 0.80; top: 18%; right: 22%;">
+          <div class="ph" data-img-slot data-label="oval + two circles diagram"></div>
+        </div>
+        <div class="rule-frame" style="--ls: 0.79; --le: 0.86; top: 60%; right: 6%;">
+          <div class="ph" data-img-slot data-label="detected face outline"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Rules lead-out: flow text, same scroll-linked reveal as s-explosion -->
+<section id="s-rules-after" class="flow copy-col">
+  <p class="lede" data-scroll-reveal data-editable>Then researchers tried something different.</p>
+  <p class="lede" data-scroll-reveal data-editable>Without using rules they &#8220;fed&#8221; the machine millions of examples and let it figure out the patterns.</p>
+</section>
+
+<!-- 5 · Datasets: staggered gallery -->
+<section id="s-datasets" class="flow copy-col" style="max-width: none;">
+  <p class="lede" data-reveal data-editable>It started with datasets&#8230;</p>
+  <div class="gallery" data-reveal>
+    <figure style="--i: 0;">
+      <div class="ph" data-img-slot data-label="MNIST handwritten digits"></div>
+      <figcaption data-editable>MNIST &#8212; handwritten digits</figcaption>
+    </figure>
+    <figure style="--i: 1;">
+      <div class="ph" data-img-slot data-label="Iris dataset visual"></div>
+      <figcaption data-editable>Iris &#8212; flower measurements</figcaption>
+    </figure>
+    <figure style="--i: 2;">
+      <div class="ph" data-img-slot data-label="Pima Indians Diabetes dataset visual"></div>
+      <figcaption data-editable>Pima Indians Diabetes &#8212; health records</figcaption>
+    </figure>
+    <figure style="--i: 3;">
+      <div class="ph" data-img-slot data-label="Chess endgame positions visual"></div>
+      <figcaption data-editable>Chess Endgame Positions</figcaption>
+    </figure>
+  </div>
+  <p class="subtext" data-reveal data-editable>&#8230;but the problem was, you need a <em>lot</em> of examples.</p>
+</section>
+
+<footer class="frame-note copy-col">— end of History section —</footer>
+
+<script>
+  /* ---------- scroll engine: write --p (0→1) onto each [data-scrub] ---------- */
+  const scrubs = [...document.querySelectorAll('[data-scrub]')];
+
+  function updateScrubs() {
+    const vh = window.innerHeight;
+    for (const s of scrubs) {
+      const r = s.getBoundingClientRect();
+      const range = r.height - vh;
+      const p = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;
+      s.style.setProperty('--p', p.toFixed(4));
+      const steps = s.querySelectorAll('.step');
+      if (steps.length > 1) {
+        // honor the section's intro lead-in (--lead) so the "front" step tracks what's actually visible
+        const lead = parseFloat(getComputedStyle(s).getPropertyValue('--lead')) || 0;
+        const tp = lead < 1 ? Math.min(1, Math.max(0, (p - lead) / (1 - lead))) : 0;
+        const k = Math.round(tp * (steps.length - 1));
+        steps.forEach((st, i) => st.classList.toggle('is-front', i === k));
+      }
+      s.querySelectorAll('[data-zoom-item]').forEach(el => updateZoomItem(el, p));
+    }
+  }
+
+  /* ---------- zoom field: translateZ/opacity/blur from a "inStart,inEnd,outStart,outEnd" range ---------- */
+  function updateZoomItem(el, p) {
+    const [inStart, inEnd, outStart, outEnd] = el.dataset.zoomItem.split(',').map(Number);
+    let z, op, blur;
+    if (p <= inStart) {
+      z = -1000; op = 0; blur = 5;
+    } else if (p < inEnd) {
+      const u = (p - inStart) / (inEnd - inStart);
+      z = -1000 + 1000 * u; op = u; blur = 5 * (1 - u);
+    } else if (p <= outStart) {
+      z = 0; op = 1; blur = 0;
+    } else if (p < outEnd) {
+      const u = (p - outStart) / (outEnd - outStart);
+      z = 1000 * u; op = 1 - u; blur = 5 * u;
+    } else {
+      z = 1000; op = 0; blur = 5;
+    }
+    el.style.setProperty('--z', z.toFixed(1) + 'px');
+    el.style.setProperty('--op', op.toFixed(3));
+    el.style.setProperty('--blur', blur.toFixed(2) + 'px');
+  }
+
+  /* ---------- [data-scroll-reveal]: --rp (0→1) from each element's own scroll position ----------
+     0 while its top is still near the bottom of the viewport (90vh), 1 once it's scrolled up to
+     55vh — a ~35vh reveal window tied directly to scroll position, so it can't be outrun. */
+  const scrollReveals = [...document.querySelectorAll('[data-scroll-reveal]')];
+  function updateScrollReveals() {
+    const vh = innerHeight;
+    const start = vh * 0.9, end = vh * 0.55;
+    for (const el of scrollReveals) {
+      const r = el.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (start - r.top) / (start - end)));
+      el.style.setProperty('--rp', p.toFixed(4));
+    }
+  }
+
+  let queued = false;
+  addEventListener('scroll', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); queued = false; });
+  }, { passive: true });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); });
+  updateScrubs();
+  updateScrollReveals();
+
+  /* ---------- split [data-highlight] text into indexed word spans ---------- */
+  document.querySelectorAll('[data-highlight]').forEach(el => {
+    let i = 0;
+    (function walk(parent, warm) {
+      [...parent.childNodes].forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const frag = document.createDocumentFragment();
+          node.textContent.split(/(\s+)/).forEach(tok => {
+            if (!tok) return;
+            if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
+            const w = document.createElement('span');
+            w.className = 'w' + (warm ? ' warm' : '');
+            w.textContent = tok;
+            w.style.setProperty('--i', i++);
+            frag.appendChild(w);
+          });
+          parent.replaceChild(frag, node);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          walk(node, warm || node.hasAttribute('data-warm'));
+        }
+      });
+    })(el, false);
+    el.style.setProperty('--n', i);
+  });
+
+  /* ---------- split [data-typewriter] text into indexed character spans (typewriter reveal) ---------- */
+  document.querySelectorAll('[data-typewriter]').forEach(el => {
+    const text = el.textContent;
+    el.textContent = '';
+    let i = 0;
+    for (const ch of text) {
+      const c = document.createElement('span');
+      c.className = 'c';
+      c.textContent = ch;
+      c.style.setProperty('--i', i++);
+      el.appendChild(c);
+    }
+    el.style.setProperty('--n', i);
+  });
+
+  /* ---------- flow reveals: toggle on entry/exit so effects replay while tuning ---------- */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => e.target.classList.toggle('is-visible', e.isIntersecting));
+  }, { threshold: 0.25 });
+  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+</script>
+<script src="controls.js" defer></script>
+
+</body>
+</html>

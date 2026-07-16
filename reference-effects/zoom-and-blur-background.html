@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zoom and Blur Background — Reference (source: CodePen)</title>
+<!--
+  Original: "Zoom and Blur background Image" by zrichard
+  https://codepen.io/zrichard/pen/vYqMEY
+  Saved for personal reference / learning, not redistributed as-is.
+  No stated license on the pen — treat as reference material to learn
+  from and adapt, not to publish verbatim in the final site.
+
+  WHAT IT DOES: a fixed full-width background image sits behind
+  scrolling content. As you scroll down, JS shrinks the background's
+  background-size (zooming it out), increases a CSS blur filter, and
+  fades its opacity — so the image seems to zoom out, blur, and dissolve
+  as you move past it.
+
+  IMPORTANT HONESTY NOTE: the original page's JS/CSS came through my
+  fetch tool partially garbled (some punctuation and one background-image
+  URL got stripped in transit). What's below is a faithful RECONSTRUCTION
+  of the same technique and logic based on what I could read — not a
+  byte-for-byte copy of the original. Treat this as "same idea, cleanly
+  rebuilt" rather than an exact transcript. Worth double-checking against
+  the live pen at the URL above before relying on exact values.
+
+  Intended fit per your spreadsheet: general background transition
+  moments, not tied to one specific section yet.
+-->
+<style>
+* { box-sizing: border-box; }
+body, html { padding: 0; margin: 0; }
+body {
+  background: #232323;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+.feature {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100vh;
+  /* Placeholder pattern — swap for background-image: url('images/your-image.jpg') */
+  background: radial-gradient(circle at 50% 40%, #3a5a6a, #101a20) center center no-repeat;
+  background-size: 100%;
+  box-shadow: 0 -50px 20px -20px #232323 inset;
+}
+
+/* Fallback overlay for browsers without background-size transition support
+   (the original detected non-Chrome/Safari browsers and appended this) */
+.opaque {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0;
+  background: #d2d6f1;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  padding-top: 45%;
+  width: 90%;
+  margin: 0 auto;
+}
+@media only screen and (min-width: 36.25em) {
+  .content { width: 60%; padding-top: 35%; }
+}
+.content p {
+  background: rgba(35,35,35,0.85);
+  padding: 1em 1.5em;
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="feature"></div>
+
+<div class="content">
+  <h2>Heading</h2>
+  <p>Replace with your section copy. Scroll to see the background zoom out and blur.</p>
+  <p>Add more paragraphs or spacer sections below to extend the scroll distance.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+$(function () {
+  var $feature = $('.feature');
+
+  // Starting background-size, read from the CSS above (as a percentage)
+  var zoom = parseFloat($feature.css('background-size')) / 100 || 1;
+  var baseSize = zoom * $feature.width();
+
+  var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+  var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
+
+  if (isChrome || isSafari) {
+    // Modern path: animate background-size + blur + opacity directly
+    $(window).on('scroll', function () {
+      var fromTop = $(window).scrollTop();
+      var newSize = baseSize - (fromTop / 3);
+
+      if (newSize > $feature.width()) {
+        $feature.css({
+          'background-size': newSize + 'px',
+          'filter': 'blur(' + (fromTop / 100) + 'px)',
+          'opacity': 1 - ((fromTop / $('html').height()) * 1.3)
+        });
+      }
+    });
+  } else {
+    // Fallback path: fade a solid overlay instead, since older/other
+    // browsers may not animate background-size or filter smoothly
+    $feature.append('<div class="opaque"></div>');
+    $(window).on('scroll', function () {
+      var opacity = 0 + ($(window).scrollTop() / 5000);
+      $('.opaque').css('opacity', opacity);
+    });
+  }
+});
+</script>
+
+</body>
+</html>

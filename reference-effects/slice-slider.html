@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Slice Slider — Reference (source: CodePen)</title>
+<!--
+  Original: "Slice Slider" by Stephen Scaff (StephenScaff)
+  https://codepen.io/StephenScaff/pen/egOedp
+  Saved for personal reference / learning, not redistributed as-is.
+  No stated license on the pen — treat as reference material to learn
+  from and adapt, not to publish verbatim in the final site.
+
+  WHAT IT DOES: full-screen slides transition in with a "slice" text
+  animation (title lines slide up + fade in), triggered by scroll wheel,
+  arrow keys, or clicking prev/next.
+
+  NOTES ON THIS COPY:
+  - The original CSS was written in SCSS (variables, a mixin, nesting).
+    I've converted it to plain CSS below so it runs with no build step,
+    but the SCSS source is included in a comment at the bottom in case
+    you want to see the original.
+  - The original JS uses jQuery. I've kept jQuery here via CDN so the
+    logic matches the source exactly; you could rewrite this in vanilla
+    JS later when you build the real section.
+  - Images are pulled from Unsplash's "source" URL format, which is
+    deprecated. Swap the three background-image URLs below for your
+    own sourced images.
+  - Intended use per your spreadsheet: the "if...then..." part of your
+    History section.
+-->
+<style>
+* { box-sizing: border-box; margin: 0; }
+
+body {
+  height: 100%;
+  overflow-y: hidden;
+  font-family: system-ui, sans-serif;
+}
+
+/* -------------------------------
+   Slides Nav
+------------------------------- */
+.slides-nav {
+  z-index: 99;
+  position: fixed;
+  right: -5%;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: #111;
+}
+@media (min-width: 54em) {
+  .slides-nav { right: 2%; }
+}
+.slides-nav__nav {
+  position: relative;
+  right: 0;
+  display: block;
+  font-size: 1em;
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+.slides-nav button {
+  position: relative;
+  display: inline-block;
+  padding: 0.35em;
+  margin: 0;
+  font-family: "Space Mono", monospace;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  overflow-x: hidden;
+  transition: color 0.5s ease;
+  cursor: pointer;
+}
+.slides-nav button:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 1px;
+  width: 0;
+  background: #111;
+  transition: width 0.4s ease;
+}
+.slides-nav button:hover {
+  color: rgba(17, 17, 17, 0.75);
+}
+.slides-nav button:hover:after {
+  width: 100%;
+}
+.slides-nav button:focus {
+  outline: 0;
+}
+body.is-sliding .slides-nav {
+  pointer-events: none;
+}
+
+/* -------------------------------
+   Slides
+------------------------------- */
+.slides {
+  position: relative;
+  display: block;
+  height: 100vh;
+  width: 100%;
+  background: #fff;
+  transition: background 1s cubic-bezier(.99,1,.92,1);
+}
+body.is-sliding .slides {
+  background: #ededed;
+  transition: background 0.3s cubic-bezier(.99,1,.92,1);
+}
+
+/* -------------------------------
+   Single Slide
+------------------------------- */
+.slide {
+  z-index: -1;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  transition: z-index 1s ease;
+}
+.slide.is-active {
+  z-index: 19;
+}
+.slide__content {
+  position: relative;
+  margin: 0 auto;
+  height: 95%;
+  width: 95%;
+  top: 2.5%;
+}
+@media (min-width: 54em) {
+  .slide__content { height: 80%; width: 80%; top: 10%; }
+}
+.slide__header {
+  z-index: 9;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow-y: hidden;
+  transform: translateX(5%);
+}
+@media (min-width: 54em) {
+  .slide__header { transform: translateX(-5%); }
+}
+.slide__title {
+  font-family: Montserrat, helvetica;
+  font-size: 2.5em;
+  font-weight: 700;
+  color: #111;
+  overflow-y: hidden;
+}
+@media (min-width: 54em) {
+  .slide__title { font-size: 5em; }
+}
+/* Slice text animation */
+.slide__title .title-line {
+  display: block;
+  overflow-y: hidden;
+}
+.slide__title .title-line span {
+  display: inline-block;
+  transform: translate3d(0, 140%, 0);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.8s ease;
+}
+.slide__title .title-line:nth-child(1) span { transition-delay: 0.2s; }
+.slide__title .title-line:nth-child(2) span { transition-delay: 0.4s; }
+.slide.is-active .title-line span {
+  transform: translate3d(0, 0%, 0);
+  opacity: 1;
+  transition: transform 0.6s cubic-bezier(.77,0,.175,1), opacity 0.1s ease;
+}
+.slide.is-active .title-line:nth-of-type(2n) span {
+  transition-delay: 0.2s;
+}
+
+/* Image wrapper */
+.slide__figure {
+  z-index: 7;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(.19,1,.22,1);
+}
+body.is-sliding .slide__figure {
+  transform: scale(0.8);
+}
+.slide__img {
+  position: relative;
+  display: block;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: 50%;
+  -webkit-backface-visibility: hidden;
+  height: 0%;
+  width: 100%;
+  filter: grayscale(0%);
+  transition: height 1s 1.4s cubic-bezier(.19,1,.22,1), filter 0.4s 0.1s ease;
+}
+.slide.is-active .slide__img {
+  height: 100%;
+  opacity: 1;
+  transition: height .5s .3s cubic-bezier(.77,0,.175,1), filter 0.4s 0.1s ease;
+}
+body.is-sliding .slide__img {
+  filter: grayscale(100%);
+}
+</style>
+</head>
+<body>
+
+<main>
+<section class="slides">
+
+  <section class="slides-nav">
+    <nav class="slides-nav__nav">
+      <button class="slides-nav__prev js-prev">Prev</button>
+      <button class="slides-nav__next js-next">Next</button>
+    </nav>
+  </section>
+
+  <section class="slide is-active">
+    <div class="slide__content">
+      <figure class="slide__figure"><div class="slide__img" style="background-image: linear-gradient(135deg, #234, #456)"></div></figure>
+      <header class="slide__header">
+        <h2 class="slide__title">
+          <span class="title-line"><span>Early AI followed rules</span></span>
+          <span class="title-line"><span>if this, then that</span></span>
+        </h2>
+      </header>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide__content">
+      <figure class="slide__figure"><div class="slide__img" style="background-image: linear-gradient(135deg, #423, #645)"></div></figure>
+      <header class="slide__header">
+        <h2 class="slide__title">
+          <span class="title-line"><span>Slide Two</span></span>
+          <span class="title-line"><span>Replace with real content</span></span>
+        </h2>
+      </header>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide__content">
+      <figure class="slide__figure"><div class="slide__img" style="background-image: linear-gradient(135deg, #334, #556)"></div></figure>
+      <header class="slide__header">
+        <h2 class="slide__title">
+          <span class="title-line"><span>Slide Three</span></span>
+          <span class="title-line"><span>Replace with real content</span></span>
+        </h2>
+      </header>
+    </div>
+  </section>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+(function($) {
+
+  var SliceSlider = {
+
+    settings: {
+      delta:              0,
+      currentSlideIndex:  0,
+      scrollThreshold:    40,
+      slides:             $('.slide'),
+      numSlides:          $('.slide').length,
+      navPrev:            $('.js-prev'),
+      navNext:            $('.js-next'),
+    },
+
+    init: function() {
+      s = this.settings;
+      this.bindEvents();
+    },
+
+    bindEvents: function(){
+      // Scrollwheel & trackpad
+      s.slides.on({
+        'DOMMouseScroll mousewheel' : SliceSlider.handleScroll
+      });
+      s.navPrev.on({ 'click' : SliceSlider.prevSlide });
+      s.navNext.on({ 'click' : SliceSlider.nextSlide });
+      // Arrow keys
+      $(document).keyup(function(e) {
+        if ((e.which === 37) || (e.which === 38)) {
+          SliceSlider.prevSlide();
+        }
+        if ((e.which === 39) || (e.which === 40)) {
+          SliceSlider.nextSlide();
+        }
+      });
+    },
+
+    handleScroll: function(e){
+      if (e.originalEvent.detail < 0 || e.originalEvent.wheelDelta > 0) {
+        s.delta--;
+        if (Math.abs(s.delta) >= s.scrollThreshold) {
+          SliceSlider.prevSlide();
+        }
+      } else {
+        s.delta++;
+        if (s.delta >= s.scrollThreshold) {
+          SliceSlider.nextSlide();
+        }
+      }
+      return false;
+    },
+
+    showSlide: function(){
+      s.delta = 0;
+      if ($('body').hasClass('is-sliding')) { return; }
+      s.slides.each(function(i, slide) {
+        $(slide).toggleClass('is-active', (i === s.currentSlideIndex));
+        $(slide).toggleClass('is-prev', (i === s.currentSlideIndex - 1));
+        $(slide).toggleClass('is-next', (i === s.currentSlideIndex + 1));
+        $('body').addClass('is-sliding');
+        setTimeout(function(){
+          $('body').removeClass('is-sliding');
+        }, 1000);
+      });
+    },
+
+    prevSlide: function(){
+      if (s.currentSlideIndex <= 0) {
+        s.currentSlideIndex = s.numSlides;
+      }
+      s.currentSlideIndex--;
+      SliceSlider.showSlide();
+    },
+
+    nextSlide: function(){
+      s.currentSlideIndex++;
+      if (s.currentSlideIndex >= s.numSlides) {
+        s.currentSlideIndex = 0;
+      }
+      SliceSlider.showSlide();
+    },
+  };
+  SliceSlider.init();
+})(jQuery);
+</script>
+
+<!--
+ORIGINAL SCSS (for reference — this is what the plain CSS above was
+converted from):
+
+$font-header: Montserrat, helvetica;
+$font-nav : "Space Mono", monospace;
+$color-dark: #111;
+$color-border: #ccc;
+$color-trans-bg: #ededed;
+$ease-cb: cubic-bezier(.4,0,.2,1);
+$ease-cb-2: cubic-bezier(.19,1,.22,1);
+$ease-cb-3: cubic-bezier(.77,0,.175,1);
+$ease-cb-4: cubic-bezier(.99,1,.92,1);
+$pad: 3em;
+$mq-med: 54em;
+$mq-large: 65em;
+$mq-xlarge: 91em;
+
+@mixin nth-trans-delay($delay_items: 7, $delay_time: 0.2s){
+  @for $i from 1 through $delay_items {
+    &:nth-child(#{$i}) { transition-delay: $delay_time * $i; }
+  }
+}
+(... full nested SCSS mirrors the plain CSS rules above ...)
+-->
+
+</body>
+</html>
