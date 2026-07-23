@@ -235,38 +235,92 @@
   .sidenote h4 { font-size: 13px; font-weight: 500; color: var(--warm); margin-bottom: 6px; }
 
   /* ============================================================
-     2 · FIRST PROPOSAL — plain intro text above a large, centered
-     PDF viewer (assets/pdfs/pages/) that scrolls continuously with
-     --p. The proposal's five key quotes surface as callouts that
-     fade in to alternating sides of the document as you scroll,
-     each pairing the quote with a reflective discussion question.
-     Each callout carries 4 breakpoints (--in-start/--hold-start/
-     --hold-end/--out-end): fades in, holds, fades out — the same
-     fade-in/hold/fade-out envelope idiom as the s-dreams outro/
-     --exit and the RULES section below (--fp via min(fade-in,
-     fade-out)).
+     2 · FIRST PROPOSAL — plain intro text on the left; below it, a
+     focus slot that surfaces each quote's real crop (assets/pdfs/
+     quotes/) plus a .prompt discussion question, typed out letter by
+     letter. On the right, the *actual* PDF pages (assets/pdfs/pages/)
+     scroll continuously — except while a prompt is typing, when the
+     PDF holds still, resuming once that line finishes forming.
+     Each quote now carries 4 breakpoints (--in-start/--type-start/
+     --type-end/--out-end) instead of a plain --start/--end pair:
+       inStart → typeStart : crop fades into focus
+       typeStart → typeEnd : held in focus, letters type out
+       typeEnd → outEnd    : crop fades back out
+     --fp (crop/frame opacity) is built from two clamped ramps
+     (fade-in, fade-out) combined with min() — a "hold" shape, same
+     idiom as the s-dreams outro/--exit, just done in one step here.
+     --typeProgress (0→1 across typeStart..typeEnd) drives the
+     per-character reveal on .prompt (JS only splits the text into
+     indexed <span class="c">s — same trick as the existing
+     [data-highlight] word-splitter, just per-character).
+     The PDF's "pause while typing" is --pdf-p: --p with each quote's
+     typing-window dwell time subtracted back out, so it freezes for
+     exactly the width of that window and resumes seamlessly after —
+     all five subtracted in one calc(), no JS required for this part.
      ============================================================ */
   .s-proposal { height: calc(var(--section-gap) * 3.4); }
-  .s-proposal .pin { gap: 4vh; }
-  /* max-width matches the 480px content width other intros land on via .copy-col's
-     padding-left:12vw + max-width:calc(12vw + 480px) (border-box folds the padding
-     into that budget) — centered here (margin-inline: auto) to sit over the
-     centered PDF below, instead of left-anchored like the other sections. */
-  .proposal-intro { text-align: center; max-width: 480px; margin-inline: auto; }
-  .proposal-layout { position: relative; width: 100%; display: grid; justify-items: center; }
+  .s-proposal .proposal-layout {
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center; gap: 5vw;
+    width: 100%; padding-inline: 12vw 8vw;
+  }
+  .s-proposal .copy-col { padding-left: 0; max-width: none; }
+  .s-proposal {
+    --pdf-p: calc(
+      var(--p)
+      - clamp(0, var(--p) - 0.06, 0.09)
+      - clamp(0, var(--p) - 0.265, 0.09)
+      - clamp(0, var(--p) - 0.47, 0.09)
+      - clamp(0, var(--p) - 0.675, 0.09)
+      - clamp(0, var(--p) - 0.88, 0.09)
+    );
+  }
 
+  /* -- left: intro + crop/prompt focus slot -- */
+  .prompt-stack { position: relative; height: clamp(170px, 22vh, 240px); margin-top: 36px; }
+  .prompt-block {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; gap: 14px;
+    --fade-in: clamp(0, calc((var(--p) - var(--in-start)) / (var(--type-start) - var(--in-start))), 1);
+    --fade-out: clamp(0, calc((var(--out-end) - var(--p)) / (var(--out-end) - var(--type-end))), 1);
+    --fp: min(var(--fade-in), var(--fade-out));
+    --typeProgress: clamp(0, calc((var(--p) - var(--type-start)) / (var(--type-end) - var(--type-start))), 1);
+    opacity: var(--fp);
+    transform: translateY(calc((1 - var(--fp)) * 10px));
+  }
+  .prompt-block .frame {
+    display: block; border-radius: 2px;
+    box-shadow: 0 0 0 calc(var(--fp) * 5px) color-mix(in srgb, var(--teal) calc(var(--fp) * 45%), transparent);
+  }
+  .prompt-block img {
+    display: block; width: 100%; height: auto; border-radius: 2px;
+    filter: grayscale(calc(1 - var(--fp))) brightness(calc(0.85 + 0.15 * var(--fp)));
+  }
+  /* new text category: a dim, reflective discussion question (vs. .subtext's neutral caption tone),
+     typed out in a typewriter face — each .c is one character, revealed near-instantly (steep
+     multiplier) once --typeProgress * charCount passes its index, so it reads as keystrokes. */
+  .prompt {
+    font-family: 'Courier Prime', ui-monospace, Menlo, monospace;
+    font-size: 14.5px; line-height: 1.7; color: var(--ink-dim); max-width: 32em;
+  }
+  .prompt .c { opacity: clamp(0, (var(--typeProgress) * var(--n) - var(--i)) * 40, 1); }
+  .prompt::after {
+    content: '|'; color: var(--teal); margin-left: 1px;
+    opacity: calc(1 - clamp(0, (var(--typeProgress) - 0.995) * 200, 1));
+  }
+
+  /* -- right: the actual PDF — pauses (via --pdf-p) while a prompt is mid-type -- */
   .pdf-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .pdf-viewport {
-    position: relative; overflow: hidden;
-    width: min(62vw, 960px); height: min(74vh, 720px);
+    position: relative; height: min(64vh, 640px); overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.14);
     background: var(--card-bg); border-radius: 4px;
-    padding: 4vh 3vw;
+    padding: 3vh 2vw;
   }
   .pdf-scroll {
     min-height: 150vh;
     display: flex; flex-direction: column; gap: 6vh;
-    transform: translateY(calc(var(--p) * -160vh));
+    transform: translateY(calc(var(--pdf-p) * -160vh));
   }
   .pdf-page-item img { display: block; width: 100%; height: auto; border-radius: 2px; }
   .pdf-page-item .cap {
@@ -276,6 +330,28 @@
   }
   .pdf-caption { font-size: 12px; color: var(--ink-dim); }
   .pdf-caption a { color: var(--teal); }
+
+  /* ============================================================
+     2b · PROPOSAL (ALT) — same five quote/question pairs, a
+     different treatment: the PDF sits large and centered instead
+     of a side column, and there's no typewriter effect. Each pair
+     instead surfaces as a callout that fades in to alternating
+     sides of the document, reusing the fade-in/hold/fade-out
+     envelope idiom from .prompt-block (--in-start/--hold-start/
+     --hold-end/--out-end → --fp via min(fade-in, fade-out)), just
+     revealed as a whole block rather than character-by-character.
+     ============================================================ */
+  .s-proposal-alt { height: calc(var(--section-gap) * 3.4); }
+  .s-proposal-alt .pin { gap: 4vh; }
+  /* max-width matches the 480px content width other intros land on via .copy-col's
+     padding-left:12vw + max-width:calc(12vw + 480px) (border-box folds the padding
+     into that budget) — centered here (margin-inline: auto) instead of left-anchored,
+     to sit over the now-centered PDF below rather than left-anchored like elsewhere. */
+  .proposal-alt-intro { text-align: center; max-width: 480px; margin-inline: auto; }
+  .proposal-alt-layout { position: relative; width: 100%; display: grid; justify-items: center; }
+
+  .pdf-viewport.lg { width: min(62vw, 960px); height: min(74vh, 720px); padding: 4vh 3vw; }
+  .pdf-scroll.lg { transform: translateY(calc(var(--p) * -160vh)); }
 
   .callout {
     position: absolute; top: 50%; width: min(20vw, 240px);
@@ -306,148 +382,18 @@
   .proposal-lead-photo .ph { aspect-ratio: 4 / 5; }
 
   /* ============================================================
-     2.5 · NAMING — 5-beat scrub (dark → blue)
-       1. entrance lede alone
-       2. gray candidate terms (+ AI as a gray term)
-       3. AI zooms up to title size
-       4. color flip (blue + bar + warm candidates)
-       5. outro line
+     2.5 · NAMING — before the field had a name, they debated what
+     to call it. Plain flow reveals (no scrub) — candidate names,
+     then the term itself, then a closing reflection into RULES.
      ============================================================ */
-  .s-naming {
-    height: calc(var(--section-gap) * 2.4);
-    --lede: clamp(0, var(--p) / 0.08, 1);
-    --terms: clamp(0, (var(--p) - 0.14) / 0.1, 1);
-    --zoom: clamp(0, (var(--p) - 0.32) / 0.2, 1);
-    --blue: clamp(0, (var(--p) - 0.58) / 0.14, 1);
-    --outro: clamp(0, (var(--p) - 0.78) / 0.12, 1);
-    color: var(--ink);
-  }
-  .s-naming .pin {
-    background: color-mix(in srgb, #467ff7 calc(var(--blue) * 100%), #060809);
-    align-content: start;
-    overflow: hidden;
-  }
-  .naming-stage {
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 14vh 12vw 10vh;
-    box-sizing: border-box;
-  }
-  .naming-lede {
-    position: relative;
-    z-index: 2;
-    flex: 0 0 auto;
-    max-width: 28em;
-    margin: 0;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    opacity: var(--lede);
-    transform: translateY(calc((1 - var(--lede)) * 16px));
-  }
-  /* terms + AI + crosshair live in the band under the lede */
-  .naming-field {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 42vh;
-    margin-top: 5vh;
-  }
-  .naming-candidate {
-    position: absolute;
-    z-index: 1;
-    color: color-mix(in srgb, var(--warm) calc(var(--blue) * 100%), #5f5f5f);
-    font-size: clamp(18px, 1.7vw, 24px);
-    font-weight: 400;
-    line-height: 1.2;
-    max-width: 14em;
-    pointer-events: none;
-    opacity: var(--terms);
-    transform: translateY(calc((1 - var(--terms)) * 12px));
-  }
-  .naming-candidate.c1 { left: 8%; top: 8%; }
-  .naming-candidate.c2 { left: 42%; top: 28%; }
-  .naming-candidate.c3 { left: 58%; top: 0%; max-width: 18em; }
-  /* AI starts among the gray terms, then zooms into the title slot near the field floor */
-  .naming-ai {
-    position: absolute;
-    z-index: 3;
-    left: -20px;
-    bottom: 18%;
-    padding-left: clamp(20px, 2.8vw, 40px);
-    opacity: var(--terms);
-    transform:
-      translate(
-        calc((1 - var(--zoom)) * 18vw),
-        calc((1 - var(--zoom)) * -22%)
-      )
-      scale(calc(0.22 + var(--zoom) * 0.78));
-    transform-origin: left bottom;
-    will-change: transform;
-  }
-  .naming-ai .naming-title {
-    margin: 0;
-    font-size: clamp(40px, 6.6vw, 96px);
-    font-weight: 500;
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    color: color-mix(in srgb, #fff calc(var(--zoom) * 100%), #5f5f5f);
-  }
-  /* bar sits at the final title slot — fades in on color flip only (not scaled) */
-  .naming-bar {
-    position: absolute;
-    z-index: 2;
-    left: -20px;
-    bottom: 12%;
-    width: min(1099px, 92vw);
-    height: clamp(100px, 18vh, 180px);
-    background: #060809;
-    opacity: var(--blue);
-    pointer-events: none;
-  }
-  .naming-outro {
-    position: relative;
-    z-index: 5;
-    flex: 0 0 auto;
-    margin: 3vh 0 0;
-    max-width: 28em;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    opacity: var(--outro);
-    transform: translateY(calc((1 - var(--outro)) * 16px));
-  }
-  .naming-crosshair {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    opacity: var(--terms);
-  }
-  .naming-crosshair::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 4%;
-    width: 2px;
-    height: 100%;
-    background: color-mix(in srgb, #060809 calc(var(--blue) * 100%), #5f5f5f);
-  }
-  .naming-crosshair::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 12%;
-    width: 100%;
-    height: 2px;
-    background: color-mix(in srgb, #fff calc((0.55 + var(--blue) * 0.45) * 100%), #5f5f5f);
+  .naming-term {
+    margin-top: 6vh; text-align: center;
+    font-size: clamp(26px, 3.6vw, 40px); font-weight: 400; color: var(--warm);
   }
 
   /* ============================================================
      3 · RULES — three worked IF/AND/THEN examples, one at a time.
-     .rule-block reuses the FIRST PROPOSAL .callout envelope idiom:
+     .rule-block reuses the s-proposal .prompt-block envelope idiom:
      --in-start/--type-start/--type-end/--out-end → --fp via
      min(fade-in, fade-out) (a hold shape, 0→1→0). Within that
      envelope, each .rline and .rule-frame has its own small --ls/--le
@@ -594,26 +540,10 @@
     .rule-frame { width: 22vw; }
     .proposal-lead-layout { grid-template-columns: 1fr; gap: 4vh; }
     .proposal-lead-photo { order: -1; max-width: 280px; }
-    .naming-stage { padding: 12vh 7vw 8vh; }
-    .naming-candidate.c1 { left: 4%; top: 6%; }
-    .naming-candidate.c2 { left: 48%; top: 22%; }
-    .naming-candidate.c3 { left: 8%; top: 36%; }
-    .naming-ai {
-      left: 0;
-      bottom: 22%;
-      padding-left: 16px;
-      transform:
-        translate(
-          calc((1 - var(--zoom)) * 6vw),
-          calc((1 - var(--zoom)) * -18%)
-        )
-        scale(calc(0.28 + var(--zoom) * 0.72));
-    }
-    .naming-ai .naming-title { white-space: normal; font-size: clamp(28px, 9vw, 48px); max-width: 88vw; }
-    .naming-bar { left: 0; width: 100%; bottom: 16%; }
-    .naming-outro { margin-top: 2vh; }
-    .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
-    .pdf-viewport { width: 86vw; height: 40vh; padding: 3vh 5vw; }
+    .s-proposal .proposal-layout { grid-template-columns: 1fr; padding-inline: 7vw; gap: 4vh; }
+    .pdf-viewport { height: 44vh; padding: 3vh 5vw; }
+    .proposal-alt-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
+    .pdf-viewport.lg { width: 86vw; height: 40vh; padding: 3vh 5vw; }
     .callout { width: 40vw; padding: 14px 16px; gap: 8px; }
     .callout-left { left: 2vw; }
     .callout-right { right: 2vw; }
@@ -749,15 +679,70 @@
   </div>
 </section>
 
-<!-- 2 · First proposal: intro text above a large centered PDF; the proposal's
-     five key quotes surface as callouts alternating left/right as you scroll -->
+<!-- 2 · First proposal: plain intro + crossfading quote/prompt focus, real PDF scrolling alongside -->
 <section id="s-proposal" class="s-proposal" data-scrub>
   <div class="pin">
-    <p class="lede proposal-intro" data-editable>The first research proposal for AI outlined a plan for what researchers wanted to use AI for.</p>
     <div class="proposal-layout">
+      <div class="copy-col">
+        <p class="lede" data-editable>The first research proposal for AI outlined a plan for what researchers wanted to use AI for.</p>
+
+        <div class="prompt-stack">
+          <div class="prompt-block" style="--in-start: 0.03; --type-start: 0.06; --type-end: 0.15; --out-end: 0.18;">
+            <span class="frame"><img src="assets/pdfs/quotes/quote1.png" alt="every aspect of learning or any other feature of intelligence can in principle be so precisely described that a machine can be made to simulate it"></span>
+            <p class="prompt" data-typewriter data-editable>Do you think every aspect of human creativity can be described precisely enough for a machine to simulate it?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.235; --type-start: 0.265; --type-end: 0.355; --out-end: 0.385;">
+            <span class="frame"><img src="assets/pdfs/quotes/quote2.png" alt="a large part of human thought consists of manipulating words according to rules of reasoning and rules of conjecture"></span>
+            <p class="prompt" data-typewriter data-editable>If writing captions or crafting stories is just rules to be replicated, what does that mean for your own creative process?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.44; --type-start: 0.47; --type-end: 0.56; --out-end: 0.59;">
+            <span class="frame"><img src="assets/pdfs/quotes/quote3.png" alt="the difference between creative thinking and unimaginative competent thinking lies in the injection of some randomness"></span>
+            <p class="prompt" data-typewriter data-editable>Is creativity just controlled randomness? Is that all it is when AI does it &#8212; is that all it is when you do it?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.645; --type-start: 0.675; --type-end: 0.765; --out-end: 0.795;">
+            <span class="frame"><img src="assets/pdfs/quotes/quote4.png" alt="one ordinarily provides the machine with a set of rules to cover each contingency which may arise&#8230; One expects the machine to follow this set of rules slavishly and to exhibit no originality or common sense"></span>
+            <p class="prompt" data-typewriter data-editable>Does a machine that follows rules &#8220;slavishly,&#8221; with no originality or common sense, sound like any AI tool you&#8217;ve used?</p>
+          </div>
+          <div class="prompt-block" style="--in-start: 0.85; --type-start: 0.88; --type-end: 0.97; --out-end: 1;">
+            <span class="frame"><img src="assets/pdfs/quotes/quote5.png" alt="I propose to study the relation of language to intelligence&#8230; The human mind apparently uses language as its means of handling complicated phenomena"></span>
+            <p class="prompt" data-typewriter data-editable>The people who decided what AI should do didn&#8217;t look like most of the people it would affect &#8212; what does that leave out?</p>
+          </div>
+        </div>
+      </div>
       <div class="pdf-panel">
         <div class="pdf-viewport">
           <div class="pdf-scroll">
+            <div class="pdf-page-item">
+              <img src="assets/pdfs/pages/page-02.png" alt="Dartmouth proposal, page 2 &#8212; the conjecture, language, and randomness sections">
+              <span class="cap">p. 2</span>
+            </div>
+            <div class="pdf-page-item">
+              <img src="assets/pdfs/pages/page-07.png" alt="Dartmouth proposal, page 7 &#8212; Rochester's Originality in Machine Performance">
+              <span class="cap">p. 7</span>
+            </div>
+            <div class="pdf-page-item">
+              <img src="assets/pdfs/pages/page-10.png" alt="Dartmouth proposal, page 10 &#8212; McCarthy's language proposal">
+              <span class="cap">p. 10</span>
+            </div>
+          </div>
+        </div>
+        <p class="pdf-caption">Source: <a href="assets/pdfs/dartmouth_aifoundations.pdf" target="_blank" rel="noopener">dartmouth_aifoundations.pdf</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 (alt) · First proposal, alternate treatment: PDF large & centered, no
+     typewriter; the same quote/question pairs pop in as callouts alternating
+     left/right of the document as you scroll. Duplicate of s-proposal above,
+     kept side by side for comparison. -->
+<section id="s-proposal-alt" class="s-proposal-alt" data-scrub>
+  <div class="pin">
+    <p class="lede proposal-alt-intro" data-editable>The first research proposal for AI outlined a plan for what researchers wanted to use AI for.</p>
+    <div class="proposal-alt-layout">
+      <div class="pdf-panel">
+        <div class="pdf-viewport lg">
+          <div class="pdf-scroll lg">
             <div class="pdf-page-item">
               <img src="assets/pdfs/pages/page-02.png" alt="Dartmouth proposal, page 2 &#8212; the conjecture, language, and randomness sections">
               <span class="cap">p. 2</span>
@@ -799,28 +784,12 @@
   </div>
 </section>
 
-<!-- Naming composition: 5-beat scrub — lede → gray terms → AI zoom → color flip → outro -->
-<section id="s-naming" class="s-naming" data-scrub>
-  <div class="pin">
-    <div class="naming-stage">
-      <p class="naming-lede" data-editable>The researchers debated on what to call this new field.</p>
-      <div class="naming-field">
-        <div class="naming-crosshair" aria-hidden="true"></div>
-        <span class="naming-candidate c1" data-editable>Automata Studies</span>
-        <span class="naming-candidate c2" data-editable>Cybernetics</span>
-        <span class="naming-candidate c3" data-editable>Complex Information Processing</span>
-        <div class="naming-bar" aria-hidden="true"></div>
-        <div class="naming-ai">
-          <p class="naming-title" data-editable>Artificial Intelligence</p>
-        </div>
-      </div>
-      <p class="naming-outro" data-editable>Of all the options, they landed on the one that compares machines to human minds.</p>
-    </div>
-  </div>
-</section>
-
-<section id="s-naming-bridge" class="flow copy-col">
-  <p class="lede" data-scroll-reveal data-editable>So what did that early &#8220;artificial intelligence&#8221; actually look like?</p>
+<!-- 2.5 · Naming: the debate over what to call the field, landing on "artificial intelligence" -->
+<section id="s-naming" class="flow copy-col">
+  <p class="lede" data-reveal data-editable>&#8220;Automata studies,&#8221; one suggested. &#8220;Cybernetics,&#8221; said another. &#8220;Complex information processing,&#8221; others kept calling it for years after.</p>
+  <p class="lede naming-term" data-reveal data-editable>artificial intelligence</p>
+  <p class="lede" data-reveal data-editable>It&#8217;s worth noticing: of all the options, they landed on the one that compares machines to human minds.</p>
+  <p class="lede" data-reveal data-editable>So what did that early &#8220;artificial intelligence&#8221; actually look like?</p>
 </section>
 
 <!-- 3 · Rules: three worked IF/AND/THEN examples, one at a time -->
@@ -1014,6 +983,21 @@
         }
       });
     })(el, false);
+    el.style.setProperty('--n', i);
+  });
+
+  /* ---------- split [data-typewriter] text into indexed character spans (typewriter reveal) ---------- */
+  document.querySelectorAll('[data-typewriter]').forEach(el => {
+    const text = el.textContent;
+    el.textContent = '';
+    let i = 0;
+    for (const ch of text) {
+      const c = document.createElement('span');
+      c.className = 'c';
+      c.textContent = ch;
+      c.style.setProperty('--i', i++);
+      el.appendChild(c);
+    }
     el.style.setProperty('--n', i);
   });
 
