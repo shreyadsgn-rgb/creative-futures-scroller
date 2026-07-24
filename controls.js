@@ -8,6 +8,11 @@
    "Save" does NOT persist anything — it prints the current values
    as a copy-paste block for you to move into the stylesheet by hand.
 
+   The panel also shows a live scroll-position readout: the active
+   [data-scrub] section's id and its --p (0→1), plus overall page scroll %.
+   "Copy ref" grabs it as text (e.g. "s-dreams  p=0.623") — handy for
+   describing exactly where a timing/scroll change should happen.
+
    To override the slider set for a specific sandbox, define
    window.DEV_CONTROLS = [{ prop, label, min, max, step, unit }, ...]
    BEFORE this script loads.
@@ -49,6 +54,19 @@
       font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
       text-transform: uppercase; color: #0097A7; margin: 0 0 12px;
     }
+    .devpanel .posblock {
+      margin-bottom: 12px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .devpanel .poslabel {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: rgba(223, 231, 231, 0.5); margin-bottom: 6px;
+    }
+    .devpanel .posline { display: flex; justify-content: space-between; align-items: baseline; }
+    .devpanel .posline span:first-child { color: #EBFE9B; font-weight: 600; }
+    .devpanel .posline output { color: #EBFE9B; }
+    .devpanel .posline.dim { color: rgba(223, 231, 231, 0.5); font-size: 10.5px; margin-top: 2px; }
+    .devpanel button.small { margin-top: 8px; padding: 5px 10px; font-size: 10px; }
     .devpanel .row { margin-bottom: 10px; }
     .devpanel .row label {
       display: flex; justify-content: space-between; margin-bottom: 3px;
@@ -98,6 +116,79 @@
   panel.className = 'devpanel';
   panel.hidden = true;
   panel.innerHTML = '<h2>Dev controls</h2>';
+
+  /* ---------- scroll position readout ----------
+     Which [data-scrub] section you're in and its current --p (0→1) — the
+     value the page's own scroll engine writes and everything else (--t,
+     --focus, --exit, per-step --k windows, etc.) derives from. Lets you
+     say "at s-dreams p=0.62" instead of guessing pixels when describing
+     a timing change. */
+  const posBlock = document.createElement('div');
+  posBlock.className = 'posblock';
+  posBlock.innerHTML = `
+    <div class="poslabel">Scroll position</div>
+    <div class="posline"><span data-pos-section>—</span><output data-pos-p></output></div>
+    <div class="posline dim">page <span data-pos-pct>0%</span></div>
+    <button type="button" class="ghost small" data-copy-pos>Copy ref</button>
+  `;
+  panel.appendChild(posBlock);
+
+  const posSection = posBlock.querySelector('[data-pos-section]');
+  const posP = posBlock.querySelector('[data-pos-p]');
+  const posPct = posBlock.querySelector('[data-pos-pct]');
+  const trackedSections = [...document.querySelectorAll('section[id]')];
+  let lastRef = '';
+
+  function updatePosition() {
+    const vh = innerHeight;
+    const line = vh * 0.5; // "current" section = whichever crosses viewport center
+    let active = trackedSections.find(s => {
+      const r = s.getBoundingClientRect();
+      return r.top <= line && r.bottom > line;
+    });
+    if (!active && trackedSections.length) {
+      active = scrollY <= 0 ? trackedSections[0] : trackedSections[trackedSections.length - 1];
+    }
+
+    const scrollable = document.documentElement.scrollHeight - vh;
+    const pagePct = scrollable > 0 ? Math.min(100, Math.max(0, (scrollY / scrollable) * 100)) : 0;
+    posPct.textContent = Math.round(pagePct) + '%';
+
+    if (!active) { posSection.textContent = '—'; posP.textContent = ''; lastRef = ''; return; }
+
+    posSection.textContent = active.id;
+    if (active.hasAttribute('data-scrub')) {
+      const p = parseFloat(getComputedStyle(active).getPropertyValue('--p'));
+      const pStr = Number.isFinite(p) ? p.toFixed(3) : '?';
+      posP.textContent = 'p=' + pStr;
+      lastRef = `${active.id}  p=${pStr}`;
+    } else {
+      posP.textContent = '';
+      lastRef = active.id;
+    }
+  }
+
+  let posQueued = false;
+  addEventListener('scroll', () => {
+    if (posQueued) return;
+    posQueued = true;
+    requestAnimationFrame(() => { updatePosition(); posQueued = false; });
+  }, { passive: true });
+  addEventListener('resize', updatePosition);
+  updatePosition();
+
+  posBlock.querySelector('[data-copy-pos]').addEventListener('click', () => {
+    if (!lastRef) return;
+    if (navigator.clipboard) navigator.clipboard.writeText(lastRef);
+    else {
+      const tmp = document.createElement('textarea');
+      tmp.value = lastRef;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      tmp.remove();
+    }
+  });
 
   const outputs = new Map(); // prop -> { ctl, input, out }
 

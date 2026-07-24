@@ -306,20 +306,27 @@
   .proposal-lead-photo .ph { aspect-ratio: 4 / 5; }
 
   /* ============================================================
-     2.5 · NAMING — 5-beat scrub (dark → blue)
+     2.5 · NAMING — scrub (dark → blue → title docks → reveal)
        1. entrance lede alone
        2. gray candidate terms (+ AI as a gray term)
-       3. AI zooms up to title size
-       4. color flip (blue + bar + warm candidates)
-       5. outro line
+       3. AI zooms up + color flip together
+       4. top words clear; title rises to the top (Figma 314:238)
+       5. outro + prompt + parallax frames reveal
      ============================================================ */
   .s-naming {
-    height: calc(var(--section-gap) * 2.4);
-    --lede: clamp(0, var(--p) / 0.08, 1);
-    --terms: clamp(0, (var(--p) - 0.14) / 0.1, 1);
-    --zoom: clamp(0, (var(--p) - 0.32) / 0.2, 1);
-    --blue: clamp(0, (var(--p) - 0.58) / 0.14, 1);
-    --outro: clamp(0, (var(--p) - 0.78) / 0.12, 1);
+    height: calc(var(--section-gap) * 3.2);
+    --lede: clamp(0, var(--p) / 0.06, 1);
+    --terms: clamp(0, (var(--p) - 0.1) / 0.08, 1);
+    --zoom: clamp(0, (var(--p) - 0.24) / 0.14, 1);
+    --blue: var(--zoom);
+    /* fade away lede + floating candidates before the title docks */
+    --clear: clamp(0, (var(--p) - 0.42) / 0.08, 1);
+    /* lift the AI title bar from mid-field up to the top */
+    --rise: clamp(0, (var(--p) - 0.48) / 0.14, 1);
+    /* copy + frames once the title is docked */
+    --reveal: clamp(0, (var(--p) - 0.66) / 0.12, 1);
+    --term-size: clamp(18px, 1.7vw, 24px);
+    --title-size: clamp(40px, 6.6vw, 96px);
     color: var(--ink);
   }
   .s-naming .pin {
@@ -327,120 +334,177 @@
     align-content: start;
     overflow: hidden;
   }
+  /* Figma GridOverlay export was fully transparent — recreate a subtle
+     square grid that reads on both the dark and blue states */
+  .s-naming .pin::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: calc(0.45 + var(--blue) * 0.25);
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center top;
+  }
   .naming-stage {
     position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 14vh 12vw 10vh;
+    z-index: 1;
+    /* 100vh, not 100% — .pin is a grid container with an auto-sized row, so a
+       percentage height here would resolve against that auto row (sized to
+       naming-lede's short in-flow content, since .naming-field is absolutely
+       positioned and doesn't count toward it) instead of the actual 100vh pin. */
+    height: 100vh;
+    padding: 12vh 12vw 8vh;
     box-sizing: border-box;
   }
   .naming-lede {
     position: relative;
     z-index: 2;
-    flex: 0 0 auto;
     max-width: 28em;
     margin: 0;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
-    opacity: var(--lede);
-    transform: translateY(calc((1 - var(--lede)) * 16px));
+    opacity: calc(var(--lede) * (1 - var(--clear)));
+    transform: translateY(calc((1 - var(--lede)) * 16px - var(--clear) * 12px));
   }
-  /* terms + AI + crosshair live in the band under the lede */
   .naming-field {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 42vh;
-    margin-top: 5vh;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
   }
   .naming-candidate {
     position: absolute;
     z-index: 1;
     color: color-mix(in srgb, var(--warm) calc(var(--blue) * 100%), #5f5f5f);
-    font-size: clamp(18px, 1.7vw, 24px);
+    font-size: var(--term-size);
     font-weight: 400;
+    letter-spacing: 0;
     line-height: 1.2;
     max-width: 14em;
     pointer-events: none;
-    opacity: var(--terms);
-    transform: translateY(calc((1 - var(--terms)) * 12px));
+    opacity: calc(var(--terms) * (1 - var(--clear)));
+    transform: translateY(calc((1 - var(--terms)) * 12px - var(--clear) * 10px));
   }
-  .naming-candidate.c1 { left: 8%; top: 8%; }
-  .naming-candidate.c2 { left: 42%; top: 28%; }
-  .naming-candidate.c3 { left: 58%; top: 0%; max-width: 18em; }
-  /* AI starts among the gray terms, then zooms into the title slot near the field floor */
+  .naming-candidate.c1 { left: 20vw; top: 32vh; }
+  .naming-candidate.c2 { left: 48vw; top: 44vh; }
+  .naming-candidate.c3 { left: 58vw; top: 26vh; max-width: 18em; }
+  /* AI starts as a gray term twin, grows, then rises to dock at the top */
   .naming-ai {
     position: absolute;
-    z-index: 3;
-    left: -20px;
-    bottom: 18%;
-    padding-left: clamp(20px, 2.8vw, 40px);
+    z-index: 4;
+    left: 12vw;
+    top: calc(52vh - var(--rise) * 40vh);
+    width: max-content;
+    max-width: calc(100% - 16vw);
     opacity: var(--terms);
     transform:
       translate(
-        calc((1 - var(--zoom)) * 18vw),
-        calc((1 - var(--zoom)) * -22%)
-      )
-      scale(calc(0.22 + var(--zoom) * 0.78));
-    transform-origin: left bottom;
-    will-change: transform;
+        calc((1 - var(--zoom)) * 14vw),
+        calc((1 - var(--zoom)) * 6vh)
+      );
+    transform-origin: left center;
+    will-change: transform, top, font-size;
+    pointer-events: none;
   }
   .naming-ai .naming-title {
+    position: relative;
+    z-index: 1;
     margin: 0;
-    font-size: clamp(40px, 6.6vw, 96px);
-    font-weight: 500;
-    line-height: 1.12;
-    letter-spacing: -0.02em;
+    padding: calc(var(--zoom) * 0.28em) calc(var(--zoom) * 0.35em);
+    font-size: calc(var(--term-size) + (var(--title-size) - var(--term-size)) * var(--zoom));
+    font-weight: calc(400 + var(--zoom) * 100);
+    line-height: 1.2;
+    letter-spacing: calc(var(--zoom) * -0.02em);
     white-space: nowrap;
     color: color-mix(in srgb, #fff calc(var(--zoom) * 100%), #5f5f5f);
   }
-  /* bar sits at the final title slot — fades in on color flip only (not scaled) */
   .naming-bar {
     position: absolute;
-    z-index: 2;
-    left: -20px;
-    bottom: 12%;
-    width: min(1099px, 92vw);
-    height: clamp(100px, 18vh, 180px);
+    z-index: 0;
+    inset: 0;
     background: #060809;
     opacity: var(--blue);
     pointer-events: none;
   }
-  .naming-outro {
-    position: relative;
-    z-index: 5;
-    flex: 0 0 auto;
-    margin: 3vh 0 0;
+  /* post-dock reveal: copy left + parallax frames right (Figma 314:238) */
+  .naming-reveal {
+    position: absolute;
+    left: 12vw;
+    right: 8vw;
+    top: calc(12vh + var(--title-size) * 1.6 + 4vh);
+    bottom: 8vh;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4vw;
+    opacity: var(--reveal);
+    transform: translateY(calc((1 - var(--reveal)) * 20px));
+    pointer-events: none;
+  }
+  .naming-copy {
     max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .naming-outro,
+  .naming-prompt {
+    margin: 0;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
-    opacity: var(--outro);
-    transform: translateY(calc((1 - var(--outro)) * 16px));
+    color: var(--ink);
   }
+  .naming-outro strong { font-weight: 700; }
+  .naming-frames {
+    position: relative;
+    min-height: 48vh;
+  }
+  .naming-frame {
+    position: absolute;
+    width: min(146px, 18vw);
+    aspect-ratio: 146 / 151;
+    /* stagger in, then keep drifting up like .rule-frame */
+    --fin: clamp(0, (var(--reveal) - var(--i) * 0.18) / 0.55, 1);
+    --drift: clamp(0, (var(--p) - 0.66) / 0.34, 1);
+    opacity: var(--fin);
+    transform: translateY(calc(40px - var(--drift) * 160px - var(--i) * 24px));
+  }
+  .naming-frame .ph { width: 100%; height: 100%; }
+  .naming-frame.f0 { top: 0; left: 8%; }
+  .naming-frame.f1 { top: 18%; left: 48%; }
+  .naming-frame.f2 { top: 42%; left: 8%; }
   .naming-crosshair {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: var(--terms);
+    opacity: calc(var(--terms) * (0.35 + var(--blue) * 0.65));
   }
+  /* vertical — starts 5vw down from the top, runs to the section bottom, right edge (Figma Line 1) */
   .naming-crosshair::before {
     content: "";
     position: absolute;
-    top: 0;
-    right: 4%;
+    top: 5vw;
+    bottom: 0;
+    right: 8.33vw;
     width: 2px;
-    height: 100%;
     background: color-mix(in srgb, #060809 calc(var(--blue) * 100%), #5f5f5f);
   }
+  /* horizontal — rides under the rising title bar, all the way to the right edge (Figma Line 2) */
   .naming-crosshair::after {
     content: "";
     position: absolute;
-    left: 0;
-    bottom: 12%;
-    width: 100%;
+    left: 12vw;
+    right: 0;
+    top: calc(
+      52vh - var(--rise) * 40vh
+      + (var(--term-size) + (var(--title-size) - var(--term-size)) * var(--zoom)) * 1.45
+    );
     height: 2px;
     background: color-mix(in srgb, #fff calc((0.55 + var(--blue) * 0.45) * 100%), #5f5f5f);
   }
@@ -584,34 +648,78 @@
         scale(calc(1 - var(--behind) * 0.22));
     }
     .s-datasets {
-      --card-w: 160px; --card-h: 154px;
-      --card-w-on: 200px; --card-h-on: 228px;
-      --gap: 6px;
+      --card-w: 58vw;
+      --card-h: 56vw;
+      --card-w-on: 78vw;
+      --card-h-on: min(88vw, 52vh);
+      --gap: 14px;
+      --slot: calc(var(--card-w-on) + var(--gap));
     }
-    .s-datasets .datasets-intro,
-    .dataset-track { padding-left: 7vw; }
+    .s-datasets .pin {
+      padding: 12vh 0 0;
+      /* clip the track as it pans to keep focus centered */
+      overflow: hidden;
+    }
+    .s-datasets .datasets-intro {
+      padding-left: 7vw;
+      padding-right: 7vw;
+      margin-bottom: 3vh;
+      max-width: none;
+      font-size: 15px;
+    }
+    .dataset-track {
+      /* on mobile, pan so the focused card sits in the viewport center */
+      padding-left: 0;
+      padding-right: 0;
+      height: calc(var(--card-h-on) + 7em);
+      width: max-content;
+      transform: translateX(calc(50vw - var(--card-w-on) / 2 - var(--focus) * var(--slot)));
+      will-change: transform;
+    }
+    .dataset-card {
+      width: var(--card-w-on);
+      gap: 10px;
+    }
+    .dataset-card figcaption {
+      font-size: 14px;
+      max-width: 100%;
+      padding-inline: 2px;
+    }
+    .dataset-card .desc {
+      max-height: calc(var(--prox) * 4.5em);
+    }
     .s-rules .intro, .rule-lines { padding-left: 7vw; }
     .rule-frame { width: 22vw; }
     .proposal-lead-layout { grid-template-columns: 1fr; gap: 4vh; }
     .proposal-lead-photo { order: -1; max-width: 280px; }
-    .naming-stage { padding: 12vh 7vw 8vh; }
-    .naming-candidate.c1 { left: 4%; top: 6%; }
-    .naming-candidate.c2 { left: 48%; top: 22%; }
-    .naming-candidate.c3 { left: 8%; top: 36%; }
+    .naming-stage { padding: 10vh 7vw 8vh; }
+    .naming-candidate.c1 { left: 8vw; top: 28vh; }
+    .naming-candidate.c2 { left: 48vw; top: 38vh; }
+    .naming-candidate.c3 { left: 14vw; top: 48vh; }
     .naming-ai {
-      left: 0;
-      bottom: 22%;
-      padding-left: 16px;
+      left: 7vw;
+      top: calc(50vh - var(--rise) * 38vh);
       transform:
         translate(
           calc((1 - var(--zoom)) * 6vw),
-          calc((1 - var(--zoom)) * -18%)
-        )
-        scale(calc(0.28 + var(--zoom) * 0.72));
+          calc((1 - var(--zoom)) * 4vh)
+        );
     }
-    .naming-ai .naming-title { white-space: normal; font-size: clamp(28px, 9vw, 48px); max-width: 88vw; }
-    .naming-bar { left: 0; width: 100%; bottom: 16%; }
-    .naming-outro { margin-top: 2vh; }
+    .s-naming { --title-size: clamp(28px, 9vw, 48px); }
+    .naming-ai .naming-title { white-space: normal; }
+    .naming-reveal {
+      left: 7vw; right: 7vw;
+      top: calc(10vh + var(--title-size) * 1.8 + 3vh);
+      grid-template-columns: 1fr;
+      gap: 3vh;
+    }
+    .naming-frames { min-height: 28vh; }
+    .naming-frame { width: min(110px, 28vw); }
+    .naming-frame.f0 { top: 0; left: 55%; }
+    .naming-frame.f1 { top: 12%; left: 72%; }
+    .naming-frame.f2 { top: 28%; left: 55%; }
+    .naming-crosshair::before { right: 7vw; }
+    .naming-crosshair::after { left: 7vw; right: 7vw; }
     .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
     .pdf-viewport { width: 86vw; height: 40vh; padding: 3vh 5vw; }
     .callout { width: 40vw; padding: 14px 16px; gap: 8px; }
@@ -799,7 +907,7 @@
   </div>
 </section>
 
-<!-- Naming composition: 5-beat scrub — lede → gray terms → AI zoom → color flip → outro -->
+<!-- Naming composition: lede → terms → zoom/blue → clear + rise → reveal (Figma 314:238) -->
 <section id="s-naming" class="s-naming" data-scrub>
   <div class="pin">
     <div class="naming-stage">
@@ -809,18 +917,30 @@
         <span class="naming-candidate c1" data-editable>Automata Studies</span>
         <span class="naming-candidate c2" data-editable>Cybernetics</span>
         <span class="naming-candidate c3" data-editable>Complex Information Processing</span>
-        <div class="naming-bar" aria-hidden="true"></div>
         <div class="naming-ai">
+          <div class="naming-bar" aria-hidden="true"></div>
           <p class="naming-title" data-editable>Artificial Intelligence</p>
         </div>
+        <div class="naming-reveal">
+          <div class="naming-copy">
+            <p class="naming-outro" data-editable>Of all the options, they landed on the one that compares machines to <strong>human minds.</strong></p>
+            <p class="naming-prompt" data-editable>Do you think that using a different name for this technology would make us treat it any differently?</p>
+          </div>
+          <div class="naming-frames">
+            <div class="naming-frame f0" style="--i: 0;">
+              <div class="ph" data-img-slot data-label="naming visual 1"></div>
+            </div>
+            <div class="naming-frame f1" style="--i: 1;">
+              <div class="ph" data-img-slot data-label="naming visual 2"></div>
+            </div>
+            <div class="naming-frame f2" style="--i: 2;">
+              <div class="ph" data-img-slot data-label="naming visual 3"></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <p class="naming-outro" data-editable>Of all the options, they landed on the one that compares machines to human minds.</p>
     </div>
   </div>
-</section>
-
-<section id="s-naming-bridge" class="flow copy-col">
-  <p class="lede" data-scroll-reveal data-editable>So what did that early &#8220;artificial intelligence&#8221; actually look like?</p>
 </section>
 
 <!-- 3 · Rules: three worked IF/AND/THEN examples, one at a time -->
@@ -877,7 +997,7 @@
 <!-- Rules lead-out: flow text, same scroll-linked reveal as s-explosion -->
 <section id="s-rules-after" class="flow copy-col">
   <p class="lede" data-scroll-reveal data-editable>Then researchers tried something different.</p>
-  <p class="lede" data-scroll-reveal data-editable>Without using rules they &#8220;fed&#8221; the machine millions of examples and let it figure out the patterns.</p>
+  <p class="lede" data-scroll-reveal data-editable>Without using rules they &#8220;fed&#8221; the machine millions of examples and let it figure out the patterns instead of following fixed rules. This approach is called machine learning and is still how a lot of AI works today.</p>
 </section>
 
 <!-- 5 · Datasets: stationary row — scroll focuses/enlarges each card -->
@@ -1014,6 +1134,21 @@
         }
       });
     })(el, false);
+    el.style.setProperty('--n', i);
+  });
+
+  /* ---------- split [data-typewriter] text into indexed character spans (typewriter reveal) ---------- */
+  document.querySelectorAll('[data-typewriter]').forEach(el => {
+    const text = el.textContent;
+    el.textContent = '';
+    let i = 0;
+    for (const ch of text) {
+      const c = document.createElement('span');
+      c.className = 'c';
+      c.textContent = ch;
+      c.style.setProperty('--i', i++);
+      el.appendChild(c);
+    }
     el.style.setProperty('--n', i);
   });
 
