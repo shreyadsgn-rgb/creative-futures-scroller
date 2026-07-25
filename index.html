@@ -6,7 +6,7 @@
 <title>History — Sandbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Tunable variables — the dev panel writes these live.
@@ -629,6 +629,230 @@
     overflow: hidden;
   }
 
+  /* ============================================================
+     6 · AI KINDS — Figma 315:295 → 320:431 → 321:476 → 321:486
+       1. two blurbs alone
+       2. AI title + example boxes (--expand)
+       3. Predictive / Generative lime tags (--tags)
+       4. Generative AI flies to the title slot + left copy swaps (--focus)
+     ============================================================ */
+  .s-ai-kinds {
+    height: calc(var(--section-gap) * 2.9);
+    --expand: clamp(0, (var(--p) - 0.06) / 0.14, 1);
+    --tags: clamp(0, (var(--p) - 0.28) / 0.12, 1);
+    /* snap: old two-column chrome vanishes in one step (no fade overlap) */
+    --swap: clamp(0, (var(--p) - 0.55) / 0.001, 1);
+    /* gen tag flight + focus copy after the snap */
+    --focus: clamp(0, (var(--p) - 0.55) / 0.22, 1);
+    /* final beat: the “LOT more examples” line */
+    --more: clamp(0, (var(--p) - 0.82) / 0.12, 1);
+  }
+  .s-ai-kinds .pin {
+    background: #2a2a2a;
+    align-content: stretch;
+    overflow: hidden;
+  }
+  .s-ai-kinds .pin::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, #000 1px, transparent 1px),
+      linear-gradient(to bottom, #000 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center top;
+  }
+  .ai-kinds-stage {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding: 16vh 14vw 10vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* fixed gap — don’t shove the columns when Generative AI grows */
+    gap: 2.5vh;
+  }
+  .ai-kinds-title-anchor {
+    position: relative;
+    flex: 0 0 auto;
+    align-self: flex-start;
+    /* constant once expanded: fits AI title or the grown Generative tag */
+    min-height: calc(var(--expand) * 130px);
+  }
+  .ai-kinds-title {
+    margin: 0;
+    padding: calc(var(--expand) * (1 - var(--swap)) * 12px) 0;
+    border-bottom: calc(var(--expand) * (1 - var(--swap)) * 4px) solid #fff;
+    font-size: clamp(40px, 4.2vw, 64px);
+    font-weight: 300;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    white-space: nowrap;
+    opacity: calc(var(--expand) * (1 - var(--swap)));
+    max-height: calc(var(--expand) * (1 - var(--swap)) * 110px);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .ai-kinds-tag--gen {
+    position: absolute;
+    z-index: 4;
+    left: 0;
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding:
+      calc(var(--tags) * 14px + var(--focus) * 10px)
+      calc(var(--tags) * 20px + var(--focus) * 4px);
+    background: var(--warm);
+    color: #000;
+    font-size: calc(var(--tags) * 32px + var(--focus) * 32px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: calc(var(--focus) * -0.02em);
+    white-space: nowrap;
+    border-bottom: calc(var(--focus) * 4px) solid #000;
+    opacity: var(--tags);
+    pointer-events: none;
+    will-change: transform, font-size, padding;
+    transform-origin: left top;
+  }
+  .ai-kinds-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 398fr) minmax(0, 448fr);
+    gap: clamp(32px, 8vw, 140px);
+    align-items: start;
+  }
+  .ai-kinds-col {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 448px;
+  }
+  .ai-kinds-col-left {
+    max-width: 398px;
+    min-height: calc(var(--swap) * 5em + var(--more) * 5em);
+  }
+  .ai-kinds-tag--pred {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: calc(var(--tags) * (1 - var(--swap)) * 14px) calc(var(--tags) * (1 - var(--swap)) * 20px);
+    background: var(--warm);
+    color: #000;
+    font-size: calc(var(--tags) * (1 - var(--swap)) * 32px);
+    font-weight: 400;
+    line-height: 1.05;
+    white-space: nowrap;
+    max-height: calc(var(--tags) * (1 - var(--swap)) * 70px);
+    overflow: hidden;
+    opacity: calc(var(--tags) * (1 - var(--swap)));
+    pointer-events: none;
+  }
+  /* invisible twin — keeps its seat so the right examples don’t jump when Generative AI leaves */
+  .ai-kinds-tag-slot {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: calc(var(--tags) * 14px) calc(var(--tags) * 20px);
+    background: var(--warm);
+    color: #000;
+    font-size: calc(var(--tags) * 32px);
+    font-weight: 400;
+    line-height: 1.05;
+    white-space: nowrap;
+    max-height: calc(var(--tags) * 70px);
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .ai-kinds-blurb {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .ai-kinds-outgoing {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    opacity: calc(1 - var(--swap));
+    max-height: calc((1 - var(--swap)) * 320px);
+    overflow: hidden;
+  }
+  .ai-kinds-col-left .ai-kinds-examples {
+    opacity: var(--expand);
+  }
+  /* hide the right blurb but keep its height so examples stay put */
+  .ai-kinds-col-right .ai-kinds-blurb {
+    opacity: calc(1 - var(--swap));
+  }
+  .ai-kinds-focus-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    pointer-events: none;
+  }
+  .ai-kinds-focus-lead {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 28em;
+    opacity: var(--swap);
+  }
+  .ai-kinds-focus-more {
+    margin: calc(var(--more) * 24px) 0 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 28em;
+    opacity: var(--more);
+    max-height: calc(var(--more) * 4.5em);
+    overflow: hidden;
+  }
+  .ai-kinds-examples {
+    border: 1px solid var(--warm);
+    padding: 24px;
+  }
+  .ai-kinds-col-right .ai-kinds-examples {
+    position: relative;
+    z-index: 8;
+    opacity: var(--expand);
+  }
+  .ai-kinds-examples .label {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--warm);
+  }
+  .ai-kinds-examples ul { list-style: none; padding: 0; margin: 0; }
+  .ai-kinds-examples li {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
   /* ---------- top / bottom framing ---------- */
   .frame-note {
     min-height: 60vh; display: grid; align-content: center;
@@ -688,6 +912,33 @@
     .dataset-card .desc {
       max-height: calc(var(--prox) * 4.5em);
     }
+    .ai-kinds-stage { padding: 12vh 7vw 8vh; gap: 2vh; }
+    .ai-kinds-cols {
+      grid-template-columns: 1fr;
+      gap: 4vh;
+    }
+    .ai-kinds-col,
+    .ai-kinds-col-left { max-width: none; }
+    .ai-kinds-title-anchor {
+      min-height: calc(var(--expand) * 100px);
+    }
+    .ai-kinds-title {
+      font-size: clamp(28px, 8vw, 40px);
+      max-height: calc(var(--expand) * (1 - var(--swap)) * 80px);
+      white-space: normal;
+    }
+    .ai-kinds-tag--pred {
+      font-size: calc(var(--tags) * (1 - var(--swap)) * 22px);
+      max-height: calc(var(--tags) * (1 - var(--swap)) * 52px);
+    }
+    .ai-kinds-tag-slot {
+      font-size: calc(var(--tags) * 22px);
+      max-height: calc(var(--tags) * 52px);
+    }
+    .ai-kinds-tag--gen {
+      font-size: calc(var(--tags) * 22px + var(--focus) * 18px);
+    }
+    .ai-kinds-focus-copy { max-width: none; }
     .s-rules .intro, .rule-lines { padding-left: 7vw; }
     .rule-frame { width: 22vw; }
     .proposal-lead-layout { grid-template-columns: 1fr; gap: 4vh; }
@@ -1037,8 +1288,48 @@
   </div>
 </section>
 
-<section id="s-datasets-after" class="flow copy-col">
-  <p class="lede" data-scroll-reveal data-editable>&#8230;but the problem was, you need a <em>lot</em> of examples.</p>
+<!-- 6 · AI kinds: blurbs → title/examples → tags → Generative focus (Figma 315:295 → 321:486) -->
+<section id="s-ai-kinds" class="s-ai-kinds" data-scrub>
+  <div class="pin">
+    <div class="ai-kinds-stage">
+      <div class="ai-kinds-title-anchor">
+        <h2 class="ai-kinds-title" data-editable>Artificial Intelligence</h2>
+      </div>
+      <p class="ai-kinds-tag--gen" data-editable>Generative AI</p>
+      <div class="ai-kinds-cols">
+        <div class="ai-kinds-col ai-kinds-col-left">
+          <p class="ai-kinds-tag--pred" data-editable>Predictive AI</p>
+          <div class="ai-kinds-outgoing">
+            <p class="ai-kinds-blurb" data-editable>Some AI uses rules or pattern recognition to sort, predict, or check things.</p>
+            <div class="ai-kinds-examples">
+              <p class="label" data-editable>Examples:</p>
+              <ul>
+                <li data-editable>Computer Vision</li>
+                <li data-editable>Speech Recognition</li>
+                <li data-editable>Robotics</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ai-kinds-focus-copy">
+            <p class="ai-kinds-focus-lead" data-editable>Let&#8217;s focus on this generative kind of AI which powers tools like ChatGPT.</p>
+            <p class="ai-kinds-focus-more" data-editable>To make generative AI, you need a&nbsp;LOT more examples than those data sets.</p>
+          </div>
+        </div>
+        <div class="ai-kinds-col ai-kinds-col-right">
+          <p class="ai-kinds-tag-slot" aria-hidden="true">Generative AI</p>
+          <p class="ai-kinds-blurb" data-editable>Other AI uses patterns to generate brand-new things, like text, images, and video.</p>
+          <div class="ai-kinds-examples">
+            <p class="label" data-editable>Examples:</p>
+            <ul>
+              <li data-editable>Computer Vision</li>
+              <li data-editable>Speech Recognition</li>
+              <li data-editable>Robotics</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <footer class="frame-note copy-col">— end of History section —</footer>
@@ -1063,7 +1354,44 @@
         steps.forEach((st, i) => st.classList.toggle('is-front', i === k));
       }
       s.querySelectorAll('[data-zoom-item]').forEach(el => updateZoomItem(el, p));
+      if (s.classList.contains('s-ai-kinds')) updateAiKindsFlight(s);
     }
+  }
+
+  /* Generative AI tag: lerp from the right-column slot to the title anchor.
+     Resolve progress from --p in JS — getComputedStyle('--focus') returns the
+     unresolved clamp() string, so parseFloat would always be NaN/0. */
+  const aiKindsFrom = new WeakMap();
+  function aiKindsProgress(p, start, dur) {
+    return Math.min(1, Math.max(0, (p - start) / dur));
+  }
+  function updateAiKindsFlight(section) {
+    const stage = section.querySelector('.ai-kinds-stage');
+    const gen = section.querySelector('.ai-kinds-tag--gen');
+    const slot = section.querySelector('.ai-kinds-tag-slot');
+    const anchor = section.querySelector('.ai-kinds-title-anchor');
+    const cols = section.querySelector('.ai-kinds-cols');
+    if (!stage || !gen || !slot || !anchor) return;
+
+    const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
+    const tags = aiKindsProgress(p, 0.28, 0.12);
+    const focus = aiKindsProgress(p, 0.55, 0.22);
+    const sr = stage.getBoundingClientRect();
+    const from = slot.getBoundingClientRect();
+
+    // cache start seat while tags are up and before the swap collapses the slot
+    if (tags > 0.85 && focus < 0.01) {
+      aiKindsFrom.set(section, { x: from.left - sr.left, y: from.top - sr.top });
+    }
+
+    const cached = aiKindsFrom.get(section);
+    const fromX = cached && focus > 0.01 ? cached.x : from.left - sr.left;
+    const fromY = cached && focus > 0.01 ? cached.y : from.top - sr.top;
+    const to = anchor.getBoundingClientRect();
+    const x = fromX + (to.left - sr.left - fromX) * focus;
+    const y = fromY + (to.top - sr.top - fromY) * focus;
+    gen.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    if (cols) cols.style.marginTop = '';
   }
 
   /* ---------- zoom field: translateZ/opacity/blur from a "inStart,inEnd,outStart,outEnd" range ---------- */
