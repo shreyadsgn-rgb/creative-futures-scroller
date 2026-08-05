@@ -86,6 +86,20 @@
     letter-spacing: 0.1em; text-transform: uppercase;
   }
   .ph::before { content: "placeholder — " attr(data-label); }
+  .ph:has(img) { border: none; background: none; padding: 0; display: block; }
+  .ph:has(img)::before { content: none; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* ---------- pixel-focus: image reads as a chunky mosaic when unfocused and
+     resolves to full clarity as focus rises. Reusable anywhere — drop
+     [data-pixel-focus] on a sized, positioned container holding an <img> +
+     <canvas>, then call PixelFocus.register(container, () => focus0to1) once
+     the section's JS knows how to compute that container's focus value. The
+     <img> stays in the DOM (opacity: 0) purely as the canvas's pixel source
+     and for its alt text; the <canvas> is what's actually seen. ---------- */
+  [data-pixel-focus] { position: relative; overflow: hidden; }
+  [data-pixel-focus] img { position: absolute; inset: 0; opacity: 0; }
+  [data-pixel-focus] canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 
   /* ============================================================
      0 · ARRIVAL — 3D zoom field, words + image placeholders
@@ -296,14 +310,41 @@
   }
 
   /* ============================================================
-     2 · PROPOSAL LEAD — intro copy beside the researchers photo,
-     then the scrubbed proposal section. Naming debate follows.
+     2 · PROPOSAL LEAD — pin the researchers photo centered, dwell,
+     then reveal the second lede before the scrubbed proposal.
      ============================================================ */
-  .proposal-lead-layout {
-    display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
-    align-items: center; gap: 6vw; max-width: none;
+  .s-proposal-lead {
+    /* short scrub: ~75vh of pinned runway after the image centers */
+    height: calc(100vh + 75vh);
+    --second: clamp(0, (var(--p) - 0.4) / 0.2, 1);
   }
-  .proposal-lead-photo .ph { aspect-ratio: 4 / 5; }
+  .s-proposal-lead .pin {
+    align-content: center;
+    padding: 0 6vw 0 12vw;
+    box-sizing: border-box;
+  }
+  .proposal-lead-layout {
+    display: grid; grid-template-columns: minmax(0, 5.5fr) minmax(0, 4.5fr);
+    align-items: center; gap: 6vw; width: 100%;
+  }
+  .proposal-lead-second {
+    opacity: var(--second);
+    max-height: calc(var(--second) * 12em);
+    margin-top: calc(var(--second) * 3vh);
+    overflow: hidden;
+    transform: translateY(calc((1 - var(--second)) * 16px));
+  }
+  .proposal-lead-photo {
+    width: 100%;
+    max-width: 400px;
+    justify-self: end;
+  }
+  .proposal-lead-photo .ph {
+    aspect-ratio: 3 / 2;
+  }
+  .proposal-lead-photo .ph img {
+    object-fit: contain;
+  }
 
   /* ============================================================
      2.5 · NAMING — scrub (dark → blue → title docks → reveal)
@@ -632,18 +673,21 @@
   /* ============================================================
      6 · AI KINDS — Figma 315:295 → 320:431 → 321:476 → 321:486
        1. two blurbs alone
-       2. AI title + example boxes (--expand)
+       2. example boxes (--expand)
        3. Predictive / Generative lime tags (--tags)
-       4. Generative AI flies to the title slot + left copy swaps (--focus)
+       4. columns pan left; left column exits by p=0.7; Generative AI
+          grows (--focus / --pan); focus copy reveals under the
+          generative body text (--copy)
      ============================================================ */
   .s-ai-kinds {
     height: calc(var(--section-gap) * 2.9);
     --expand: clamp(0, (var(--p) - 0.06) / 0.14, 1);
     --tags: clamp(0, (var(--p) - 0.28) / 0.12, 1);
-    /* snap: old two-column chrome vanishes in one step (no fade overlap) */
-    --swap: clamp(0, (var(--p) - 0.55) / 0.001, 1);
-    /* gen tag flight + focus copy after the snap */
-    --focus: clamp(0, (var(--p) - 0.55) / 0.22, 1);
+    /* pan + gen grow: left column fully off-frame by p=0.7 */
+    --focus: clamp(0, (var(--p) - 0.55) / 0.15, 1);
+    --pan: var(--focus);
+    /* focus copy under the generative body text once the pan lands */
+    --copy: clamp(0, (var(--p) - 0.68) / 0.1, 1);
     /* final beat: the “LOT more examples” line */
     --more: clamp(0, (var(--p) - 0.82) / 0.12, 1);
   }
@@ -675,28 +719,7 @@
     justify-content: flex-start;
     /* fixed gap — don’t shove the columns when Generative AI grows */
     gap: 2.5vh;
-  }
-  .ai-kinds-title-anchor {
-    position: relative;
-    flex: 0 0 auto;
-    align-self: flex-start;
-    /* constant once expanded: fits AI title or the grown Generative tag */
-    min-height: calc(var(--expand) * 130px);
-  }
-  .ai-kinds-title {
-    margin: 0;
-    padding: calc(var(--expand) * (1 - var(--swap)) * 12px) 0;
-    border-bottom: calc(var(--expand) * (1 - var(--swap)) * 4px) solid #fff;
-    font-size: clamp(40px, 4.2vw, 64px);
-    font-weight: 300;
-    line-height: 0.98;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-    white-space: nowrap;
-    opacity: calc(var(--expand) * (1 - var(--swap)));
-    max-height: calc(var(--expand) * (1 - var(--swap)) * 110px);
     overflow: hidden;
-    pointer-events: none;
   }
   .ai-kinds-tag--gen {
     position: absolute;
@@ -723,11 +746,43 @@
     will-change: transform, font-size, padding;
     transform-origin: left top;
   }
+  .ai-kinds-focus-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 28em;
+    opacity: var(--copy);
+    max-height: calc(var(--copy) * 12em);
+    overflow: hidden;
+    transform: translateY(calc((1 - var(--copy)) * 12px));
+  }
+  .ai-kinds-focus-lead {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 28em;
+  }
+  .ai-kinds-focus-more {
+    margin: calc(var(--more) * 24px) 0 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 28em;
+    opacity: var(--more);
+    max-height: calc(var(--more) * 4.5em);
+    overflow: hidden;
+  }
   .ai-kinds-cols {
     display: grid;
     grid-template-columns: minmax(0, 398fr) minmax(0, 448fr);
     gap: clamp(32px, 8vw, 140px);
     align-items: start;
+    /* reserve landing zone for Generative AI (was title-anchor height) */
+    margin-top: calc(var(--expand) * 130px);
+    will-change: transform;
   }
   .ai-kinds-col {
     position: relative;
@@ -738,7 +793,6 @@
   }
   .ai-kinds-col-left {
     max-width: 398px;
-    min-height: calc(var(--swap) * 5em + var(--more) * 5em);
   }
   .ai-kinds-tag--pred {
     display: inline-flex;
@@ -746,16 +800,16 @@
     align-items: center;
     justify-content: center;
     margin: 0;
-    padding: calc(var(--tags) * (1 - var(--swap)) * 14px) calc(var(--tags) * (1 - var(--swap)) * 20px);
+    padding: calc(var(--tags) * 14px) calc(var(--tags) * 20px);
     background: var(--warm);
     color: #000;
-    font-size: calc(var(--tags) * (1 - var(--swap)) * 32px);
+    font-size: calc(var(--tags) * 32px);
     font-weight: 400;
     line-height: 1.05;
     white-space: nowrap;
-    max-height: calc(var(--tags) * (1 - var(--swap)) * 70px);
+    max-height: calc(var(--tags) * 70px);
     overflow: hidden;
-    opacity: calc(var(--tags) * (1 - var(--swap)));
+    opacity: var(--tags);
     pointer-events: none;
   }
   /* invisible twin — keeps its seat so the right examples don’t jump when Generative AI leaves */
@@ -788,46 +842,9 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    opacity: calc(1 - var(--swap));
-    max-height: calc((1 - var(--swap)) * 320px);
-    overflow: hidden;
   }
   .ai-kinds-col-left .ai-kinds-examples {
     opacity: var(--expand);
-  }
-  /* hide the right blurb but keep its height so examples stay put */
-  .ai-kinds-col-right .ai-kinds-blurb {
-    opacity: calc(1 - var(--swap));
-  }
-  .ai-kinds-focus-copy {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    pointer-events: none;
-  }
-  .ai-kinds-focus-lead {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--ink);
-    max-width: 28em;
-    opacity: var(--swap);
-  }
-  .ai-kinds-focus-more {
-    margin: calc(var(--more) * 24px) 0 0;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--ink);
-    max-width: 28em;
-    opacity: var(--more);
-    max-height: calc(var(--more) * 4.5em);
-    overflow: hidden;
   }
   .ai-kinds-examples {
     border: 1px solid var(--warm);
@@ -913,23 +930,23 @@
       max-height: calc(var(--prox) * 4.5em);
     }
     .ai-kinds-stage { padding: 12vh 7vw 8vh; gap: 2vh; }
+    /* keep a horizontal track so the left-pan still clips Predictive off-screen */
     .ai-kinds-cols {
-      grid-template-columns: 1fr;
-      gap: 4vh;
+      display: flex;
+      grid-template-columns: none;
+      gap: 8vw;
+      width: max-content;
+      margin-top: calc(var(--expand) * 100px);
     }
     .ai-kinds-col,
-    .ai-kinds-col-left { max-width: none; }
-    .ai-kinds-title-anchor {
-      min-height: calc(var(--expand) * 100px);
-    }
-    .ai-kinds-title {
-      font-size: clamp(28px, 8vw, 40px);
-      max-height: calc(var(--expand) * (1 - var(--swap)) * 80px);
-      white-space: normal;
+    .ai-kinds-col-left {
+      max-width: none;
+      width: calc(100vw - 14vw);
+      flex: 0 0 auto;
     }
     .ai-kinds-tag--pred {
-      font-size: calc(var(--tags) * (1 - var(--swap)) * 22px);
-      max-height: calc(var(--tags) * (1 - var(--swap)) * 52px);
+      font-size: calc(var(--tags) * 22px);
+      max-height: calc(var(--tags) * 52px);
     }
     .ai-kinds-tag-slot {
       font-size: calc(var(--tags) * 22px);
@@ -938,11 +955,11 @@
     .ai-kinds-tag--gen {
       font-size: calc(var(--tags) * 22px + var(--focus) * 18px);
     }
-    .ai-kinds-focus-copy { max-width: none; }
     .s-rules .intro, .rule-lines { padding-left: 7vw; }
     .rule-frame { width: 22vw; }
     .proposal-lead-layout { grid-template-columns: 1fr; gap: 4vh; }
-    .proposal-lead-photo { order: -1; max-width: 280px; }
+    .s-proposal-lead .pin { padding-inline: 7vw; }
+    .proposal-lead-photo { order: -1; max-width: 260px; justify-self: start; }
     .naming-stage { padding: 10vh 7vw 8vh; }
     .naming-candidate.c1 { left: 8vw; top: 28vh; }
     .naming-candidate.c2 { left: 48vw; top: 38vh; }
@@ -1070,7 +1087,7 @@
         <h3 data-editable>Za&#8217;irajah paper machines (~14th Century)</h3>
         <p class="subtext" data-editable>Long before computers, medieval Arab scholars built a device called the Za&#8217;irajah: a paper machine designed to generate answers to questions through a system of rotating circles, letter values, and mathematical rules. People could pose a question, and the machine would combine the numerical values of the Arabic letters in your words with astrological categories to produce an answer in the form of a new arrangement of letters. It wasn&#8217;t AI but similar to early AI models, it acted as a rule-based system for producing meaning from patterns.</p>
       </div>
-      <div class="media"><div class="ph" data-img-slot data-label="Za'irajah manuscript diagram"></div></div>
+      <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Za'irajah manuscript diagram"><img src="assets/zairja-manuscript.png" alt="Za'irajah manuscript diagram, a medieval Arabic paper machine of rotating circles and letter values" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
     </div>
 
     <div class="step" style="--k: 2;">
@@ -1078,7 +1095,7 @@
         <h3 data-editable>The Golem of Prague (16th century)</h3>
         <p class="subtext" data-editable>In 16th-century Prague, Rabbi Judah Loew ben Bezalel was said to have shaped a figure from river clay and brought it to life by placing a piece of paper inscribed with a sacred word into its mouth. The golem couldn&#8217;t speak or think; it could only follow instructions, serving as a protector for a Jewish community living under threat of persecution. Every Friday before the Sabbath, the rabbi would remove the shem to deactivate it, until one week he forgot, and the golem became uncontrollable. The rabbi eventually stopped it, and legend says its remains still sit in the attic of Prague&#8217;s Old New Synagogue, waiting.</p>
       </div>
-      <div class="media"><div class="ph" data-img-slot data-label="Golem of Prague illustration"></div></div>
+      <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Golem of Prague illustration"><img src="assets/golem-of-prague-mikolas-ales.jpg" alt="1899 illustration of the Golem of Prague by Mikol&#225;&#353; Ale&#353;" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
     </div>
 
     <div class="step" style="--k: 3;">
@@ -1095,15 +1112,17 @@
   </div>
 </section>
 
-<!-- Proposal lead-in: copy + researchers photo -->
-<section id="s-proposal-lead" class="flow copy-col" style="max-width: none;">
-  <div class="proposal-lead-layout">
-    <div>
-      <p class="lede" data-scroll-reveal data-editable>The kind of AI that we know and talk about today was started over 100 years ago.</p>
-      <p class="lede" data-scroll-reveal data-editable>In 1955, a small group of researchers wrote a proposal to study how machines might reason, use language, and solve problems normally reserved for people.</p>
-    </div>
-    <div class="proposal-lead-photo" data-scroll-reveal>
-      <div class="ph" data-img-slot data-label="the researchers who debated the name &#8212; group photo"></div>
+<!-- Proposal lead-in: pin photo centered, dwell, then reveal second lede -->
+<section id="s-proposal-lead" class="s-proposal-lead" data-scrub>
+  <div class="pin">
+    <div class="proposal-lead-layout">
+      <div class="proposal-lead-copy">
+        <p class="lede" data-editable>The kind of AI that we know and talk about today was started over 100 years ago.</p>
+        <p class="lede proposal-lead-second" data-editable>In 1955, a small group of researchers wrote a proposal to study how machines might reason, use language, and solve problems normally reserved for people.</p>
+      </div>
+      <div class="proposal-lead-photo">
+        <div class="ph" data-img-slot data-label="the researchers who debated the name &#8212; group photo"><img src="assets/dartmouth_conference-aifounders.avif" alt="McCarthy, Minsky, Rochester, and Shannon at the 2006 Dartmouth conference 50th-anniversary commemoration" loading="lazy"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -1207,10 +1226,10 @@
           <p class="rline" style="--ls: 0.11; --le: 0.14;"><span class="kw">THEN</span> take the queen</p>
         </div>
         <div class="rule-frame" style="--ls: 0.03; --le: 0.10; top: 18%; right: 22%;">
-          <div class="ph" data-img-slot data-label="chess board &#8212; queen exposed to rook"></div>
+          <div class="ph" data-img-slot data-label="chess board &#8212; queen exposed to rook"><img src="assets/kali-graphist-zKqq5M0hFsE-unsplash.jpg" alt="Chess board mid-game with pieces in play" loading="lazy"></div>
         </div>
         <div class="rule-frame" style="--ls: 0.09; --le: 0.16; top: 60%; right: 6%;">
-          <div class="ph" data-img-slot data-label="chess move &#8212; rook captures queen"></div>
+          <div class="ph" data-img-slot data-label="chess move &#8212; rook captures queen"><img src="assets/josue-soto-C2WLgD4ELXg-unsplash.jpg" alt="Close-up of a wooden rook chess piece on the board" loading="lazy"></div>
         </div>
       </div>
 
@@ -1257,21 +1276,21 @@
     <p class="lede datasets-intro" data-editable>This type of machine learning started with datasets.</p>
     <div class="dataset-track">
       <figure class="dataset-card" style="--i: 0;">
-        <div class="media"><div class="ph" data-img-slot data-label="MNIST handwritten digits"></div></div>
+        <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="MNIST handwritten digits"><img src="assets/MNIST_dataset_example.png" alt="Grid of handwritten digit samples from the MNIST dataset" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
         <figcaption>
           <span class="name" data-editable>MNIST</span>
           <span class="desc" data-editable>Handwritten digits used to train early image classifiers.</span>
         </figcaption>
       </figure>
       <figure class="dataset-card" style="--i: 1;">
-        <div class="media"><div class="ph" data-img-slot data-label="Iris dataset visual"></div></div>
+        <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Iris dataset visual"><img src="assets/irisflower-unsplash.jpg" alt="Purple iris flower in bloom" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
         <figcaption>
           <span class="name" data-editable>Iris</span>
           <span class="desc" data-editable>Flower measurements for sorting species by pattern.</span>
         </figcaption>
       </figure>
       <figure class="dataset-card" style="--i: 2;">
-        <div class="media"><div class="ph" data-img-slot data-label="Pima Indians Diabetes dataset visual"></div></div>
+        <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Pima Indians Diabetes dataset visual"><img src="assets/The_Pima_Indians_-_pg_85.png" alt="Archival photograph of the Pima Indians community, page 85" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
         <figcaption>
           <span class="name" data-editable>Pima Indians Diabetes</span>
           <span class="desc" data-editable>Health records used to predict medical outcomes.</span>
@@ -1288,13 +1307,10 @@
   </div>
 </section>
 
-<!-- 6 · AI kinds: blurbs → title/examples → tags → Generative focus (Figma 315:295 → 321:486) -->
+<!-- 6 · AI kinds: blurbs → examples → tags → Generative focus (Figma 315:295 → 321:486) -->
 <section id="s-ai-kinds" class="s-ai-kinds" data-scrub>
   <div class="pin">
     <div class="ai-kinds-stage">
-      <div class="ai-kinds-title-anchor">
-        <h2 class="ai-kinds-title" data-editable>Artificial Intelligence</h2>
-      </div>
       <p class="ai-kinds-tag--gen" data-editable>Generative AI</p>
       <div class="ai-kinds-cols">
         <div class="ai-kinds-col ai-kinds-col-left">
@@ -1310,14 +1326,14 @@
               </ul>
             </div>
           </div>
-          <div class="ai-kinds-focus-copy">
-            <p class="ai-kinds-focus-lead" data-editable>Let&#8217;s focus on this generative kind of AI which powers tools like ChatGPT.</p>
-            <p class="ai-kinds-focus-more" data-editable>To make generative AI, you need a&nbsp;LOT more examples than those data sets.</p>
-          </div>
         </div>
         <div class="ai-kinds-col ai-kinds-col-right">
           <p class="ai-kinds-tag-slot" aria-hidden="true">Generative AI</p>
           <p class="ai-kinds-blurb" data-editable>Other AI uses patterns to generate brand-new things, like text, images, and video.</p>
+          <div class="ai-kinds-focus-copy">
+            <p class="ai-kinds-focus-lead" data-editable>Let&#8217;s focus on this generative kind of AI which powers tools like ChatGPT.</p>
+            <p class="ai-kinds-focus-more" data-editable>To make generative AI, you need a&nbsp;LOT more examples than those data sets.</p>
+          </div>
           <div class="ai-kinds-examples">
             <p class="label" data-editable>Examples:</p>
             <ul>
@@ -1358,9 +1374,9 @@
     }
   }
 
-  /* Generative AI tag: lerp from the right-column slot to the title anchor.
-     Resolve progress from --p in JS — getComputedStyle('--focus') returns the
-     unresolved clamp() string, so parseFloat would always be NaN/0. */
+  /* Generative AI tag: matches the columns' leftward pan exactly (same
+     horizontal speed), rising into the title while it grows. Left column
+     is fully past the stage clip by p=0.7. Resolve progress from --p in JS. */
   const aiKindsFrom = new WeakMap();
   function aiKindsProgress(p, start, dur) {
     return Math.min(1, Math.max(0, (p - start) / dur));
@@ -1369,29 +1385,47 @@
     const stage = section.querySelector('.ai-kinds-stage');
     const gen = section.querySelector('.ai-kinds-tag--gen');
     const slot = section.querySelector('.ai-kinds-tag-slot');
-    const anchor = section.querySelector('.ai-kinds-title-anchor');
     const cols = section.querySelector('.ai-kinds-cols');
-    if (!stage || !gen || !slot || !anchor) return;
+    const left = section.querySelector('.ai-kinds-col-left');
+    if (!stage || !gen || !slot || !cols || !left) return;
 
     const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
     const tags = aiKindsProgress(p, 0.28, 0.12);
-    const focus = aiKindsProgress(p, 0.55, 0.22);
-    const sr = stage.getBoundingClientRect();
-    const from = slot.getBoundingClientRect();
+    const focus = aiKindsProgress(p, 0.55, 0.15);
+    const cs = getComputedStyle(stage);
+    const toY = parseFloat(cs.paddingTop) || 0;
 
-    // cache start seat while tags are up and before the swap collapses the slot
+    // cache start seat + full clear distance before any pan (must clear past
+    // stage padding — overflow:hidden still paints inside the padding box)
     if (tags > 0.85 && focus < 0.01) {
-      aiKindsFrom.set(section, { x: from.left - sr.left, y: from.top - sr.top });
+      cols.style.transform = '';
+      const sr0 = stage.getBoundingClientRect();
+      const from0 = slot.getBoundingClientRect();
+      const left0 = left.getBoundingClientRect();
+      aiKindsFrom.set(section, {
+        x: from0.left - sr0.left,
+        y: from0.top - sr0.top,
+        clear: left0.right - sr0.left,
+      });
     }
 
     const cached = aiKindsFrom.get(section);
+    const sr = stage.getBoundingClientRect();
+    const from = slot.getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(cols).columnGap || getComputedStyle(cols).gap) || 0;
+    const padL = parseFloat(cs.paddingLeft) || 0;
+    const clear = cached && cached.clear > 0
+      ? cached.clear
+      : left.offsetWidth + gap + padL;
+    const slide = clear * focus;
+    cols.style.transform = `translateX(${(-slide).toFixed(1)}px)`;
+
     const fromX = cached && focus > 0.01 ? cached.x : from.left - sr.left;
     const fromY = cached && focus > 0.01 ? cached.y : from.top - sr.top;
-    const to = anchor.getBoundingClientRect();
-    const x = fromX + (to.left - sr.left - fromX) * focus;
-    const y = fromY + (to.top - sr.top - fromY) * focus;
+    // same horizontal velocity as the columns; rise to the title vertically
+    const x = fromX - slide;
+    const y = fromY + (toY - fromY) * focus;
     gen.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-    if (cols) cols.style.marginTop = '';
   }
 
   /* ---------- zoom field: translateZ/opacity/blur from a "inStart,inEnd,outStart,outEnd" range ---------- */
@@ -1416,6 +1450,118 @@
     el.style.setProperty('--blur', blur.toFixed(2) + 'px');
   }
 
+  /* ============================================================
+     PIXEL FOCUS — reusable "pixelates when unfocused, resolves when in
+     focus" image effect. No separate pixelated asset: a <canvas> redraws
+     the same <img> at a low resolution and lets the browser's own
+     nearest-neighbor upscale (image-rendering: pixelated, set in CSS)
+     do the blocking. As focus → 1 the draw resolution climbs to match
+     the container's real (device-pixel) size, so it resolves to the
+     same crispness as a plain <img>.
+
+     Usage elsewhere: give a sized, positioned container [data-pixel-focus]
+     holding an <img> and a <canvas>, then:
+       PixelFocus.register(container, () => someFocusValue0to1);
+     and make sure PixelFocus.updateAll() runs in your scroll/resize loop
+     (see the bottom of this script for how the dataset cards do it).
+     ============================================================ */
+  const PixelFocus = (() => {
+    const instances = [];
+    const MAX_BLOCK = 26; // mosaic block size in CSS px at focus 0 — the chunkiest step
+
+    function register(container, getFocus, ease = t => t) {
+      const img = container.querySelector('img');
+      const canvas = container.querySelector('canvas');
+      if (!img || !canvas) return null;
+      const inst = { container, img, canvas, ctx: canvas.getContext('2d'), getFocus, ease, ready: false, lastW: -1, lastH: -1 };
+      instances.push(inst);
+      const markReady = () => { inst.ready = true; draw(inst); };
+      if (img.complete && img.naturalWidth) markReady();
+      else img.addEventListener('load', markReady, { once: true });
+      return inst;
+    }
+
+    function draw(inst) {
+      if (!inst.ready) return;
+      const { container, img, canvas, ctx } = inst;
+      const rect = container.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const focus = Math.min(1, Math.max(0, inst.getFocus()));
+      const eased = inst.ease(focus);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const minBlock = 1 / dpr; // one device pixel — fully crisp, same as a plain <img>
+      // Interpolate the mosaic's BLOCK SIZE linearly (not the draw resolution — block
+      // size and resolution are inversely related, so a linear resolution ramp looks
+      // sharp almost immediately and then does nothing for the rest of the range).
+      // Linear block size instead means the visible chunkiness shrinks at a constant
+      // rate, in lockstep with whatever else `focus` drives — e.g. the dataset cards'
+      // own linear size growth — so de-pixelation reads as gradual and synced to it.
+      const blockSize = MAX_BLOCK + (minBlock - MAX_BLOCK) * eased;
+      const w = Math.max(1, Math.round(rect.width / blockSize));
+      const h = Math.max(1, Math.round(rect.height / blockSize));
+      if (w === inst.lastW && h === inst.lastH) return; // skip redundant redraws
+      inst.lastW = w; inst.lastH = h;
+      canvas.width = w;
+      canvas.height = h;
+
+      // replicate object-fit: cover — crop the source to the container's ratio
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+      const cRatio = w / h, iRatio = iw / ih;
+      let sx, sy, sw, sh;
+      if (iRatio > cRatio) { sh = ih; sw = ih * cRatio; sx = (iw - sw) / 2; sy = 0; }
+      else { sw = iw; sh = iw / cRatio; sx = 0; sy = (ih - sh) / 2; }
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+    }
+
+    function updateAll() { instances.forEach(draw); }
+    return { register, updateAll };
+  })();
+
+  /* ---------- dataset cards: wire pixel-focus to the same --prox each card already
+     uses for its size/opacity swell (mirrored here in JS since getComputedStyle
+     can't resolve a calc()/clamp() custom property back into a number — see the
+     --focus note on updateAiKindsFlight above for the same constraint). ---------- */
+  document.querySelectorAll('.dataset-card').forEach(card => {
+    const slot = card.querySelector('.media [data-pixel-focus]');
+    const section = card.closest('[data-scrub]');
+    if (!slot || !section) return;
+    const i = parseFloat(getComputedStyle(card).getPropertyValue('--i')) || 0;
+    const cards = parseFloat(getComputedStyle(section).getPropertyValue('--cards')) || 1;
+    const hold = parseFloat(getComputedStyle(card).getPropertyValue('--hold')) || 0;
+    PixelFocus.register(slot, () => {
+      const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
+      const d = p * cards - i;
+      const ad = Math.abs(d);
+      return 1 - Math.max(0, ad - hold) / (1 - hold);
+    }, f => f ** 3);
+  });
+
+  /* ---------- s-dreams steps: same idea — pixel-focus tied to each step's own
+     --behind depth, the same value .step .media uses for its scale(1 - behind*0.25)
+     shrink. behind 0 (front, full size) → focus 1; behind 2 (deepest visible ghost,
+     half size) → focus 0. Mirrored in JS for the same reason as the dataset cards
+     (and updateAiKindsFlight above): --t/--exit/--behind are calc()-derived, so
+     getComputedStyle can't hand back a resolved number for them. ---------- */
+  document.querySelectorAll('.s-dreams .step').forEach(step => {
+    const slot = step.querySelector('.media [data-pixel-focus]');
+    const section = step.closest('[data-scrub]');
+    if (!slot || !section) return;
+    const k = parseFloat(getComputedStyle(step).getPropertyValue('--k')) || 0;
+    const lead = parseFloat(getComputedStyle(section).getPropertyValue('--lead')) || 0;
+    const stepsEnd = parseFloat(getComputedStyle(section).getPropertyValue('--steps-end')) || 1;
+    const exitEnd = parseFloat(getComputedStyle(section).getPropertyValue('--exit-end')) || 1;
+    PixelFocus.register(slot, () => {
+      const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
+      const t = Math.min(3, (p - lead) / (stepsEnd - lead) * 3);
+      const exit = Math.min(1, Math.max(0, (p - stepsEnd) / (exitEnd - stepsEnd)));
+      const d = t - k + exit;
+      const behind = Math.min(3, Math.max(0, -d));
+      return 1 - Math.min(behind, 2) / 2;
+    }, f => f ** 3);
+  });
+
   /* ---------- [data-scroll-reveal]: --rp (0→1) from each element's own scroll position ----------
      0 while its top is still near the bottom of the viewport (90vh), 1 once it's scrolled up to
      55vh — a ~35vh reveal window tied directly to scroll position, so it can't be outrun. */
@@ -1434,11 +1580,12 @@
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
+  PixelFocus.updateAll();
 
   /* ---------- split [data-highlight] text into indexed word spans ---------- */
   document.querySelectorAll('[data-highlight]').forEach(el => {
