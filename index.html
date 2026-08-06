@@ -1398,6 +1398,47 @@
     display: block;
   }
 
+  /* ============================================================
+     15–23 · CLOSING BEATS (Figma 179:315 frame stack) — plain
+     full-viewport copy sections, dark or warm, in listed order.
+     ============================================================ */
+  .beat {
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    align-content: start;
+    padding: 18vh 12vw 10vh;
+  }
+  .beat--dark { background: #000; color: var(--ink); }
+  .beat--warm { background: var(--warm); color: #000; }
+  .beat-copy {
+    max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  .beat--warm .lede { color: #000; }
+  .beat-media-row {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    margin-top: 4vh;
+    max-width: calc(100vw - 12vw);
+    overflow-x: auto;
+  }
+  .beat-media-row .ph {
+    flex: 0 0 auto;
+    width: min(270px, 42vw);
+    height: 260px;
+    border-color: rgba(0, 0, 0, 0.28);
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.45);
+  }
+  .beat-media-row .ph.tall {
+    width: min(352px, 48vw);
+    height: 402px;
+  }
+
   /* ---------- top / bottom framing ---------- */
   .frame-note {
     min-height: 60vh; display: grid; align-content: center;
@@ -1561,6 +1602,10 @@
       max-width: 520px;
       margin-top: 4vh;
     }
+    .beat { padding: 14vh 7vw 8vh; }
+    .beat-media-row { gap: 16px; }
+    .beat-media-row .ph { width: min(200px, 55vw); height: 200px; }
+    .beat-media-row .ph.tall { width: min(240px, 62vw); height: 280px; }
   }
 </style>
 </head>
@@ -2065,6 +2110,72 @@
 <section id="s-reclaim" class="s-reclaim">
   <div class="reclaim-copy">
     <p class="lede" data-scroll-reveal data-editable>So while some are using AI to create art, others are finding ways to reclaim their art.</p>
+  </div>
+</section>
+
+<!-- 15–23 · Closing beats from Figma 179:315 (Intro & History stack), in order. -->
+<section id="s-datacenters-cost" class="beat beat--dark">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>Aside from models, data scraping and data processing, there is one more significant part to the development of generative AI.</p>
+    <p class="lede" data-scroll-reveal data-editable>Every AI request travels to physical computers. Those computers require electricity, cooling systems, networking equipment, and buildings. This comes with environmental costs.</p>
+  </div>
+</section>
+
+<section id="s-datacenters-name" class="beat beat--dark">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>These buildings are called data centers. They already existed for the internet but their growth is exploding now.</p>
+  </div>
+</section>
+
+<section id="s-datacenters-unequal" class="beat beat--warm">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>...which aren&#8217;t distributed equally...</p>
+  </div>
+</section>
+
+<section id="s-datacenters-communities" class="beat beat--warm">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>And they&#8217;re jarring to nearby communities&#8230;</p>
+  </div>
+</section>
+
+<section id="s-datacenters-fight" class="beat beat--warm">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>...which are fighting back.</p>
+  </div>
+  <div class="beat-media-row" aria-hidden="true">
+    <div class="ph" data-img-slot data-scroll-reveal data-label="community resist 1"></div>
+    <div class="ph tall" data-img-slot data-scroll-reveal data-label="community resist 2"></div>
+    <div class="ph" data-img-slot data-scroll-reveal data-label="community resist 3"></div>
+    <div class="ph" data-img-slot data-scroll-reveal data-label="community resist 4"></div>
+  </div>
+</section>
+
+<section id="s-ai-positives" class="beat beat--dark">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>People are embracing AI for different reasons.</p>
+    <p class="lede" data-scroll-reveal data-editable>**include &#8220;AI positives&#8221;</p>
+  </div>
+</section>
+
+<section id="s-ai-everywhere" class="beat beat--dark">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>Even if for those who don&#8217;t personally use AI, AI is a little bit everywhere.</p>
+    <p class="lede" data-scroll-reveal data-editable>*include AI in research papers, AI in everyday spoken english, etc</p>
+  </div>
+</section>
+
+<section id="s-built-by-many" class="beat beat--dark">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>And built from the contributions of a LOT of people.</p>
+    <p class="lede" data-scroll-reveal data-editable>*summarize scroller (early imaginations, researchers, data sets, people posting internet, people clearing data, people using/fighting ai)</p>
+  </div>
+</section>
+
+<section id="s-ai-futures" class="beat beat--dark">
+  <div class="beat-copy">
+    <p class="lede" data-scroll-reveal data-editable>There are many different ideas about how AI will play out.</p>
+    <p class="lede" data-scroll-reveal data-editable>And so much that still needs to be figured out.</p>
   </div>
 </section>
 
