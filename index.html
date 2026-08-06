@@ -26,6 +26,7 @@
     --warm: #EBFE9B;           /* warm / human / reflective */
     --card-bg: #0C1414;
     --gray-panel: #222222;    /* neutral dark gray — callouts, vs. --card-bg's teal tint */
+    --purple: #4F1EDB;        /* internet-data building grid's gutter/frame (Figma 179:262) */
   }
 
   * { box-sizing: border-box; margin: 0; }
@@ -476,7 +477,7 @@
     position: absolute;
     left: 12vw;
     right: 8vw;
-    top: calc(12vh + var(--title-size) * 1.6 + 4vh);
+    top: calc(12vh + var(--title-size) * 1.6 + 8vh);
     bottom: 8vh;
     z-index: 3;
     display: grid;
@@ -518,7 +519,7 @@
   .naming-frame .ph { width: 100%; height: 100%; }
   .naming-frame.f0 { top: 0; left: 8%; }
   .naming-frame.f1 { top: 18%; left: 48%; }
-  .naming-frame.f2 { top: 42%; left: 8%; }
+  .naming-frame.f2 { top: 58%; left: 8%; }
   .naming-crosshair {
     position: absolute;
     inset: 0;
@@ -870,6 +871,533 @@
     color: var(--ink);
   }
 
+  /* ============================================================
+     7 · INTERNET-SCALE DATA (Figma 179:262) — cityscape + drifting clouds
+     backdrop, a grid-background layer, a color-shiftable building grid of
+     b/w portrait cutouts (positions fixed per Figma, fill color swaps in a
+     later frame via --building-fill so it can't be a flattened image), and
+     placeholder "posts" parallaxing up either side faster than everything
+     else in the section.
+     ============================================================ */
+  .s-internet {
+    /* phase 1 (p 0–0.5): intro copy holds, backdrop + building + posts settle in, as before.
+       phase 2 (p 0.5–1, Figma 378:214): intro exits, building + posts pan left into a new
+       layout, new copy + graph fade in on the right. Doubling the original 1.4x height gives
+       phase 2 the same amount of scroll room phase 1 had. */
+    height: calc(var(--section-gap) * 2.8);
+    --old-out: clamp(0, (0.58 - var(--p)) / 0.08, 1);
+    --pan2: clamp(0, (var(--p) - 0.55) / 0.2, 1);
+    --new-in: clamp(0, (var(--p) - 0.72) / 0.18, 1);
+  }
+  .s-internet .pin { background: var(--bg); }
+  /* grid-background layer — same dot/line-grid idiom as .s-ai-kinds .pin::before,
+     just recolored (light lines on --bg instead of black lines on gray). Fades out with
+     the clouds/cityscape once the phase-2 pan kicks in — but stays put through both
+     phases as the section's constant backdrop. */
+  .s-internet .pin::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .s-internet .intro {
+    position: relative;
+    z-index: 5;
+    padding-left: 12vw;
+    --in: clamp(0, var(--p) / 0.05, 1);
+    opacity: calc(var(--in) * var(--old-out));
+    transform: translateY(calc((1 - var(--in)) * 16px));
+  }
+  .s-internet .intro p + p { margin-top: 2vh; }
+
+  /* ---------- phase 2 outro: new copy + graph placeholder on the right, fading in
+     once the building/posts pan lands (Figma 378:214, right column). ---------- */
+  .internet-outro {
+    position: absolute;
+    z-index: 5;
+    left: 42vw; /* middle column — posts now sit to its right, not between it and the building */
+    /* Match the pin-centered intro body — don't center on the tall graph stack */
+    top: calc(50% - 6em);
+    width: min(28vw, 400px);
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+    opacity: var(--new-in);
+    transform: translateY(calc((1 - var(--new-in)) * 16px));
+    pointer-events: none;
+  }
+  .internet-outro-graph { width: 100%; aspect-ratio: 423 / 272; }
+
+  /* ---------- clouds: two alternating cutouts, stretched, scattered across a strip
+     wider than the viewport so the drift never visibly runs out mid-scrub; the whole
+     strip creeps left at a slow, ambient rate relative to everything else below. ---------- */
+  .internet-clouds {
+    position: absolute;
+    z-index: 1;
+    top: -4vh;
+    left: 0;
+    width: 340vw;
+    height: 34vh;
+    transform: translateX(calc(var(--p) * -22vw));
+    opacity: calc(1 - var(--pan2)); /* clears out once the phase-2 pan lands (Figma 378:214 is a plain stage) */
+    will-change: transform;
+  }
+  .internet-clouds img {
+    position: absolute;
+    top: 0;
+    width: min(34vw, 408px); /* stretch caps out at its 1200px-viewport size, doesn't grow past it */
+    height: 60%;
+    object-fit: fill; /* stretched per reference, not aspect-locked */
+    opacity: 0.9;
+  }
+  .internet-clouds img:nth-child(1) { left: 0vw; top: 2%; }
+  .internet-clouds img:nth-child(2) { left: 30vw; top: 30%; }
+  .internet-clouds img:nth-child(3) { left: 62vw; top: 0%; }
+  .internet-clouds img:nth-child(4) { left: 96vw; top: 22%; }
+  .internet-clouds img:nth-child(5) { left: 130vw; top: 4%; }
+  .internet-clouds img:nth-child(6) { left: 162vw; top: 32%; }
+  .internet-clouds img:nth-child(7) { left: 196vw; top: 0%; }
+  .internet-clouds img:nth-child(8) { left: 228vw; top: 24%; }
+  .internet-clouds img:nth-child(9) { left: 262vw; top: 6%; }
+  .internet-clouds img:nth-child(10) { left: 294vw; top: 28%; }
+
+  /* ---------- cityscape: static silhouette pinned to the section's bottom edge ---------- */
+  .internet-cityscape {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    opacity: calc(1 - var(--pan2)); /* clears out once the phase-2 pan lands (Figma 378:214 is a plain stage) */
+    pointer-events: none;
+  }
+
+  /* ---------- building grid: 3x3, even gaps, purple gutter, color-swappable cell fill.
+     Geometry (column count, gap-to-cell ratio) taken directly from Figma 179:262 →
+     Frame 93 (382x535, 4px gap, 6px outer margin on a 120.67x171.67 cell). Shared across
+     every section that reuses this graphic (s-internet, s-training-gaps, ...) — only
+     positioning differs per instance, so that's kept out of this shared rule. ---------- */
+  .building-grid {
+    --building-fill: var(--warm); /* swap this custom property when a color-shift frame needs it */
+    width: min(30vw, 382px);
+    aspect-ratio: 382 / 535;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1.05%;
+    padding: 0.6%;
+    background: var(--purple);
+    box-sizing: border-box;
+  }
+  .building-grid .cell {
+    position: relative;
+    background: var(--building-fill);
+    display: grid;
+    place-items: end center;
+    overflow: hidden;
+  }
+  .building-grid .cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+    display: block;
+  }
+  /* ---------- building-track: wraps s-internet → s-training-gaps → s-human-labor →
+     s-ai-flood so the building graphic can be ONE element, position: sticky, whose
+     containing block spans all four — it only detaches once you scroll past the very
+     end of s-ai-flood (see updateBuildingTrack() for --pan2 / --reveal / --ai-cells). ---------- */
+  .building-track { position: relative; }
+  .building-track-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .building-track-building {
+    position: absolute;
+    left: 52vw;
+    bottom: 0; /* flush with the cityscape's own bottom edge (its art touches the PNG's edge, no padding) */
+    /* phase 2: pans from the right-of-center resting spot (52vw) to the left column (~12vw,
+       matching the copy-col convention); holds at 12vw for the rest of the building-track
+       (s-training-gaps + s-human-labor), since --pan2 stays clamped at 1 once s-internet
+       has scrolled past */
+    transform: translateX(calc(var(--pan2, 0) * -40vw));
+  }
+  /* the 2 cells (r2c3 + r3c1, matching Figma 381:256) that shift as s-training-gaps' copy scrolls in */
+  .building-track-building .cell:nth-child(6),
+  .building-track-building .cell:nth-child(7) {
+    background: color-mix(in srgb, var(--teal) calc(var(--reveal, 0) * 100%), var(--warm) calc((1 - var(--reveal, 0)) * 100%));
+  }
+  .building-track-building .cell:nth-child(6) img,
+  .building-track-building .cell:nth-child(7) img {
+    transform-origin: bottom center;
+    transform: scale(calc(1 - var(--reveal, 0) * 0.5));
+  }
+  /* Figma 382:365 — top-left + bottom-right cells flip to black “AI” tiles */
+  .building-track-building .cell:nth-child(1),
+  .building-track-building .cell:nth-child(9) {
+    background: color-mix(in srgb, #000 calc(var(--ai-cells, 0) * 100%), var(--warm) calc((1 - var(--ai-cells, 0)) * 100%));
+  }
+  .building-track-building .cell:nth-child(1) img {
+    transform-origin: bottom left;
+    transform: scale(calc(1 - var(--ai-cells, 0) * 0.72));
+  }
+  .building-track-building .cell:nth-child(9) img {
+    transform-origin: top right;
+    transform: scale(calc(1 - var(--ai-cells, 0) * 0.72));
+  }
+  /* blue L of three pixels — Figma cookieadmin secondary-hover #0065ff */
+  .building-track-building .cell:nth-child(1)::after,
+  .building-track-building .cell:nth-child(9)::after {
+    content: "";
+    position: absolute;
+    width: 18%;
+    aspect-ratio: 1;
+    background: #0065ff;
+    box-shadow:
+      110% 0 0 #0065ff,
+      110% 110% 0 #0065ff;
+    opacity: var(--ai-cells, 0);
+    pointer-events: none;
+  }
+  .building-track-building .cell:nth-child(1)::after {
+    left: 28%;
+    top: 32%;
+  }
+  .building-track-building .cell:nth-child(9)::after {
+    left: 28%;
+    top: 30%;
+  }
+  /* Figma 382:286 / 382:365 — white outline frames, sticky with the building
+     from s-human-labor through s-ai-flood (--hl-frames fades them in). */
+  .building-track-frames {
+    position: absolute;
+    inset: 0;
+    opacity: var(--hl-frames, 0);
+  }
+  .building-track-frame {
+    position: absolute;
+    width: min(115px, 9vw);
+    aspect-ratio: 115 / 140;
+    border: 1px solid #fff;
+    box-sizing: border-box;
+  }
+  .building-track-frame.f0 { left: 2.5vw; bottom: 6vh; }
+  .building-track-frame.f1 { left: calc(12vw + min(30vw, 382px) + 4vw); bottom: 22vh; }
+  .building-track-frame.f2 { left: calc(12vw + min(30vw, 382px) + 14vw); bottom: 10vh; }
+
+  /* ---------- parallax posts: placeholder stack on the right of the building, rising
+     continuously off --p at a steeper rate than any other motion in the section — stacked
+     deep enough (8 items) that the climb never runs out before the scrub ends. ---------- */
+  .internet-posts {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 0;
+    right: 3vw;
+    width: min(13.5vw, 180px); /* 1.5x the original min(9vw, 120px) */
+    /* stays put through phase 2 — building pans left, outro lands in the middle, posts
+       keep the far-right column so the order reads building / text+graph / posts */
+  }
+  .internet-post {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    /* conveyor loop, not a one-shot climb: each item's position is p's progress plus its
+       own phase offset, wrapped by the column's full cycle length (mod()) — so once an
+       item exits off the top it re-enters at the bottom instead of just drifting away and
+       leaving the column empty for the rest of the scrub. */
+    --spacing: 55vh;      /* gap between consecutive items in the stream */
+    --cycle: calc(8 * var(--spacing));
+    --phase: calc(var(--i) * var(--spacing));
+    transform: translateY(calc(100vh - mod(var(--p) * 480vh + var(--phase), var(--cycle))));
+    will-change: transform;
+  }
+
+  /* ============================================================
+     8 · TRAINING GAPS (Figma 381:256) — normal document flow, not a
+     [data-scrub] pin. The building itself lives in .building-track-sticky
+     above (shared with s-internet); this section only lays out the copy
+     column, offset to clear the building's on-screen column. As the copy
+     scrolls into view, --reveal (0→1, computed off the copy block's own
+     scroll position — same window as [data-scroll-reveal], see
+     updateBuildingTrack()) crossfades 2 of the building's cells from
+     yellow to teal and shrinks their photos to half size in place.
+     ============================================================ */
+  .s-training-gaps {
+    background: var(--purple);
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    align-content: center;
+    padding-block: 8vh;
+  }
+  .training-gaps-layout {
+    /* clears the sticky building's own column (12vw page margin + its width + gap) */
+    padding-left: calc(12vw + min(30vw, 382px) + 8vw);
+    padding-right: 12vw;
+  }
+  .training-gaps-copy {
+    max-width: 30em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  .training-gaps-copy .subtext { color: rgba(255, 255, 255, 0.75); }
+  .training-gaps-copy .subtext em { color: var(--ink); }
+  .training-gaps-graph { width: 100%; aspect-ratio: 423 / 272; }
+
+  /* ============================================================
+     9 · HUMAN LABOR (Figma 382:286) — purple full-viewport beat after
+     training-gaps. Building stays sticky via .building-track. White
+     outline frames float near the building; body copy + a lower-right
+     statistic note sit in the cleared right column.
+     ============================================================ */
+  .s-human-labor {
+    background: var(--purple);
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    align-content: center;
+    padding-block: 8vh;
+    position: relative;
+  }
+  .human-labor-layout {
+    position: relative;
+    /* clears the sticky building's own column (12vw page margin + its width + gap) */
+    padding-left: calc(12vw + min(30vw, 382px) + 8vw);
+    padding-right: 12vw;
+    min-height: 70vh;
+  }
+  .human-labor-copy {
+    max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  .human-labor-stat {
+    position: absolute;
+    right: 12vw;
+    bottom: 0;
+    max-width: 18em;
+    color: var(--ink);
+  }
+
+  /* ============================================================
+     10 · AI FLOOD (Figma 382:365) — purple full-viewport beat. Building
+     stays sticky; two corner cells flip to black “AI” tiles with a blue
+     L pixel mark as this section’s copy scrolls in. Outline frames stay
+     sticky via .building-track-frames.
+     ============================================================ */
+  .s-ai-flood {
+    background: var(--purple);
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    align-content: center;
+    padding-block: 8vh;
+    position: relative;
+  }
+  .ai-flood-layout {
+    position: relative;
+    padding-left: calc(12vw + min(30vw, 382px) + 8vw);
+    padding-right: 12vw;
+    min-height: 70vh;
+  }
+  .ai-flood-copy {
+    max-width: 28em;
+  }
+
+  /* ============================================================
+     11 · MODEL COLLAPSE (Figma 382:421 → 382:436) — scrub like s-naming:
+       1. intro copy + mid-field title on the crosshair
+       2. intro clears; title rises and docks at the top
+       3. deeper copy + bell-curve placeholder reveal below
+     ============================================================ */
+  .s-model-collapse {
+    height: calc(var(--section-gap) * 1.8);
+    --lede: clamp(0, var(--p) / 0.08, 1);
+    --clear: clamp(0, (var(--p) - 0.18) / 0.1, 1);
+    --rise: clamp(0, (var(--p) - 0.22) / 0.18, 1);
+    --reveal: clamp(0, (var(--p) - 0.45) / 0.14, 1);
+    --title-size: clamp(40px, 4.4vw, 64px);
+    --title-top: calc(50% * (1 - var(--rise)) + 12vh * var(--rise));
+    color: var(--ink);
+  }
+  .s-model-collapse .pin {
+    background: #232323;
+    align-content: start;
+    overflow: hidden;
+  }
+  .s-model-collapse .pin::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .model-collapse-stage {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 12vh 12vw 8vh;
+  }
+  .model-collapse-lede {
+    position: relative;
+    z-index: 2;
+    max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+    opacity: calc(var(--lede) * (1 - var(--clear)));
+    transform: translateY(calc((1 - var(--lede)) * 16px - var(--clear) * 12px));
+  }
+  .model-collapse-crosshair {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* vertical — right edge (Figma Line 1) */
+  .model-collapse-crosshair::before {
+    content: "";
+    position: absolute;
+    top: 5vw;
+    bottom: 0;
+    right: 8.33vw;
+    width: 2px;
+    background: #5f5f5f;
+  }
+  /* horizontal — rides with the rising title bar (Figma Line 2) */
+  .model-collapse-crosshair::after {
+    content: "";
+    position: absolute;
+    left: 12vw;
+    right: 0;
+    top: var(--title-top);
+    height: 2px;
+    background: #fff;
+  }
+  .model-collapse-title {
+    position: absolute;
+    z-index: 4;
+    left: calc(41.67% + 2vw);
+    top: var(--title-top);
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0.32em 0.45em;
+    background: #060809;
+    color: var(--ink);
+    font-size: var(--title-size);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  /* post-dock reveal: copy left + bell-curve media right (Figma 382:436) */
+  .model-collapse-reveal {
+    position: absolute;
+    left: 12vw;
+    right: 8vw;
+    top: calc(12vh + var(--title-size) * 1.6 + 6vh);
+    bottom: 8vh;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 4vw;
+    align-items: start;
+    opacity: var(--reveal);
+    transform: translateY(calc((1 - var(--reveal)) * 20px));
+    pointer-events: none;
+  }
+  .model-collapse-copy {
+    max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  .model-collapse-media {
+    width: 100%;
+    aspect-ratio: 525 / 304;
+    background: #fff;
+    color: #000;
+    border: none;
+  }
+  .model-collapse-media::before {
+    color: #000;
+    content: attr(data-label);
+    text-transform: none;
+    letter-spacing: 0;
+    font: 400 16px/1.5 'Poppins', system-ui, sans-serif;
+  }
+
+  /* ============================================================
+     12 · CONTAMINATION RESPONSE (Figma 179:297) + 14 · RECLAIM ART
+     (Figma 179:306) — plain black full-viewport copy beats.
+     ============================================================ */
+  .s-contamination,
+  .s-reclaim {
+    background: #000;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    align-content: start;
+    padding: 18vh 12vw 10vh;
+  }
+  .contamination-copy,
+  .reclaim-copy {
+    max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+
+  /* ============================================================
+     13 · OPT-OUT OVERVIEW (Figma 383:447) — plain black beat: copy
+     upper-left + training opt-out chart lower-right. Nothing fancy.
+     ============================================================ */
+  .s-optout {
+    background: #000;
+    min-height: 100vh;
+    box-sizing: border-box;
+    position: relative;
+    padding: 18vh 12vw 8vh;
+    display: grid;
+    align-content: start;
+  }
+  .optout-copy {
+    max-width: 28em;
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  .optout-chart {
+    position: absolute;
+    right: 6vw;
+    bottom: 6vh;
+    width: min(48vw, 677px);
+  }
+  .optout-chart img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
   /* ---------- top / bottom framing ---------- */
   .frame-note {
     min-height: 60vh; display: grid; align-content: center;
@@ -977,7 +1505,7 @@
     .naming-ai .naming-title { white-space: normal; }
     .naming-reveal {
       left: 7vw; right: 7vw;
-      top: calc(10vh + var(--title-size) * 1.8 + 3vh);
+      top: calc(10vh + var(--title-size) * 1.8 + 6vh);
       grid-template-columns: 1fr;
       gap: 3vh;
     }
@@ -985,7 +1513,7 @@
     .naming-frame { width: min(110px, 28vw); }
     .naming-frame.f0 { top: 0; left: 55%; }
     .naming-frame.f1 { top: 12%; left: 72%; }
-    .naming-frame.f2 { top: 28%; left: 55%; }
+    .naming-frame.f2 { top: 42%; left: 55%; }
     .naming-crosshair::before { right: 7vw; }
     .naming-crosshair::after { left: 7vw; right: 7vw; }
     .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
@@ -993,6 +1521,46 @@
     .callout { width: 40vw; padding: 14px 16px; gap: 8px; }
     .callout-left { left: 2vw; }
     .callout-right { right: 2vw; }
+    .human-labor-layout {
+      padding-left: 7vw;
+      padding-right: 7vw;
+      min-height: 0;
+    }
+    .human-labor-stat {
+      position: static;
+      margin-top: 4vh;
+      max-width: none;
+    }
+    .building-track-frames { display: none; }
+    .ai-flood-layout {
+      padding-left: 7vw;
+      padding-right: 7vw;
+      min-height: 0;
+    }
+    .model-collapse-stage { padding: 10vh 7vw 8vh; }
+    .model-collapse-crosshair::before { right: 7vw; }
+    .model-collapse-crosshair::after { left: 7vw; }
+    .s-model-collapse { --title-size: clamp(28px, 8vw, 40px); }
+    .model-collapse-title {
+      left: 7vw;
+      max-width: calc(100% - 14vw);
+      white-space: normal;
+    }
+    .model-collapse-reveal {
+      left: 7vw; right: 7vw;
+      top: calc(10vh + var(--title-size) * 1.8 + 4vh);
+      grid-template-columns: 1fr;
+      gap: 3vh;
+    }
+    .s-contamination,
+    .s-reclaim { padding: 14vh 7vw 8vh; }
+    .s-optout { padding: 14vh 7vw 8vh; }
+    .optout-chart {
+      position: static;
+      width: 100%;
+      max-width: 520px;
+      margin-top: 4vh;
+    }
   }
 </style>
 </head>
@@ -1348,6 +1916,158 @@
   </div>
 </section>
 
+<!-- 7 · Internet-scale data: cityscape + clouds backdrop, color-shiftable
+     building grid of b/w portraits, parallax "posts" rising either side
+     (Figma 179:262). Visual layers land in a follow-up pass; copy only
+     for now. -->
+<!-- s-internet → s-training-gaps → s-human-labor → s-ai-flood share one building
+     graphic: it lives in .building-track-sticky, sticky across the whole wrapper.
+     See updateBuildingTrack() for --pan2 / --reveal / --ai-cells. -->
+<div class="building-track">
+  <div class="building-track-sticky" aria-hidden="true">
+    <div class="building-track-building building-grid">
+      <div class="cell"><img src="assets/building/box1.png" alt="Man checking his phone, arms crossed" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box2.png" alt="Woman taking a selfie" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box3.png" alt="Woman with curly hair holding a tablet" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box4.png" alt="Woman seated in profile, looking at her phone" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box5.png" alt="Woman smiling at her phone" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box6.png" alt="Man walking with earbuds, looking at his phone" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box7.png" alt="Person in a cap, side profile" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box8.png" alt="Man in a cap and hoodie holding a tablet" loading="lazy"></div>
+      <div class="cell"><img src="assets/building/box9.png" alt="Woman relaxed in an armchair holding a mug" loading="lazy"></div>
+    </div>
+    <div class="building-track-frames">
+      <div class="building-track-frame f0"></div>
+      <div class="building-track-frame f1"></div>
+      <div class="building-track-frame f2"></div>
+    </div>
+  </div>
+
+  <section id="s-internet" class="s-internet" data-scrub>
+    <div class="pin">
+      <div class="intro">
+        <p class="lede" data-editable>The internet solved that problem.</p>
+        <p class="lede" data-editable>Every post, comment, photo, and video made by real people became potential training material.</p>
+        <p class="subtext" data-editable>This was important for GPT 3.5: the model that rapidly accelerated ChatGPT&#8217;s popularity</p>
+      </div>
+
+      <div class="internet-clouds" aria-hidden="true">
+        <img src="assets/clouds-1.png" alt="" loading="lazy">
+        <img src="assets/clouds-2.png" alt="" loading="lazy">
+        <img src="assets/clouds-1.png" alt="" loading="lazy">
+        <img src="assets/clouds-2.png" alt="" loading="lazy">
+        <img src="assets/clouds-1.png" alt="" loading="lazy">
+        <img src="assets/clouds-2.png" alt="" loading="lazy">
+        <img src="assets/clouds-1.png" alt="" loading="lazy">
+        <img src="assets/clouds-2.png" alt="" loading="lazy">
+        <img src="assets/clouds-1.png" alt="" loading="lazy">
+        <img src="assets/clouds-2.png" alt="" loading="lazy">
+      </div>
+
+      <img class="internet-cityscape" src="assets/cityscape.png" alt="City skyline silhouette" loading="lazy">
+
+      <div class="internet-posts" aria-hidden="true">
+        <div class="internet-post ph" data-img-slot data-label="post 1" style="--i: 0;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 2" style="--i: 1;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 3" style="--i: 2;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 4" style="--i: 3;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 5" style="--i: 4;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 6" style="--i: 5;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 7" style="--i: 6;"></div>
+        <div class="internet-post ph" data-img-slot data-label="post 8" style="--i: 7;"></div>
+      </div>
+
+      <div class="internet-outro">
+        <p class="lede" data-editable>in addition to other things in its giant collection of human-created content.</p>
+        <div class="internet-outro-graph ph" data-img-slot data-label="graph — most common training sources for GPT-2"></div>
+        <p class="subtext" data-editable>Most common training sources for GPT2.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Training gaps: normal-flow section, building lives in the shared sticky track
+       above — see .s-training-gaps CSS for how --reveal crossfades + shrinks 2 cells. -->
+  <section id="s-training-gaps" class="s-training-gaps">
+    <div class="training-gaps-layout">
+      <div class="training-gaps-copy">
+        <p class="lede" data-scroll-reveal data-editable>Some languages, cultures, and communities are represented more in training data than others.</p>
+        <p class="subtext" data-scroll-reveal data-editable>Common Crawl&#8217;s crawling process prioritizes pages on <em>popular</em> websites, which means smaller websites and sites in non-English languages are not as represented.</p>
+        <div class="training-gaps-graph ph" data-img-slot data-scroll-reveal data-label="graph — node and link diagram"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · Human labor: purple full-viewport beat (Figma 382:286). Building stays sticky
+       via the shared track; outline frames + body copy + statistic note. -->
+  <section id="s-human-labor" class="s-human-labor">
+    <div class="human-labor-layout">
+      <div class="human-labor-copy">
+        <p class="lede" data-scroll-reveal data-editable>It takes more than data to train these models.</p>
+        <p class="lede" data-scroll-reveal data-editable>Behind the scenes, millions of people help prepare data, review outputs, and improve models.</p>
+      </div>
+      <p class="subtext human-labor-stat" data-scroll-reveal data-editable>*Insert statistic about how many people are doing this for little pay in other countries.</p>
+    </div>
+  </section>
+
+  <!-- 10 · AI flood: purple full-viewport beat (Figma 382:365). Building stays sticky;
+       corner cells flip to black AI tiles as the copy scrolls in. -->
+  <section id="s-ai-flood" class="s-ai-flood">
+    <div class="ai-flood-layout">
+      <div class="ai-flood-copy">
+        <p class="lede" data-scroll-reveal data-editable>And as you know, the internet has been filling up with writing and images made by AI, not people.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 11 · Model Collapse: scrub like s-naming — mid title + intro → rise/dock →
+     deeper copy + bell-curve placeholder (Figma 382:421 → 382:436). -->
+<section id="s-model-collapse" class="s-model-collapse" data-scrub>
+  <div class="pin">
+    <div class="model-collapse-stage">
+      <div class="model-collapse-crosshair" aria-hidden="true"></div>
+      <div class="model-collapse-lede">
+        <p class="lede" data-editable>When AI models increasingly get trained on other AI-generated things instead of real content, their quality can erode.</p>
+        <p class="lede" data-editable>Researchers call this model collapse.</p>
+      </div>
+      <h2 class="model-collapse-title" data-editable>Model Collapse</h2>
+      <div class="model-collapse-reveal">
+        <div class="model-collapse-copy">
+          <p class="lede" data-editable>When this happens, it&#8217;s the things that show up less often in training data, like unique styles of phrasing, niche topics, and uncommon perspectives that disappear while the most common information survives.</p>
+          <p class="lede" data-editable>This further impacts whoever was already underrepresented in the data to begin with.</p>
+        </div>
+        <div class="model-collapse-media ph" data-img-slot data-label="bell curve placeholder"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · Contamination response: plain black copy beat (Figma 179:297). -->
+<section id="s-contamination" class="s-contamination">
+  <div class="contamination-copy">
+    <p class="lede" data-scroll-reveal data-editable>Currently, some LLM companies are looking at printed material as training data that is safe from AI contamination.</p>
+    <p class="lede" data-scroll-reveal data-editable>Others are leaning on synthetic data (curated artificial data) to grow and develop their models.</p>
+  </div>
+</section>
+
+<!-- 13 · Opt-out overview: copy + Surfshark chart (Figma 383:447). -->
+<section id="s-optout" class="s-optout">
+  <div class="optout-copy">
+    <p class="lede" data-scroll-reveal data-editable>As generative AI companies compete to develop better AI models, it&#8217;s becoming less clear where and how exactly they are training their models.</p>
+    <p class="lede" data-scroll-reveal data-editable>This has been a concern for people who do not want their content to be used as training material.</p>
+  </div>
+  <div class="optout-chart" data-scroll-reveal>
+    <img src="assets/ai_model_training_on_user_data_optout_overview_for_top_10_social_media_platforms.jpg" alt="AI model training on user data: opt-out overview for top 10 social media platforms &#8212; chart by Surfshark" loading="lazy">
+  </div>
+</section>
+
+<!-- 14 · Reclaim art: plain black copy beat (Figma 179:306). -->
+<section id="s-reclaim" class="s-reclaim">
+  <div class="reclaim-copy">
+    <p class="lede" data-scroll-reveal data-editable>So while some are using AI to create art, others are finding ways to reclaim their art.</p>
+  </div>
+</section>
+
 <footer class="frame-note copy-col">— end of History section —</footer>
 
 <script>
@@ -1533,8 +2253,11 @@
     PixelFocus.register(slot, () => {
       const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
       const d = p * cards - i;
-      const ad = Math.abs(d);
-      return 1 - Math.max(0, ad - hold) / (1 - hold);
+      // d < 0: card hasn't been reached yet — pixelate based on how far off it still is.
+      // d >= 0: card has already been focused and passed — stays fully resolved instead of
+      // re-pixelating as it shrinks back out of frame (Math.max(0, -d) collapses to 0 here).
+      const approach = Math.max(0, -d);
+      return 1 - Math.max(0, approach - hold) / (1 - hold);
     }, f => f ** 3);
   });
 
@@ -1576,15 +2299,64 @@
     }
   }
 
+  /* ---------- building-track: the shared building (position: sticky, spans s-internet →
+     s-training-gaps → s-human-labor → s-ai-flood — see the .building-track CSS block)
+     lives outside those sections' DOM subtrees, so it can't inherit their CSS custom
+     properties directly. Instead:
+       --pan2      from #s-internet's --p (mirrors the 0.55/0.2 --pan2 window).
+       --reveal    from .training-gaps-copy (scroll-reveal window).
+       --ai-cells  from .ai-flood-copy (corner-cell flip, Figma 382:365).
+       --hl-frames from #s-human-labor (fade in once that section owns the viewport). ---------- */
+  const sInternetEl = document.getElementById('s-internet');
+  const sHumanLaborEl = document.getElementById('s-human-labor');
+  const buildingTrackBuilding = document.querySelector('.building-track-building');
+  const buildingTrackFrames = document.querySelector('.building-track-frames');
+  const trainingGapsCopy = document.querySelector('.training-gaps-copy');
+  const aiFloodCopy = document.querySelector('.ai-flood-copy');
+  function scrollRevealProgress(el) {
+    if (!el) return 0;
+    const vh = innerHeight;
+    const start = vh * 0.9, end = vh * 0.55;
+    const r = el.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (start - r.top) / (start - end)));
+  }
+  function updateBuildingTrack() {
+    if (!buildingTrackBuilding && !buildingTrackFrames) return;
+    if (sInternetEl && buildingTrackBuilding) {
+      const p = parseFloat(getComputedStyle(sInternetEl).getPropertyValue('--p')) || 0;
+      const pan2 = Math.min(1, Math.max(0, (p - 0.55) / 0.2));
+      buildingTrackBuilding.style.setProperty('--pan2', pan2.toFixed(4));
+    }
+    if (buildingTrackBuilding) {
+      buildingTrackBuilding.style.setProperty('--reveal', scrollRevealProgress(trainingGapsCopy).toFixed(4));
+      buildingTrackBuilding.style.setProperty('--ai-cells', scrollRevealProgress(aiFloodCopy).toFixed(4));
+    }
+    if (buildingTrackFrames) {
+      // only while s-human-labor owns the screen — not while its top is still
+      // peeking in under s-training-gaps (that fired too early around 97vh)
+      if (!sHumanLaborEl) {
+        buildingTrackFrames.style.setProperty('--hl-frames', '0');
+      } else {
+        const vh = innerHeight;
+        const top = sHumanLaborEl.getBoundingClientRect().top;
+        const start = vh * 0.4; // section clearly in view; training-gaps mostly gone
+        const end = 0;          // fully on once the section docks at the top
+        const p = Math.min(1, Math.max(0, (start - top) / (start - end)));
+        buildingTrackFrames.style.setProperty('--hl-frames', p.toFixed(4));
+      }
+    }
+  }
+
   let queued = false;
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); PixelFocus.updateAll(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateBuildingTrack(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateBuildingTrack(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
+  updateBuildingTrack();
   PixelFocus.updateAll();
 
   /* ---------- split [data-highlight] text into indexed word spans ---------- */
