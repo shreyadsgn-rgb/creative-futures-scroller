@@ -21,10 +21,12 @@
   'use strict';
 
   const CONTROLS = window.DEV_CONTROLS || [
-    { prop: '--section-gap',   label: 'Section gap',   min: 100, max: 400, step: 5,    unit: 'vh' },
-    { prop: '--anim-duration', label: 'Anim duration', min: 0.1, max: 2.5, step: 0.05, unit: 's'  },
-    { prop: '--anim-delay',    label: 'Anim delay',    min: 0,   max: 1.5, step: 0.05, unit: 's'  },
-    { prop: '--stagger',       label: 'Stagger',       min: 0,   max: 500, step: 10,   unit: 'ms' },
+    { prop: '--section-gap',     label: 'Section gap',     min: 100, max: 800, step: 10,   unit: 'vh' },
+    { prop: '--section-between', label: 'Between hold',    min: 0,   max: 400, step: 10,   unit: 'vh' },
+    { prop: '--lede-beat',       label: 'Lede beat',       min: 40,  max: 400, step: 10,   unit: 'vh' },
+    { prop: '--anim-duration',   label: 'Anim duration',   min: 0.1, max: 2.5, step: 0.05, unit: 's'  },
+    { prop: '--anim-delay',      label: 'Anim delay',      min: 0,   max: 1.5, step: 0.05, unit: 's'  },
+    { prop: '--stagger',         label: 'Stagger',         min: 0,   max: 500, step: 10,   unit: 'ms' },
   ];
 
   const root = document.documentElement;
