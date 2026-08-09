@@ -1364,6 +1364,7 @@
        1. intro copy + mid-field title on the crosshair
        2. intro drifts up out of view; title rises and docks at the top
        3. deeper copy + bell-curve placeholder reveal below
+       4. on exit, white line + title hinge down ~45° with a bounce
      ============================================================ */
   .s-model-collapse {
     height: calc(var(--section-gap) * 1.8);
@@ -1373,6 +1374,7 @@
     --reveal: clamp(0, (var(--p) - 0.45) / 0.14, 1);
     --title-size: clamp(40px, 4.4vw, 64px);
     --title-top: calc(50% * (1 - var(--rise)) + 12vh * var(--rise));
+    --collapse-angle: 0; /* degrees; JS writes bounce-eased value on exit */
     color: var(--ink);
   }
   .s-model-collapse .pin {
@@ -1425,21 +1427,32 @@
     width: 2px;
     background: #5f5f5f;
   }
-  /* horizontal — rides with the rising title bar (Figma Line 2) */
-  .model-collapse-crosshair::after {
-    content: "";
+  /* hinge: white line + title rotate down together on exit (over the media) */
+  .model-collapse-hinge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--title-top);
+    height: 0;
+    z-index: 5;
+    pointer-events: none;
+    transform: rotate(calc(var(--collapse-angle) * 1deg));
+    transform-origin: 12vw center;
+    will-change: transform;
+  }
+  .model-collapse-hline {
     position: absolute;
     left: 12vw;
     right: 0;
-    top: var(--title-top);
+    top: 0;
     height: 2px;
     background: #fff;
+    transform: translateY(-50%);
   }
   .model-collapse-title {
     position: absolute;
-    z-index: 4;
     left: calc(41.67% + 2vw);
-    top: var(--title-top);
+    top: 0;
     transform: translateY(-50%);
     margin: 0;
     padding: 0.32em 0.45em;
@@ -1450,7 +1463,6 @@
     line-height: 1.2;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    pointer-events: none;
   }
   /* post-dock reveal: copy left + bell-curve media right (Figma 382:436) */
   .model-collapse-reveal {
@@ -1725,7 +1737,8 @@
     }
     .model-collapse-stage { padding: 10vh 7vw 8vh; }
     .model-collapse-crosshair::before { right: 7vw; }
-    .model-collapse-crosshair::after { left: 7vw; }
+    .model-collapse-hinge { transform-origin: 7vw center; }
+    .model-collapse-hline { left: 7vw; }
     .s-model-collapse { --title-size: clamp(28px, 8vw, 40px); }
     .model-collapse-title {
       left: 7vw;
@@ -2244,7 +2257,10 @@
         <p class="lede" data-editable>When AI models increasingly get trained on other AI-generated things instead of real content, their quality can erode.</p>
         <p class="lede" data-editable>Researchers call this model collapse.</p>
       </div>
-      <h2 class="model-collapse-title" data-editable>Model Collapse</h2>
+      <div class="model-collapse-hinge">
+        <div class="model-collapse-hline" aria-hidden="true"></div>
+        <h2 class="model-collapse-title" data-editable>Model Collapse</h2>
+      </div>
       <div class="model-collapse-reveal">
         <div class="model-collapse-copy">
           <p class="lede" data-editable>When this happens, it&#8217;s the things that show up less often in training data, like unique styles of phrasing, niche topics, and uncommon perspectives that disappear while the most common information survives.</p>
@@ -2629,6 +2645,21 @@
     }
   }
 
+  /* ---------- model-collapse exit: hinge line + title down ~45° with a bounce ---------- */
+  const sModelCollapseEl = document.getElementById('s-model-collapse');
+  function easeOutBack(t) {
+    const c1 = 1.70158;
+    const c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+  function updateModelCollapse() {
+    if (!sModelCollapseEl) return;
+    const p = parseFloat(sModelCollapseEl.style.getPropertyValue('--p')) || 0;
+    const t = Math.min(1, Math.max(0, (p - 0.84) / 0.12));
+    const angle = (t <= 0 ? 0 : easeOutBack(t)) * 45;
+    sModelCollapseEl.style.setProperty('--collapse-angle', angle.toFixed(2));
+  }
+
   /* ---------- johnniac-track: sticky photo sits outside the scrub
      sections, so overlay stages are copied from --p:
        --johnniac-deepen  40%→60% during #s-johnniac
@@ -2698,11 +2729,12 @@
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateJohnniacTrack(); updateBuildingTrack(); PixelFocus.updateAll(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateJohnniacTrack(); updateBuildingTrack(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
+  updateModelCollapse();
   updateJohnniacTrack();
   updateBuildingTrack();
   PixelFocus.updateAll();
