@@ -213,20 +213,19 @@
 
   /* ============================================================
      1 · OLD DREAMS — 4-step fade-forward sequence
-     (Figma 143:2159 / 115:1845: Grammatizator → Za'irajah → Golem → sidenote)
+     (Za'irajah → Golem → Al-Jazari → Jaquet-Droz)
      The intro holds alone for the first --lead of the scrub; --t then runs
-     0 → 3 across the steps zone, each .step peaking at --t == --k with a
-     --hold deadzone so copy stays fully opaque for a stretch of scroll
-     before fading; --exit then carries the *last* step's own fade-out
-     (0→1) through the exit zone (since t is pinned at 3 by then, d = t-k
-     would otherwise stay 0 forever); the outro line only starts fading
-     in once --exit finishes.
+     -1 → 3 across the steps zone (so the first card enters from behind),
+     each .step peaking at --t == --k; --exit then carries the *last* step's
+     own fade-out (0→1) through the exit zone (since t is pinned at 3 by
+     then, d = t-k would otherwise stay 0 forever); the outro line only
+     starts fading in once --exit finishes.
 
      Media (Figma 115:1845): images stay in a shared diagonal stack —
      front is full size/opacity; upcoming cards sit up-right behind it
      at progressive scale + black overlay (0 / 0.4 / 0.8). Once a card
      has been front it just fades out in place (no recede). Copy
-     crossfades separately so the ghosts aren't killed by text opacity.
+     snaps on when its card is front so the ghosts aren't killed by text opacity.
      ============================================================ */
   .s-dreams {
     /* taller scrub: intro lead + spaced steps + long outro linger */
@@ -239,7 +238,8 @@
     /* only cap the upper bound at 3 — must stay negative (not clamped to 0) while
        p < lead, otherwise step 0's d = t - k would hit 0 immediately and it'd
        appear at full opacity before the lead-in finishes */
-    --t: min(3, calc((var(--p) - var(--lead)) / (var(--steps-end) - var(--lead)) * 3));
+    /* t runs -1 → 3 so the first card approaches from behind before becoming front */
+    --t: min(3, calc((var(--p) - var(--lead)) / (var(--steps-end) - var(--lead)) * 4 - 1));
     --exit: clamp(0, calc((var(--p) - var(--steps-end)) / (var(--exit-end) - var(--steps-end))), 1);
   }
   .s-dreams .intro {
@@ -266,23 +266,22 @@
     /* + --exit only ever moves the *last* step (t-k==0 there once --t is pinned at 3);
        earlier steps are already fully exited (d > 1) by the time --exit turns on. */
     --d: calc(var(--t) - var(--k) + var(--exit));
-    --past: clamp(0, var(--d), 1);           /* 0→1 as the card leaves the stack */
     --behind: clamp(0, 0 - var(--d), 3);     /* 0 front, 1 mid ghost, 2 back ghost… */
+    /* next card's |d| wins z-order once d > 0.5 — hard-cut then, don't linger */
+    --overtaken: clamp(0, (var(--d) - 0.5 + 0.001) * 1000, 1);
     pointer-events: none;                    /* .is-front (set by JS) takes clicks */
   }
   .step.is-front { pointer-events: auto; }
+  /* last card has no successor in the stack — hold through --exit until outro */
+  .pin > .step:last-child {
+    --overtaken: clamp(0, (var(--d) - 1 + 0.001) * 1000, 1);
+  }
   .step .copy {
     align-self: end; max-width: 430px; position: relative; z-index: 5;
-    /* exclusive ownership of the front slot: fade in, stay, hard-cut at
-       +--win. Windows abut (width 1 in --d), so neighbors never overlap. */
-    --win: 0.5;
-    --fade: 0.28;
-    --enter: clamp(0, (var(--d) + var(--win)) / var(--fade), 1);
-    --cut: clamp(0, (var(--d) - var(--win) + 0.001) * 1000, 1);
-    opacity: calc(var(--step-gate) * var(--enter) * (1 - var(--cut)));
+    /* snap on when front; linger; hard-cut the instant the next card overtakes */
+    --on: clamp(0, (var(--d) + 0.001) * 1000, 1);
+    opacity: calc(var(--step-gate) * var(--on) * (1 - var(--overtaken)));
   }
-  /* last passage holds through --exit until the outro takes over */
-  .pin > .step:last-child .copy { --win: 1; }
   .step h3 { font-size: 17px; font-weight: 500; margin-bottom: 10px; }
   .step .media {
     position: relative;
@@ -290,16 +289,14 @@
     width: min(100%, 428px);
     height: min(58vh, 520px);
     transform-origin: center center;
-    /* diagonal stack for upcoming cards only (--behind); once a card has
-       been front, it stays put and drops out — no recede up-right */
+    /* diagonal stack for upcoming cards only (--behind); once overtaken, hard-cut */
     transform:
       translate(calc(var(--behind) * 22%), calc(var(--behind) * -10%))
       scale(calc(1 - var(--behind) * 0.25));
-    /* gated with --step-gate so nothing peeks during the intro lead;
-       quick fade once past; cards >2 behind stay hidden until they advance */
     opacity: calc(
       var(--step-gate)
-      * clamp(0, 1 - var(--past) * 3.2 - max(0, var(--behind) - 2) * 1.2, 1)
+      * (1 - var(--overtaken))
+      * clamp(0, 1 - max(0, var(--behind) - 2) * 1.2, 1)
     );
     z-index: calc(20 - max(var(--d), 0 - var(--d)) * 10);
   }
@@ -1845,26 +1842,18 @@
   <div class="pin">
     <div class="intro">
       <p class="lede" data-editable>Long before computers, cultures around the world imagined artificial beings, mechanical minds, and machines that could speak, write, or serve.</p>
-      <p class="lede outro" data-editable>These stories did not predict modern AI exactly, but they created many of the ideas we still associate with intelligence, automation, authorship, and the risks of making nonhuman agents.</p>
+      <p class="lede outro" data-editable>None of these predicted modern AI exactly but together they show that the dream of a machine that thinks, creates, or serves has followed humans across centuries and cultures.</p>
     </div>
 
     <div class="step" style="--k: 0;">
       <div class="copy">
-        <h3 data-editable>The Great Automatic Grammatizator (1953)</h3>
-        <p class="subtext" data-editable>A mechanically minded man reasons that the rules of grammar are fixed by certain, almost mathematical principles. By exploiting this idea, he is able to create a mammoth machine that can write a prize-winning novel in roughly fifteen minutes. The story ends on a fearful note, as more and more of the world&#8217;s writers are forced into licensing their names&#8212;and all hope of human creativity&#8212;to the machine.</p>
-      </div>
-      <div class="media"><div class="ph" data-img-slot data-label="Roald Dahl book cover / Grammatizator collage"></div></div>
-    </div>
-
-    <div class="step" style="--k: 1;">
-      <div class="copy">
         <h3 data-editable>Za&#8217;irajah paper machines (~14th Century)</h3>
-        <p class="subtext" data-editable>Long before computers, medieval Arab scholars built a device called the Za&#8217;irajah: a paper machine designed to generate answers to questions through a system of rotating circles, letter values, and mathematical rules. People could pose a question, and the machine would combine the numerical values of the Arabic letters in your words with astrological categories to produce an answer in the form of a new arrangement of letters. It wasn&#8217;t AI but similar to early AI models, it acted as a rule-based system for producing meaning from patterns.</p>
+        <p class="subtext" data-editable>Long before computers, medieval Arab scholars built a device called the Za&#8217;irajah: a paper machine designed to generate answers to questions through a system of rotating circles, letter values, and mathematical rules. People could pose a question, and the machine would combine the numerical values of the Arabic letters in your words with astrological categories to produce an answer in the form of a new arrangement of letters. It acted as a rule-based system for producing meaning from patterns.</p>
       </div>
       <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Za'irajah manuscript diagram"><img src="assets/zairja-manuscript.png" alt="Za'irajah manuscript diagram, a medieval Arabic paper machine of rotating circles and letter values" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
     </div>
 
-    <div class="step" style="--k: 2;">
+    <div class="step" style="--k: 1;">
       <div class="copy">
         <h3 data-editable>The Golem of Prague (16th century)</h3>
         <p class="subtext" data-editable>In 16th-century Prague, Rabbi Judah Loew ben Bezalel was said to have shaped a figure from river clay and brought it to life by placing a piece of paper inscribed with a sacred word into its mouth. The golem couldn&#8217;t speak or think; it could only follow instructions, serving as a protector for a Jewish community living under threat of persecution. Every Friday before the Sabbath, the rabbi would remove the shem to deactivate it, until one week he forgot, and the golem became uncontrollable. The rabbi eventually stopped it, and legend says its remains still sit in the attic of Prague&#8217;s Old New Synagogue, waiting.</p>
@@ -1872,16 +1861,20 @@
       <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Golem of Prague illustration"><img src="assets/golem-of-prague-mikolas-ales.jpg" alt="1899 illustration of the Golem of Prague by Mikol&#225;&#353; Ale&#353;" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
     </div>
 
+    <div class="step" style="--k: 2;">
+      <div class="copy">
+        <h3 data-editable>Al-Jazari&#8217;s Musical Boat Automaton (13th Century)</h3>
+        <p class="subtext" data-editable>In 13th-century Mesopotamia, an engineer named Al-Jazari designed a boat carrying four mechanical musicians (a drummer, two flutists, and a harpist) that could play different rhythms by repositioning pegs on a rotating drum. This machine generated music by following a set of instructions, and changing the song just required changing the pegs. It is one of the earliest programmable machines on record.</p>
+      </div>
+      <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Al-Jazari musical boat automaton"><img src="assets/Al-Jazari_-_A_Musical_Toy.jpg" alt="Al-Jazari&#8217;s musical boat automaton with four mechanical musicians" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
+    </div>
+
     <div class="step" style="--k: 3;">
       <div class="copy">
-        <h3 data-editable>The Golem of Prague (16th century)</h3>
-        <p class="subtext" data-editable>The golem couldn&#8217;t speak or think; it could only follow instructions &#8212; a being run entirely on rules.</p>
-        <div class="sidenote">
-          <h4 data-editable>And Other Golems</h4>
-          <p class="subtext" data-editable>One popular reference to the golem is Minecraft&#8217;s Iron Golem: a silent, powerful figure that protects a village and follows rules while also being deadly.</p>
-        </div>
+        <h3 data-editable>The Jaquet-Droz Automata (1768&#8211;1774)</h3>
+        <p class="subtext" data-editable>In 18th-century Switzerland, watchmaker Pierre Jaquet-Droz and his family built a series of mechanical figures so precise they astonished European courts. One played a real organ, with its chest rising and falling to mimic breathing. Another could write custom messages by dipping a quill in ink with 6,000 moving parts encoding the letters through a system of cams that could be rearranged to change what it wrote. These figures are considered among the earliest ancestors of modern computers.</p>
       </div>
-      <div class="media"><div class="ph" data-img-slot data-label="Minecraft Iron Golem screenshot"></div></div>
+      <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Jaquet-Droz automata"><img src="assets/Automates-Jaquet-Droz-p1030490.jpg" alt="Jaquet-Droz automata, 18th-century mechanical writing and music figures" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
     </div>
   </div>
 </section>
@@ -2623,7 +2616,8 @@
     const exitEnd = parseFloat(getComputedStyle(section).getPropertyValue('--exit-end')) || 1;
     PixelFocus.register(slot, () => {
       const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
-      const t = Math.min(3, (p - lead) / (stepsEnd - lead) * 3);
+      /* match CSS: t runs -1 → 3 so the first card enters from behind */
+      const t = Math.min(3, (p - lead) / (stepsEnd - lead) * 4 - 1);
       const exit = Math.min(1, Math.max(0, (p - stepsEnd) / (exitEnd - stepsEnd)));
       const d = t - k + exit;
       const behind = Math.min(3, Math.max(0, -d));
