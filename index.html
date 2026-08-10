@@ -813,23 +813,27 @@
   /* ============================================================
      6 · AI KINDS — Figma 315:295 → 320:431 → 321:476 → 321:486
        1. two blurbs alone
-       2. example boxes (--expand)
+       2. example boxes: outline + label (--ex-box), then bullets (--ex-1/2/3)
        3. Predictive / Generative lime tags (--tags)
        4. columns pan left; left column exits by p=0.7; Generative AI
           grows (--focus / --pan); focus copy reveals under the
           generative body text (--copy)
      ============================================================ */
   .s-ai-kinds {
-    height: calc(var(--section-gap) * 2.9);
-    --expand: clamp(0, (var(--p) - 0.06) / 0.14, 1);
-    --tags: clamp(0, (var(--p) - 0.28) / 0.12, 1);
-    /* pan + gen grow: left column fully off-frame by p=0.7 */
-    --focus: clamp(0, (var(--p) - 0.55) / 0.15, 1);
+    height: calc(var(--section-gap) * 3.8);
+    /* example boxes: outline + label, then each bullet — doubled scroll runway */
+    --ex-box: clamp(0, (var(--p) - 0.05) / 0.10, 1);
+    --ex-1: clamp(0, (var(--p) - 0.18) / 0.08, 1);
+    --ex-2: clamp(0, (var(--p) - 0.30) / 0.08, 1);
+    --ex-3: clamp(0, (var(--p) - 0.42) / 0.08, 1);
+    --tags: clamp(0, (var(--p) - 0.54) / 0.10, 1);
+    /* pan + gen grow */
+    --focus: clamp(0, (var(--p) - 0.68) / 0.12, 1);
     --pan: var(--focus);
     /* focus copy under the generative body text once the pan lands */
-    --copy: clamp(0, (var(--p) - 0.68) / 0.1, 1);
+    --copy: clamp(0, (var(--p) - 0.80) / 0.08, 1);
     /* final beat: the “LOT more examples” line */
-    --more: clamp(0, (var(--p) - 0.82) / 0.12, 1);
+    --more: clamp(0, (var(--p) - 0.90) / 0.08, 1);
   }
   .s-ai-kinds .pin {
     background: #2a2a2a;
@@ -895,6 +899,8 @@
     max-height: calc(var(--copy) * 12em);
     overflow: hidden;
     transform: translateY(calc((1 - var(--copy)) * 12px));
+    /* when closed, cancel the flex gap so both example boxes share a top edge */
+    margin-top: calc((1 - var(--copy)) * -24px);
   }
   .ai-kinds-focus-lead {
     margin: 0;
@@ -920,8 +926,8 @@
     grid-template-columns: minmax(0, 398fr) minmax(0, 448fr);
     gap: clamp(32px, 8vw, 140px);
     align-items: start;
-    /* reserve landing zone for Generative AI (was title-anchor height) */
-    margin-top: calc(var(--expand) * 130px);
+    /* reserve landing zone for Generative AI from the start (was expand-driven) */
+    margin-top: 130px;
     will-change: transform;
   }
   .ai-kinds-col {
@@ -984,16 +990,26 @@
     gap: 24px;
   }
   .ai-kinds-col-left .ai-kinds-examples {
-    opacity: var(--expand);
+    opacity: var(--ex-box);
   }
   .ai-kinds-examples {
     border: 1px solid var(--warm);
-    padding: 24px;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
   }
   .ai-kinds-col-right .ai-kinds-examples {
     position: relative;
     z-index: 8;
-    opacity: var(--expand);
+    /* hard-cut the instant --copy turns on — no fade / collapse animation */
+    --ex-hide: clamp(0, (var(--copy) - 0.001) * 1000, 1);
+    opacity: calc(var(--ex-box) * (1 - var(--ex-hide)));
+    max-height: calc((1 - var(--ex-hide)) * 100vmax);
+    overflow: hidden;
+    margin-top: calc(var(--ex-hide) * -24px);
+    padding: calc((1 - var(--ex-hide)) * 48px);
+    border-width: calc((1 - var(--ex-hide)) * 1px);
   }
   .ai-kinds-examples .label {
     margin: 0;
@@ -1002,13 +1018,24 @@
     line-height: 1.5;
     color: var(--warm);
   }
-  .ai-kinds-examples ul { list-style: disc; padding: 0 0 0 1.25em; margin: 0; }
+  .ai-kinds-examples ul {
+    list-style: disc;
+    padding: 0 0 0 1.25em;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
   .ai-kinds-examples li {
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
+    opacity: 0;
   }
+  .ai-kinds-examples li:nth-child(1) { opacity: var(--ex-1); }
+  .ai-kinds-examples li:nth-child(2) { opacity: var(--ex-2); }
+  .ai-kinds-examples li:nth-child(3) { opacity: var(--ex-3); }
 
   /* ============================================================
      7 · INTERNET-SCALE DATA (Figma 179:262) — cityscape + drifting clouds
@@ -1658,7 +1685,7 @@
       grid-template-columns: none;
       gap: 8vw;
       width: max-content;
-      margin-top: calc(var(--expand) * 100px);
+      margin-top: 100px;
     }
     .ai-kinds-col,
     .ai-kinds-col-left {
@@ -2315,10 +2342,20 @@
   </div>
 </section>
 
+<section id="s-datacenters-power" class="beat beat--dark lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>Data centers are powerful and consume a lot of energy to power powerful models.</p>
+      <p class="subtext" data-scroll-reveal data-editable>*electricity consumption, water consumption, labor needs — explain how this actually works</p>
+    </div>
+  </div>
+</section>
+
 <section id="s-datacenters-unequal" class="beat beat--warm lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>...which aren&#8217;t distributed equally...</p>
+      <p class="lede" data-scroll-reveal data-editable>This resource consumption doesn&#8217;t impact everyone equally.</p>
+      <div class="ph" data-img-slot data-scroll-reveal data-label="map — current + proposed data centers overlaid with native reservations, low-income areas, and articles about why they&#8217;re built there" style="margin-top: 4vh; width: min(520px, 70vw); aspect-ratio: 16 / 10;"></div>
     </div>
   </div>
 </section>
@@ -2326,7 +2363,7 @@
 <section id="s-datacenters-communities" class="beat beat--warm lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>And they&#8217;re jarring to nearby communities&#8230;</p>
+      <p class="lede" data-scroll-reveal data-editable>They can be jarring to these communities&#8230;</p>
     </div>
   </div>
 </section>
@@ -2417,7 +2454,7 @@
 
   /* Generative AI tag: matches the columns' leftward pan exactly (same
      horizontal speed), rising into the title while it grows. Left column
-     is fully past the stage clip by p=0.7. Resolve progress from --p in JS. */
+     is fully past the stage clip once --focus completes. Resolve progress from --p in JS. */
   const aiKindsFrom = new WeakMap();
   function aiKindsProgress(p, start, dur) {
     return Math.min(1, Math.max(0, (p - start) / dur));
@@ -2431,8 +2468,8 @@
     if (!stage || !gen || !slot || !cols || !left) return;
 
     const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
-    const tags = aiKindsProgress(p, 0.28, 0.12);
-    const focus = aiKindsProgress(p, 0.55, 0.15);
+    const tags = aiKindsProgress(p, 0.54, 0.10);
+    const focus = aiKindsProgress(p, 0.68, 0.12);
     const cs = getComputedStyle(stage);
     const toY = parseFloat(cs.paddingTop) || 0;
 
