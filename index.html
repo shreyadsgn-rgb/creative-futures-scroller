@@ -6,7 +6,7 @@
 <title>History — Sandbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Courier+Prime:wght@400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Tunable variables — the dev panel writes these live.
@@ -1625,6 +1625,296 @@
     height: 402px;
   }
 
+  /* ============================================================
+     DATACENTER TRACK — sticky aerial photo pans between foci while
+     black copy boxes scroll. Yellow Fira Code labels + framed
+     overlays live on the sticky HUD and fade during pan transitions.
+     Figma: 436:98 → 446:337 → 446:364 → 446:384 → 436:38
+     ============================================================ */
+  .datacenter-track { position: relative; }
+  .datacenter-track-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: var(--dc-reveal, 0);
+  }
+  .datacenter-photo {
+    position: absolute;
+    /* Figma zoomed frames use ~2304×1535 over a ~1440×959 stage (≈1.6×). */
+    width: calc(100% * var(--dc-w, 1));
+    height: calc(100% * var(--dc-h, 1));
+    left: calc(var(--dc-left, 0) * 1%);
+    top: calc(var(--dc-top, 0) * 1%);
+    max-width: none;
+    object-fit: cover;
+    object-position: center;
+    will-change: left, top, width, height;
+  }
+  .datacenter-tint {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 14, 35, 0.2);
+  }
+  .dc-hud {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: none;
+  }
+  .dc-hud.is-on { opacity: 1; }
+
+  .dc-caption {
+    position: absolute;
+    left: calc(8.33% + 3.5vw);
+    bottom: 8vh;
+    color: var(--warm);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* Yellow mono callouts (Figma Fira Code / --warm) */
+  .dc-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--warm);
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.05;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .dc-label-mark {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--warm);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    box-sizing: border-box;
+  }
+  .dc-label-text { display: flex; flex-direction: column; }
+
+  /* Non-bg images: thin warm outline + 5% warm fill (Figma overlays) */
+  .dc-frame {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--warm);
+    background: rgba(235, 254, 155, 0.05);
+    overflow: hidden;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  }
+  .dc-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1;
+    mix-blend-mode: normal;
+  }
+  .dc-frame--cooling img {
+    object-fit: contain;
+  }
+  /* Government collage: capitol + people layers (Figma 446:389) */
+  .dc-frame--gov img {
+    position: absolute;
+    max-width: none;
+    opacity: 1;
+    mix-blend-mode: normal;
+  }
+  .dc-frame--gov .gov-capitol {
+    left: 7.5%;
+    top: 21.4%;
+    width: 92.4%;
+    height: 78.3%;
+    object-fit: cover;
+    object-position: center 28%;
+  }
+  .dc-frame--gov .gov-people-roof {
+    left: 9.6%;
+    top: 41.2%;
+    width: 28.6%;
+    height: 29.6%;
+    object-fit: contain;
+  }
+  .dc-frame--gov .gov-people-protest {
+    left: 62.9%;
+    top: 70.8%;
+    width: 27.9%;
+    height: 28.9%;
+    object-fit: contain;
+  }
+  /* Construction crew: larger, bottom-aligned in the yellow frame */
+  .dc-frame--workers .dc-workers-crop {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    height: 100%;
+    overflow: hidden;
+  }
+  .dc-frame--workers .dc-workers-crop img {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    top: auto;
+    width: 120%;
+    height: 120%;
+    transform: translateX(-50%);
+    object-fit: cover;
+    object-position: center bottom;
+    opacity: 1;
+    mix-blend-mode: normal;
+    max-width: none;
+  }
+
+  /* Water HUD placements (Figma 446:337, 1440 stage) */
+  .dc-hud--water .dc-frame--cooling {
+    left: calc(41.67% + 3.6vw);
+    top: 35vh;
+    width: min(389px, 28vw);
+    aspect-ratio: 389 / 259;
+  }
+  .dc-hud--water .dc-label--steam { left: auto; right: 2vw; top: 29.5vh; }
+  .dc-hud--water .dc-label--towers {
+    left: calc(41.67% + 3.6vw);
+    top: calc(35vh + min(389px, 28vw) * 259 / 389 + 14px);
+  }
+  .dc-hud--water .dc-label--river { left: 4.2vw; top: 85vh; }
+
+  /* Electricity HUD (Figma 446:364) */
+  .dc-hud--electricity .dc-frame--towers {
+    left: calc(41.67% + 3.4vw);
+    top: 50vh;
+    width: min(360px, 26vw);
+    aspect-ratio: 360 / 254;
+  }
+  .dc-hud--electricity .dc-label--fiber { left: auto; right: 3vw; top: 53vh; }
+  .dc-hud--electricity .dc-label--hv { left: calc(66.67% + 1vw); top: 63.5vh; }
+  .dc-hud--electricity .dc-label--sub { left: calc(70% - 2.3vw); top: 85.5vh; }
+
+  /* Government HUD (Figma 446:384) */
+  .dc-hud--government .dc-frame--gov {
+    left: calc(41.67% + 6.3vw);
+    top: 40.5vh;
+    width: min(681px, 48vw);
+    aspect-ratio: 681 / 494;
+  }
+  .dc-hud--government .dc-label--zoning { left: calc(25% + 4vw); top: 11.5vh; }
+  .dc-hud--government .dc-label--gov { left: auto; right: 3vw; top: 66vh; }
+
+  /* Labor HUD (Figma 436:38) */
+  .dc-hud--labor .dc-frame--workers {
+    left: calc(25% + 2.6vw);
+    top: 59vh;
+    width: min(641px, 46vw);
+    aspect-ratio: 641 / 329;
+  }
+  .dc-hud--labor .dc-label--dc { left: calc(66.67% + 0.7vw); top: 53.8vh; }
+  .dc-hud--labor .dc-label--crew { left: calc(58.33% + 0.1vw); top: 64.4vh; }
+
+  /* Name beat sits over the track: black until the aerial fades in */
+  .s-dc-name {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+  }
+  .s-dc-name .lede-hold-pin {
+    background: rgba(0, 0, 0, calc(1 - var(--dc-reveal, 0)));
+  }
+
+  .dc-aerial {
+    position: relative;
+    z-index: 1;
+    height: calc(100vh + var(--lede-beat));
+    background: transparent;
+  }
+  .dc-aerial .pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background: transparent;
+  }
+
+  .dc-transit {
+    position: relative;
+    z-index: 1;
+    height: calc(var(--section-gap) * 0.55);
+    background: transparent;
+  }
+  .dc-transit .pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background: transparent;
+  }
+
+  .dc-chapter {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    min-height: 100vh;
+  }
+  .dc-chapter-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 55vh;
+    padding: 18vh 0 70vh;
+    padding-left: calc(8.33% + 3.4vw);
+    box-sizing: border-box;
+  }
+  .dc-box {
+    width: min(448px, 86vw);
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 36px 24px;
+    color: #fff;
+  }
+  .dc-box--tight { padding: 24px; }
+  .dc-box p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: none;
+  }
+  .dc-box p + p { margin-top: 1.5em; }
+  .dc-bridge {
+    position: relative;
+    z-index: 1;
+    min-height: 50vh;
+    display: grid;
+    align-content: start;
+    padding: 18vh calc(8.33% + 3.4vw) 4vh;
+    background: transparent;
+    color: #fff;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: calc(8.33% + 3.4vw + 448px);
+  }
+
+  @media (max-width: 800px) {
+    .dc-chapter-flow { padding-left: 7vw; gap: 40vh; }
+    .dc-bridge { padding-left: 7vw; max-width: none; }
+    .dc-label { font-size: 12px; gap: 8px; }
+    .dc-hud--water .dc-frame--cooling,
+    .dc-hud--electricity .dc-frame--towers,
+    .dc-hud--government .dc-frame--gov,
+    .dc-hud--labor .dc-frame--workers {
+      width: min(70vw, 320px);
+      left: auto;
+      right: 4vw;
+    }
+    .dc-hud--government .dc-frame--gov { width: min(88vw, 420px); }
+    .dc-hud--labor .dc-frame--workers { width: min(88vw, 420px); }
+  }
+
   /* ---------- top / bottom framing ---------- */ 
   @media (max-width: 800px) {
     .s-intro .zoom-field { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(7, 1fr); }
@@ -2324,7 +2614,7 @@
   </div>
 </section>
 
-<!-- 15–23 · Closing beats from Figma 179:315 (Intro & History stack), in order. -->
+<!-- 15 · Datacenter cost lead-in (still plain black), then sticky aerial track. -->
 <section id="s-datacenters-cost" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
@@ -2334,51 +2624,170 @@
   </div>
 </section>
 
-<section id="s-datacenters-name" class="beat beat--dark lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>These buildings are called data centers. They already existed for the internet but their growth is exploding now.</p>
+<!-- Sticky DataCenterLarge aerial: fades in at end of name, then pans between
+     water → electricity → government → labor foci (Figma 436:98…436:38). -->
+<div class="datacenter-track">
+  <div class="datacenter-track-sticky" aria-hidden="true">
+    <img class="datacenter-photo" src="assets/DataCenterLarge-EDIT.png" alt="">
+    <div class="datacenter-tint"></div>
+
+    <div class="dc-hud dc-hud--intro" data-dc-hud="intro">
+      <p class="dc-caption">Google Data Center in Oregon.</p>
+    </div>
+
+    <div class="dc-hud dc-hud--water" data-dc-hud="water">
+      <div class="dc-frame dc-frame--cooling">
+        <img src="assets/datacenter/cooling-towers.png" alt="Cooling towers releasing steam">
+      </div>
+      <div class="dc-label dc-label--steam">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text"><span>steam released</span><span>into the air</span></span>
+      </div>
+      <div class="dc-label dc-label--towers">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text">cooling towers</span>
+      </div>
+      <div class="dc-label dc-label--river">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text">columbia river</span>
+      </div>
+    </div>
+
+    <div class="dc-hud dc-hud--electricity" data-dc-hud="electricity">
+      <div class="dc-frame dc-frame--towers">
+        <img src="assets/datacenter/electric-towers.png" alt="High-voltage transmission towers">
+      </div>
+      <div class="dc-label dc-label--fiber">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text"><span>Fiber Optic Cables</span><span>(Underground, not Pictured)</span></span>
+      </div>
+      <div class="dc-label dc-label--hv">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text"><span>high-voltage</span><span>transmission lines</span></span>
+      </div>
+      <div class="dc-label dc-label--sub">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text">POWER SUBSTATION</span>
+      </div>
+    </div>
+
+    <div class="dc-hud dc-hud--government" data-dc-hud="government">
+      <div class="dc-frame dc-frame--gov">
+        <img class="gov-capitol" src="assets/datacenter/gov-capitol.png" alt="">
+        <img class="gov-people-roof" src="assets/datacenter/gov-people-roof.png" alt="">
+        <img class="gov-people-protest" src="assets/datacenter/gov-people-protest.png" alt="">
+      </div>
+      <div class="dc-label dc-label--zoning">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text">zoning boundary</span>
+      </div>
+      <div class="dc-label dc-label--gov">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text">local government</span>
+      </div>
+    </div>
+
+    <div class="dc-hud dc-hud--labor" data-dc-hud="labor">
+      <div class="dc-frame dc-frame--workers">
+        <div class="dc-workers-crop">
+          <img src="assets/datacenter/labor-workers.png" alt="Construction and maintenance crew">
+        </div>
+      </div>
+      <div class="dc-label dc-label--dc">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text">Data Center</span>
+      </div>
+      <div class="dc-label dc-label--crew">
+        <span class="dc-label-mark"></span>
+        <span class="dc-label-text"><span>construction and</span><span>maintenance crew</span></span>
+      </div>
     </div>
   </div>
-</section>
 
-<section id="s-datacenters-power" class="beat beat--dark lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>Data centers are powerful and consume a lot of energy to power powerful models.</p>
-      <p class="subtext" data-scroll-reveal data-editable>*electricity consumption, water consumption, labor needs — explain how this actually works</p>
+  <section id="s-datacenters-name" class="beat beat--dark lede-hold s-dc-name">
+    <div class="lede-hold-pin">
+      <div class="beat-copy">
+        <p class="lede" data-scroll-reveal data-editable>These buildings are called data centers. They already existed for the internet but their growth is exploding now.</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="s-datacenters-unequal" class="beat beat--warm lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>This resource consumption doesn&#8217;t impact everyone equally.</p>
-      <div class="ph" data-img-slot data-scroll-reveal data-label="map — current + proposed data centers overlaid with native reservations, low-income areas, and articles about why they&#8217;re built there" style="margin-top: 4vh; width: min(520px, 70vw); aspect-ratio: 16 / 10;"></div>
+  <!-- Figma 436:98 — full aerial + caption hold -->
+  <section id="s-dc-aerial" class="dc-aerial" data-scrub data-dc-hold="intro">
+    <div class="pin"></div>
+  </section>
+
+  <section id="s-dc-to-water" class="dc-transit" data-scrub data-dc-from="intro" data-dc-to="water">
+    <div class="pin"></div>
+  </section>
+
+  <!-- Figma 446:337 — Water usage -->
+  <section id="s-dc-water" class="dc-chapter" data-dc-hold="water">
+    <div class="dc-chapter-flow">
+      <div class="dc-box">
+        <p data-editable>Servers generate a lot of heat. To keep them from failing, data centers pump water through cooling systems that absorb that heat and release it as steam through cooling towers.</p>
+        <p data-editable>A large data center can consume up to 5 million gallons of water per day, roughly equivalent to the daily water use of a town of 10,000 to 50,000 people.</p>
+      </div>
+      <div class="dc-box dc-box--tight">
+        <p data-editable>This water usage most directly impacts locals. In The Dalles, Oregon, Google built its first data center in 2006. By 2024, a third of the entire city's water supply went to Google's three local data center sites.</p>
+      </div>
+      <div class="dc-box dc-box--tight">
+        <p data-editable>Beyond cooling, indirect water consumption from the power plants that supply electricity can represent up to 75% of a data center's total water use.</p>
+        <p data-editable>To decrease water usage, some new approaches are being developed. For example, immersion cooling submerges servers in a non-conductive liquid, which gets rid of the need for water-based cooling. These technologies are being worked on and are not yet adopted widely.</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="s-datacenters-communities" class="beat beat--warm lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>They can be jarring to these communities&#8230;</p>
+  <section id="s-dc-to-electricity" class="dc-transit" data-scrub data-dc-from="water" data-dc-to="electricity">
+    <div class="pin"></div>
+  </section>
+
+  <!-- Figma 446:364 — Electricity -->
+  <section id="s-dc-electricity" class="dc-chapter" data-dc-hold="electricity">
+    <div class="dc-chapter-flow">
+      <div class="dc-box dc-box--tight">
+        <p data-editable>When you send a prompt to an non-local AI, it travels through underground fiber optic cables to reach a data center. Inside, thousands of servers process your request simultaneously. This takes electricity, which comes from the local power grid through high-voltage transmission lines.</p>
+      </div>
+      <div class="dc-box dc-box--tight">
+        <p data-editable>Data centers can require amounts of power similar to a medium-sized city, and accounted for nearly 4.4% of U.S. annual electricity in 2023, a figure expected to grow dramatically as AI demand increases.</p>
+        <p data-editable>Since that electricity comes from the existing grid, data centers compete with homes, schools, and hospitals for power. Some companies are investing in on-site solar and wind; others purchase renewable energy credits without changing how they actually draw from the grid.</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="s-datacenters-fight" class="beat beat--warm">
-  <div class="beat-copy">
-    <p class="lede" data-scroll-reveal data-editable>...so some of these communities are fighting back.</p>
-  </div>
-  <div class="beat-media-row" aria-hidden="true">
-    <div class="ph" data-img-slot data-scroll-reveal data-label="community resist 1"></div>
-    <div class="ph tall" data-img-slot data-scroll-reveal data-label="community resist 2"></div>
-    <div class="ph" data-img-slot data-scroll-reveal data-label="community resist 3"></div>
-    <div class="ph" data-img-slot data-scroll-reveal data-label="community resist 4"></div>
-  </div>
-</section>
+  <section id="s-dc-to-government" class="dc-transit" data-scrub data-dc-from="electricity" data-dc-to="government">
+    <div class="pin"></div>
+  </section>
+
+  <!-- Figma 446:384 — Government / zoning -->
+  <section id="s-dc-government" class="dc-chapter" data-dc-hold="government">
+    <div class="dc-chapter-flow">
+      <div class="dc-box dc-box--tight">
+        <p data-editable>Before a single server is installed, a data center needs approval from local government: land use permits, environmental impact assessments, noise level reviews, and confirmation that the local grid and water systems can handle the load.</p>
+        <p data-editable>Zoning reviews must evaluate whether the local grid and water systems can support such loads, especially in areas with old or limited infrastructure.</p>
+      </div>
+      <div class="dc-box dc-box--tight">
+        <p data-editable>Companies often approach local governments with offers that are hard to refuse, like investment in water or road infrastructure, property tax revenue, and promises of jobs.</p>
+        <p data-editable>Google invested almost $29 million into updating The Dalles' water system in exchange for a 92% discount on its property taxes for 15 years. These deals shape what communities get and what they give up.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-dc-to-labor" class="dc-transit" data-scrub data-dc-from="government" data-dc-to="labor">
+    <div class="pin"></div>
+  </section>
+
+  <!-- Figma 436:38 — Labor -->
+  <section id="s-dc-labor" class="dc-chapter" data-dc-hold="labor">
+    <div class="dc-chapter-flow">
+      <div class="dc-box dc-box--tight">
+        <p data-editable>Building and running a data center requires skilled workers: electricians, HVAC technicians, network engineers, construction crews, and security staff. The construction phase brings a surge of temporary jobs to an area. But once a facility is operational, most of the work is automated.</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="dc-bridge" data-dc-hold="labor" data-editable>...which aren&#8217;t distributed equally...</p>
+</div>
 
 <section id="s-ai-positives" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
@@ -2756,18 +3165,144 @@
     }
   }
 
+  /* ---------- datacenter-track: sticky aerial pans between foci.
+     Camera keyframes match Figma absolute placements of the 1.6× crop:
+       intro        fit (1×) centered
+       water        1.6× top-left
+       electricity  1.6× top-right (left ≈ -60%)
+       government   1.6× bottom-left (top ≈ -62%)
+       labor        1.6× mid (left ≈ -30%, top ≈ -8.5%)
+     Yellow HUD fades out during transit scrubs; copy boxes scroll in chapters. ---------- */
+  const dcSticky = document.querySelector('.datacenter-track-sticky');
+  const dcNameEl = document.getElementById('s-datacenters-name');
+  const dcHuds = dcSticky ? [...dcSticky.querySelectorAll('[data-dc-hud]')] : [];
+  const DC_FOCI = {
+    intro:       { w: 1,    h: 1,    left: 0,     top: 0 },
+    water:       { w: 1.6,  h: 1.6,  left: 0,     top: 0 },
+    electricity: { w: 1.6,  h: 1.6,  left: -60.3, top: 0 },
+    government:  { w: 1.6,  h: 1.6,  left: 0,     top: -62 },
+    labor:       { w: 1.6,  h: 1.6,  left: -30.3, top: -22 },
+  };
+  function dcLerp(a, b, t) { return a + (b - a) * t; }
+  function dcMix(a, b, t) {
+    return {
+      w: dcLerp(a.w, b.w, t),
+      h: dcLerp(a.h, b.h, t),
+      left: dcLerp(a.left, b.left, t),
+      top: dcLerp(a.top, b.top, t),
+    };
+  }
+  function dcApplyCam(cam) {
+    if (!dcSticky) return;
+    dcSticky.style.setProperty('--dc-w', cam.w.toFixed(4));
+    dcSticky.style.setProperty('--dc-h', cam.h.toFixed(4));
+    dcSticky.style.setProperty('--dc-left', cam.left.toFixed(4));
+    dcSticky.style.setProperty('--dc-top', cam.top.toFixed(4));
+  }
+  function dcSetHud(name, opacity) {
+    for (const hud of dcHuds) {
+      const on = hud.dataset.dcHud === name ? opacity : 0;
+      hud.style.opacity = on.toFixed(3);
+      hud.classList.toggle('is-on', on > 0.05);
+    }
+  }
+  function updateDatacenterTrack() {
+    if (!dcSticky) return;
+    const vh = innerHeight;
+    const track = document.querySelector('.datacenter-track');
+
+    // Fade the aerial in during the last third of the name beat; stay on
+    // until the track itself scrolls away.
+    let reveal = 0;
+    if (dcNameEl) {
+      const r = dcNameEl.getBoundingClientRect();
+      const range = Math.max(1, r.height - vh);
+      const p = Math.min(1, Math.max(0, -r.top / range));
+      reveal = Math.min(1, Math.max(0, (p - 0.55) / 0.35));
+      if (r.bottom < vh * 0.85) reveal = 1;
+      if (r.top > vh * 0.2 && p <= 0) reveal = 0;
+    }
+    if (track) {
+      const tr = track.getBoundingClientRect();
+      const nameBottom = dcNameEl ? dcNameEl.getBoundingClientRect().bottom : 0;
+      if (nameBottom < vh * 0.55 && tr.bottom > vh * 0.25) reveal = 1;
+      if (tr.bottom <= 0 || tr.top >= vh) reveal = 0;
+    }
+    dcSticky.style.setProperty('--dc-reveal', reveal.toFixed(4));
+    if (dcNameEl) dcNameEl.style.setProperty('--dc-reveal', reveal.toFixed(4));
+
+    // Active camera: prefer an in-progress transit; else the nearest hold.
+    const transits = [...document.querySelectorAll('.dc-transit[data-scrub]')];
+    let cam = DC_FOCI.intro;
+    let hudName = 'intro';
+    let hudOp = 0;
+    let handled = false;
+
+    for (const t of transits) {
+      const p = parseFloat(t.style.getPropertyValue('--p')) || 0;
+      const r = t.getBoundingClientRect();
+      // only while this scrub is actively progressing — completed/upcoming
+      // transits must not steal the camera from neighboring chapter holds
+      if (p <= 0.001 || p >= 0.999) continue;
+      if (r.bottom <= 0 || r.top >= vh) continue;
+      const from = DC_FOCI[t.dataset.dcFrom];
+      const to = DC_FOCI[t.dataset.dcTo];
+      if (!from || !to) continue;
+      // labels clear quickly, then the pan runs across the rest of the scrub
+      const clear = Math.min(1, Math.max(0, p / 0.18));
+      const panT = Math.min(1, Math.max(0, (p - 0.18) / 0.82));
+      cam = dcMix(from, to, panT);
+      if (p <= 0.18) { hudName = t.dataset.dcFrom; hudOp = 1 - clear; }
+      else if (p >= 0.85) { hudName = t.dataset.dcTo; hudOp = Math.min(1, (p - 0.85) / 0.15); }
+      else { hudName = t.dataset.dcFrom; hudOp = 0; }
+      handled = true;
+      break;
+    }
+
+    if (!handled) {
+      const holds = [...document.querySelectorAll('[data-dc-hold]')];
+      let best = null;
+      let bestScore = -Infinity;
+      for (const h of holds) {
+        const r = h.getBoundingClientRect();
+        if (r.bottom <= 0) continue; // fully scrolled past
+        // Prefer a hold that has docked (top <= 0) with top closest to 0;
+        // otherwise the next upcoming hold (smallest positive top).
+        const score = r.top <= 0 ? (100000 + r.top) : -r.top;
+        if (score > bestScore) {
+          bestScore = score;
+          best = h;
+        }
+      }
+      if (best) {
+        const key = best.dataset.dcHold;
+        cam = DC_FOCI[key] || cam;
+        hudName = key;
+        hudOp = reveal;
+      } else if (reveal > 0) {
+        cam = DC_FOCI.intro;
+        hudName = 'intro';
+        hudOp = reveal > 0.85 ? (reveal - 0.85) / 0.15 : 0;
+      }
+    }
+
+    dcApplyCam(cam);
+    dcSetHud(hudName, hudOp * reveal);
+  }
+
   let queued = false;
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); PixelFocus.updateAll(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
   updateModelCollapse();
   updateJohnniacTrack();
   updateBuildingTrack();
+  updateDatacenterTrack();
   PixelFocus.updateAll();
 
   /* ---------- split [data-highlight] text into indexed word spans ---------- */
