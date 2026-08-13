@@ -243,7 +243,11 @@
     --exit: clamp(0, calc((var(--p) - var(--steps-end)) / (var(--exit-end) - var(--steps-end))), 1);
   }
   .s-dreams .intro {
-    position: absolute; top: 12vh; left: 12vw; z-index: 2;
+    /* match .step media top: centered in the padded grid (bottom pad 12vh) */
+    position: absolute;
+    top: calc((100vh - 12vh - min(58vh, 520px)) / 2);
+    left: 12vw;
+    z-index: 2;
   }
   .s-dreams .intro .lede {
     /* appears first: fade + rise in, then holds through the rest of --lead */
@@ -1790,12 +1794,22 @@
   }
   .dc-hud--water .dc-label--river { left: 4.2vw; top: 85vh; }
 
-  /* Electricity HUD (Figma 446:364) */
+  /* Electricity HUD (Figma 446:364) — taller yellow frame, image keeps prior height */
   .dc-hud--electricity .dc-frame--towers {
     left: calc(41.67% + 3.4vw);
-    top: 50vh;
+    top: 46vh;
     width: min(360px, 26vw);
-    aspect-ratio: 360 / 254;
+    aspect-ratio: 360 / 330;
+  }
+  .dc-frame--towers img {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    width: 100%;
+    height: calc(100% * 254 / 330);
+    transform: translateY(-50%);
+    object-fit: cover;
   }
   .dc-hud--electricity .dc-label--fiber { left: auto; right: 3vw; top: 53vh; }
   .dc-hud--electricity .dc-label--hv { left: calc(66.67% + 1vw); top: 63.5vh; }
@@ -1886,19 +1900,6 @@
     max-width: none;
   }
   .dc-box p + p { margin-top: 1.5em; }
-  .dc-bridge {
-    position: relative;
-    z-index: 1;
-    min-height: 50vh;
-    display: grid;
-    align-content: start;
-    padding: 18vh calc(8.33% + 3.4vw) 4vh;
-    background: transparent;
-    color: #fff;
-    font-size: 16px;
-    line-height: 1.5;
-    max-width: calc(8.33% + 3.4vw + 448px);
-  }
 
   /* ============================================================
      DATACENTER IMPACT MAP — teal boxes + map layers stay pinned;
@@ -1929,14 +1930,18 @@
   .dc-impact-step.is-front { pointer-events: auto; }
   .dc-impact-map {
     position: absolute;
-    inset: 0;
+    top: 50%;
+    right: 2vw;
+    width: 75%;
+    height: 75%;
+    transform: translateY(-50%);
   }
   .dc-impact-map img {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center top;
+    object-fit: contain;
+    object-position: center right;
   }
   .dc-impact-box {
     position: absolute;
@@ -1958,17 +1963,211 @@
   .dc-impact-box p + p { margin-top: 1.5em; }
 
   @media (max-width: 800px) {
+    .dc-impact-map {
+      right: 0;
+      width: 92%;
+      height: 55%;
+      top: auto;
+      bottom: 4vh;
+      transform: none;
+    }
+    .dc-impact-map img { object-position: center center; }
     .dc-impact-box {
       left: 7vw;
-      top: 12vh;
+      top: 8vh;
       width: min(400px, 86vw);
       padding: 24px 18px;
     }
   }
 
+  /* ============================================================
+     NEARBY COMMUNITIES — yellow stage collage; labels fade in
+     one-by-one on scrub (Figma 179:339).
+     ============================================================ */
+  .s-dc-nearby {
+    height: calc(var(--section-gap) * 1.5);
+    background: var(--warm);
+    color: #000;
+  }
+  .s-dc-nearby .pin {
+    padding: 0;
+    align-content: stretch;
+    background: var(--warm);
+  }
+  .nearby-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .nearby-copy {
+    position: absolute;
+    left: calc(8.33% + 3.6vw);
+    top: 48.5%;
+    transform: translateY(-50%);
+    width: min(346px, 34vw);
+    z-index: 4;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000;
+  }
+  .nearby-copy em { font-style: italic; }
+  .nearby-piece {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .nearby-piece img {
+    position: absolute;
+    max-width: none;
+    display: block;
+  }
+  /* Speakers — Figma 462:636 */
+  .nearby-piece--speakers {
+    left: 43.06%;
+    top: 26.67%;
+    width: 20%;
+    height: 39.29%;
+    z-index: 2;
+  }
+  .nearby-piece--speakers img {
+    left: 0;
+    top: -34.05%;
+    width: 205.1%;
+    height: 134.16%;
+  }
+  /* Houses — Figma 462:633 */
+  .nearby-piece--houses {
+    left: 35.97%;
+    top: 34.4%;
+    width: 60.28%;
+    height: 55.83%;
+    z-index: 1;
+  }
+  .nearby-piece--houses img {
+    left: 0;
+    top: -38.8%;
+    width: 100%;
+    height: 138.85%;
+  }
+  /* Bins — Figma 462:634 */
+  .nearby-piece--bins {
+    left: 40.21%;
+    top: 73.33%;
+    width: 19.51%;
+    height: 26.67%;
+    z-index: 3;
+  }
+  .nearby-piece--bins img {
+    left: -48.75%;
+    top: -76%;
+    width: 198.58%;
+    height: 186.83%;
+  }
+  /* Mailbox — Figma 462:635 (flipped) */
+  .nearby-piece--mailbox {
+    left: 92.78%;
+    top: 78.69%;
+    width: 5.625%;
+    height: 17.62%;
+    z-index: 3;
+  }
+  .nearby-piece--mailbox img {
+    left: -166.86%;
+    top: -74.47%;
+    width: 426.04%;
+    height: 174.47%;
+    transform: scaleX(-1);
+  }
+  /* Ink mono labels on warm (same geometry as .dc-label) */
+  .nearby-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 5;
+    color: #000;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: var(--show, 0);
+    transform: translateY(calc((1 - var(--show, 0)) * 10px));
+  }
+  .nearby-label-mark {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #000;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    box-sizing: border-box;
+  }
+  .nearby-label-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .nearby-label--noise {
+    left: 63.06%;
+    top: 30.24%;
+    --show: clamp(0, (var(--p) - 0.12) / 0.14, 1);
+  }
+  .nearby-label--carbon {
+    left: 26.04%;
+    top: 86.67%;
+    --show: clamp(0, (var(--p) - 0.38) / 0.14, 1);
+  }
+  .nearby-label--carbon .nearby-label-text { text-align: right; }
+  .nearby-label--bills {
+    left: 74.1%;
+    top: 92.74%;
+    --show: clamp(0, (var(--p) - 0.64) / 0.14, 1);
+  }
+  .nearby-label--bills .nearby-label-text { text-align: right; }
+
+  @media (max-width: 800px) {
+    .nearby-copy {
+      left: 7vw;
+      top: 8vh;
+      transform: none;
+      width: min(346px, 86vw);
+    }
+    .nearby-piece--speakers {
+      left: 48%;
+      top: 22%;
+      width: 28%;
+      height: 28%;
+    }
+    .nearby-piece--houses {
+      left: 8%;
+      top: 36%;
+      width: 90%;
+      height: 42%;
+    }
+    .nearby-piece--bins {
+      left: 28%;
+      top: 68%;
+      width: 32%;
+      height: 22%;
+    }
+    .nearby-piece--mailbox {
+      left: 78%;
+      top: 72%;
+      width: 12%;
+      height: 18%;
+    }
+    .nearby-label { font-size: 12px; gap: 8px; }
+    .nearby-label--noise { left: 52%; top: 18%; }
+    .nearby-label--carbon { left: 4vw; top: 88%; }
+    .nearby-label--bills { left: auto; right: 4vw; top: 90%; }
+  }
+
   @media (max-width: 800px) {
     .dc-chapter-flow { padding-left: 7vw; gap: 40vh; }
-    .dc-bridge { padding-left: 7vw; max-width: none; }
     .dc-label { font-size: 12px; gap: 8px; }
     .dc-hud--water .dc-frame--cooling,
     .dc-hud--electricity .dc-frame--towers,
@@ -2844,7 +3043,6 @@
     </div>
   </section>
 
-  <p class="dc-bridge" data-dc-hold="labor" data-editable>...which aren&#8217;t distributed equally...</p>
 </div>
 
 <!-- Datacenter impact map: pinned stage, teal copy + map layers crossfade (Figma 453:417). -->
@@ -2853,7 +3051,7 @@
     <div class="dc-impact-stage">
       <div class="dc-impact-step" data-dc-impact-step="0">
         <div class="dc-impact-map">
-          <img src="assets/datacenter/impact-map-0.png" alt="United States map with no data layers visible">
+          <img src="assets/DataCenterImpactDashboard_Default.png" alt="United States map with no data layers visible">
         </div>
         <div class="dc-impact-box">
           <p data-editable>Data centers already existed for decades to run the internet but their growth is exploding now.</p>
@@ -2861,7 +3059,7 @@
       </div>
       <div class="dc-impact-step" data-dc-impact-step="1">
         <div class="dc-impact-map">
-          <img src="assets/datacenter/impact-map-1.png" alt="United States map showing operating, proposed, and cancelled data centers">
+          <img src="assets/DataCenterImpactDashboard_DataCenters.png" alt="United States map showing operating, proposed, and cancelled data centers">
         </div>
         <div class="dc-impact-box">
           <p data-editable>Over 1,500 new data centers are currently in development across the United States, with more expected as AI demand increases.</p>
@@ -2870,7 +3068,7 @@
       </div>
       <div class="dc-impact-step" data-dc-impact-step="2">
         <div class="dc-impact-map">
-          <img src="assets/datacenter/impact-map-2.png" alt="United States map with data centers and tribal lands overlay">
+          <img src="assets/DataCenterImpactDashboard_NativeLand.png" alt="United States map with data centers and tribal lands overlay">
         </div>
         <div class="dc-impact-box">
           <p data-editable>Energy projects on non-tribal lands can face permitting delays of three to ten years, but projects on tribal land often move faster because tribes have sovereign authority to handle their own regulations. This incentivizes data center construction on and near this land.</p>
@@ -2879,12 +3077,47 @@
       </div>
       <div class="dc-impact-step" data-dc-impact-step="3">
         <div class="dc-impact-map">
-          <img src="assets/datacenter/impact-map-3.png" alt="United States map with data centers and poverty ratio overlay">
+          <img src="assets/DataCenterImpactDashboard_LowIncome.png" alt="United States map with data centers and poverty ratio overlay">
         </div>
         <div class="dc-impact-box">
           <p data-editable>Data centers are disproportionately located in communities that already face unhealthy air quality, groundwater threats, and high concentrations of hazardous waste.</p>
           <p data-editable>In California alone, nearly one-third of all data centers are in the state's most polluted neighborhoods.</p>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Nearby communities collage: sticky yellow stage; labels fade in one-by-one (Figma 179:339). -->
+<section id="s-dc-nearby" class="s-dc-nearby" data-scrub>
+  <div class="pin">
+    <div class="nearby-stage">
+      <div class="nearby-piece nearby-piece--speakers">
+        <img src="assets/AI Scroller - Nearby Communities (2)/34.png" alt="Loudspeakers on a utility pole">
+      </div>
+      <div class="nearby-piece nearby-piece--houses">
+        <img src="assets/AI Scroller - Nearby Communities (2)/35.png" alt="Row of suburban houses">
+      </div>
+      <div class="nearby-piece nearby-piece--bins">
+        <img src="assets/AI Scroller - Nearby Communities (2)/36.png" alt="Trash and recycling bins">
+      </div>
+      <div class="nearby-piece nearby-piece--mailbox">
+        <img src="assets/AI Scroller - Nearby Communities (2)/37.png" alt="Mailbox">
+      </div>
+
+      <p class="nearby-copy" data-editable>When community well-being isn&#8217;t prioritizing, the introduction of a data center can be <em>jarring</em>.</p>
+
+      <div class="nearby-label nearby-label--noise">
+        <span class="nearby-label-mark" aria-hidden="true"></span>
+        <span class="nearby-label-text">Noise pollution</span>
+      </div>
+      <div class="nearby-label nearby-label--carbon">
+        <span class="nearby-label-text"><span>carbon Emissions and</span><span>hazardous waste</span></span>
+        <span class="nearby-label-mark" aria-hidden="true"></span>
+      </div>
+      <div class="nearby-label nearby-label--bills">
+        <span class="nearby-label-text"><span>Higher Electricity</span><span>and water bills</span></span>
+        <span class="nearby-label-mark" aria-hidden="true"></span>
       </div>
     </div>
   </div>
