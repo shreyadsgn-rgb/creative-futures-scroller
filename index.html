@@ -2953,8 +2953,16 @@
     top: 36.97%;
     width: 63.82%;
     height: 48.83%;
-    background: #fff;
+    background: #0d0d0d;
     z-index: 1;
+    overflow: hidden;
+  }
+  .ask-panel img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
   }
   .ask-note {
     position: absolute;
@@ -4275,7 +4283,9 @@
     <div class="ask-stage">
       <p class="ask-lede" data-editable>We asked some media arts students how they felt about AI in creative spaces.</p>
       <p class="ask-sub" data-editable>When asked about their personal ethics towards AI usage here&#8217;s what they came up with:</p>
-      <div class="ask-panel" aria-hidden="true"></div>
+      <div class="ask-panel">
+        <img src="assets/avgAI_ethicsquad.png" alt="Student AI ethics quadrant: pressure versus whether something is a good idea">
+      </div>
       <p class="ask-note" data-editable>n = 40, ages ranged from 9-17 across 3 classes</p>
     </div>
   </div>
