@@ -2265,26 +2265,6 @@
     --dur: 0.3;
     --from: 118vw;
   }
-  .comm-crowd {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: min(100%, 1100px);
-    height: 18vh;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-    --slide: clamp(0, (var(--p) - 0.55) / 0.28, 1);
-    opacity: calc(0.35 + var(--slide) * 0.65);
-    transform: translateX(calc((1 - var(--slide)) * 30vw));
-  }
-  .comm-crowd img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-  }
 
   /* Tablet + phone: leave the sticky collage — stack in document flow */
   @media (max-width: 1200px) {
@@ -2312,8 +2292,7 @@
       margin: 0 auto;
     }
     .comm-lede,
-    .comm-item,
-    .comm-crowd {
+    .comm-item {
       position: static;
       left: auto;
       top: auto;
@@ -2327,6 +2306,7 @@
       transform: none;
       will-change: auto;
       overflow: visible;
+      z-index: 1;
     }
     .comm-lede { margin-bottom: 4px; }
     .comm-box {
@@ -2348,25 +2328,435 @@
       height: 100%;
       object-fit: cover;
     }
-    .comm-crowd {
-      order: 99;
-      width: 100%;
-      height: 22vw;
-      min-height: 140px;
-      max-height: 220px;
-      margin-top: 8px;
-      opacity: 1;
-    }
   }
 
   @media (max-width: 600px) {
     .s-communities-change { padding: 7vh 5vw 9vh; }
     .comm-stage { gap: 16px; }
     .comm-box { font-size: 14px; padding: 18px 12px; }
-    .comm-crowd {
-      height: 32vw;
-      min-height: 110px;
+  }
+
+  /* ============================================================
+     BUILT BY MANY — purple collage of reused scroller assets
+     (Figma 493:292, artboard 1440×944). Positions are % of stage.
+     ============================================================ */
+  .s-built-by-many {
+    height: calc(var(--lede-beat) * 2 + 100vh);
+    background: var(--purple);
+    color: #fff;
+  }
+  .s-built-by-many .pin {
+    padding: 0;
+    align-content: stretch;
+    background: var(--purple);
+    overflow: hidden;
+  }
+  .bbm-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* subtle grid like the Figma fill */
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent 0 47px,
+        rgba(0, 0, 0, 0.14) 47px 48px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 47px,
+        rgba(0, 0, 0, 0.14) 47px 48px
+      );
+  }
+  .bbm-lede {
+    position: absolute;
+    left: 11.94%;
+    top: 21.19%;
+    width: 31.11%;
+    max-width: 448px;
+    margin: 0;
+    z-index: 6;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+  }
+  .bbm-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 7;
+    color: #fff;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: clamp(11px, 1.04vw, 15px);
+    font-weight: 400;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .bbm-label--warm { color: var(--warm); }
+  .bbm-label-mark {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    box-sizing: border-box;
+  }
+  .bbm-label-text { display: flex; flex-direction: column; line-height: 1; }
+
+  .bbm-cluster { position: absolute; z-index: 2; }
+
+  /* Human ideas — parallax placeholder (494:351) */
+  .bbm-parallax {
+    left: 2.22%;
+    top: 33.05%;
+    width: 12.57%;
+    height: 56.57%;
+    background: #fff;
+    color: #000;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.5;
+    z-index: 1;
+  }
+  .bbm-label--ideas { left: 3.54%; top: 92.16%; }
+
+  /* Content on the internet — 3×3 building grid in AI-flood end state */
+  .bbm-internet-wrap {
+    left: 16.74%;
+    top: 32.63%;
+    width: 38.33%;
+    height: 37.29%;
+    /* sits in front of the labor aerial that tucks under it */
+    z-index: 5;
+  }
+  .bbm-internet {
+    position: absolute;
+    left: 15.98%;
+    top: 0;
+    width: 45.56%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2.6px;
+    padding: 4px;
+    background: var(--purple);
+    box-sizing: border-box;
+  }
+  .bbm-internet .cell {
+    position: relative;
+    overflow: hidden;
+    background: var(--warm);
+  }
+  .bbm-internet .cell:nth-child(1),
+  .bbm-internet .cell:nth-child(9) { background: #000; }
+  .bbm-internet .cell:nth-child(6),
+  .bbm-internet .cell:nth-child(7) { background: var(--teal); }
+  .bbm-internet .cell img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+  .bbm-internet .cell:nth-child(1) img {
+    width: 29%;
+    height: 23%;
+    inset: auto;
+    left: 0;
+    bottom: 0;
+  }
+  .bbm-internet .cell:nth-child(9) img {
+    width: 31%;
+    height: 22%;
+    inset: auto;
+    right: 2%;
+    top: 16%;
+  }
+  .bbm-internet .cell:nth-child(1)::after,
+  .bbm-internet .cell:nth-child(9)::after {
+    content: "";
+    position: absolute;
+    width: 17%;
+    aspect-ratio: 1;
+    background: #0065ff;
+    box-shadow:
+      110% 0 0 #0065ff,
+      110% 110% 0 #0065ff;
+    pointer-events: none;
+  }
+  .bbm-internet .cell:nth-child(1)::after { left: 29%; top: 31%; }
+  .bbm-internet .cell:nth-child(9)::after { left: 29%; top: 31%; }
+  .bbm-label--internet { left: 23.13%; top: 29.98%; }
+
+  /* Early automata — overlapping bordered frames (493:342) */
+  .bbm-automata {
+    left: 47.5%;
+    top: 17.58%;
+    width: 21.6%;
+    height: 31.46%;
+    z-index: 4;
+  }
+  .bbm-automata .shot {
+    position: absolute;
+    border: 1.5px solid #000;
+    overflow: hidden;
+    background: #111;
+    box-sizing: border-box;
+  }
+  .bbm-automata .shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bbm-automata .shot--a {
+    left: 50.23%;
+    top: 0;
+    width: 49.8%;
+    height: 63.1%;
+    z-index: 1;
+  }
+  .bbm-automata .shot--b {
+    left: 0;
+    top: 26.04%;
+    width: 74.18%;
+    height: 73.96%;
+    z-index: 2;
+  }
+  /* clear of automata shots + researchers */
+  .bbm-label--automata { left: 52%; top: 51.8%; }
+
+  /* AI researchers (493:281) */
+  .bbm-researchers {
+    left: 71.5%;
+    top: 33.58%;
+    width: 26.67%;
+    height: 28.23%;
+    overflow: hidden;
+    z-index: 3;
+  }
+  .bbm-researchers img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  .bbm-label--researchers { left: 85.14%; top: 63.5%; }
+
+  /* Labor for data centers — behind the people-building grid */
+  .bbm-labor {
+    left: 18.61%;
+    top: 63.5%;
+    width: 36.11%;
+    height: 30.5%;
+    border: 1.5px solid #000;
+    overflow: hidden;
+    background: #000;
+    box-sizing: border-box;
+    z-index: 2;
+  }
+  .bbm-labor-bg {
+    position: absolute;
+    left: -30%;
+    top: -18%;
+    width: 160%;
+    height: 170.5%;
+  }
+  .bbm-labor-bg img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+  }
+  .bbm-labor-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 14, 35, 0.2);
+  }
+  .bbm-labor-inset {
+    position: absolute;
+    left: 17.97%;
+    /* sit just under the people-building tuck so workers stay fully visible */
+    top: 18%;
+    width: 64.05%;
+    height: 72%;
+    border: 1px solid var(--warm);
+    background: rgba(235, 254, 155, 0.05);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .bbm-labor-inset img {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 135%;
+    height: 135%;
+    max-width: none;
+    transform: translateX(-50%);
+    object-fit: cover;
+    object-position: center bottom;
+  }
+  .bbm-label--labor { left: 39.65%; top: 95.5%; }
+
+  /* People in datasets — reused MNIST / iris / Pima (Figma had checkerboards) */
+  .bbm-datasets {
+    left: 59.93%;
+    top: 72.5%;
+    width: 38.6%;
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    padding-left: 2.8%;
+    box-sizing: border-box;
+    z-index: 4;
+  }
+  .bbm-datasets .shot {
+    flex: 0 0 auto;
+    overflow: hidden;
+    background: #222;
+  }
+  .bbm-datasets .shot:nth-child(1) {
+    width: 23.8%;
+    aspect-ratio: 132 / 151;
+  }
+  .bbm-datasets .shot:nth-child(2),
+  .bbm-datasets .shot:nth-child(3) {
+    width: 28.4%;
+    aspect-ratio: 158 / 152;
+  }
+  .bbm-datasets .shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bbm-label--datasets { left: 63.06%; top: 89.62%; }
+
+  /* empty white frames beside the building (493:335–337) */
+  .bbm-frame {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    pointer-events: none;
+    z-index: 2;
+    box-sizing: border-box;
+  }
+  .bbm-frame--a {
+    left: 0;
+    top: 67.5%;
+    width: 13.71%;
+    height: 26.18%;
+  }
+  .bbm-frame--b {
+    left: 63.79%;
+    top: 53.66%;
+    width: 13.71%;
+    height: 26.18%;
+  }
+  .bbm-frame--c {
+    left: 79.77%;
+    top: 66.75%;
+    width: 13.71%;
+    height: 26.18%;
+  }
+
+  @media (max-width: 1100px) {
+    .s-built-by-many {
+      height: auto;
+      min-height: 0;
+      padding: 8vh 5vw 10vh;
+      box-sizing: border-box;
     }
+    .s-built-by-many .pin {
+      position: relative;
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
+    .bbm-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      height: auto;
+      max-width: 720px;
+      margin: 0 auto;
+      background-image: none;
+    }
+    .bbm-lede,
+    .bbm-cluster,
+    .bbm-label,
+    .bbm-frame,
+    .bbm-internet-wrap {
+      position: static;
+      left: auto;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      width: 100%;
+      max-width: none;
+      height: auto;
+      transform: none;
+    }
+    .bbm-frame { display: none; }
+    .bbm-parallax {
+      width: 100%;
+      height: 180px;
+    }
+    .bbm-internet-wrap {
+      width: min(100%, 320px);
+      height: 420px;
+      align-self: center;
+      position: relative;
+    }
+    .bbm-internet {
+      left: 0;
+      width: 100%;
+    }
+    .bbm-automata {
+      width: 100%;
+      height: 280px;
+      position: relative;
+    }
+    .bbm-automata .shot--a,
+    .bbm-automata .shot--b { position: absolute; }
+    .bbm-researchers {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 384 / 266;
+    }
+    .bbm-labor {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 520 / 325;
+      position: relative;
+    }
+    .bbm-datasets {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding-left: 0;
+    }
+    .bbm-datasets .shot,
+    .bbm-datasets .shot:nth-child(1),
+    .bbm-datasets .shot:nth-child(2),
+    .bbm-datasets .shot:nth-child(3) {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+    }
+    .bbm-label { margin-top: -8px; white-space: normal; }
   }
 
   /* ============================================================
@@ -3498,9 +3888,82 @@
         <p data-editable>Tribal nations are asserting their own terms. The Seminole Nation voted 24&#8211;0 to permanently ban data center construction after a startup tried to bypass community consent.</p>
         <p data-editable>In Tulsa and Oklahoma City, city officials voted to pause all incoming data center development until 2027.</p>
       </div>
+    </div>
+  </div>
+</section>
 
-      <div class="comm-crowd" aria-hidden="true">
-        <img src="assets/AI Scroller Images.png" alt="">
+<section id="s-built-by-many" class="s-built-by-many lede-hold">
+  <div class="pin lede-hold-pin">
+    <div class="bbm-stage">
+      <p class="bbm-lede" data-editable>Remember, generative AI was built from the contributions of a LOT of people.</p>
+
+      <div class="bbm-cluster bbm-parallax" aria-hidden="true">
+        <p>(placeholder for<br>parallax scroll)</p>
+      </div>
+      <div class="bbm-label bbm-label--ideas">
+        <span class="bbm-label-mark" aria-hidden="true"></span>
+        <span class="bbm-label-text"><span>HUman Ideas &amp;</span><span>Creativity</span></span>
+      </div>
+
+      <div class="bbm-cluster bbm-internet-wrap" aria-label="Content on the internet">
+        <div class="bbm-internet">
+          <div class="cell"><img src="assets/building/box1.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box2.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box3.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box4.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box5.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box6.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box7.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box8.png" alt=""></div>
+          <div class="cell"><img src="assets/building/box9.png" alt=""></div>
+        </div>
+        <div class="bbm-frame bbm-frame--a" aria-hidden="true"></div>
+        <div class="bbm-frame bbm-frame--b" aria-hidden="true"></div>
+        <div class="bbm-frame bbm-frame--c" aria-hidden="true"></div>
+      </div>
+      <div class="bbm-label bbm-label--internet">
+        <span class="bbm-label-mark" aria-hidden="true"></span>
+        <span class="bbm-label-text">Content on the Internet</span>
+      </div>
+
+      <div class="bbm-cluster bbm-automata" aria-label="Early automata">
+        <div class="shot shot--a"><img src="assets/zairja-manuscript.png" alt="Za'irajah manuscript diagram"></div>
+        <div class="shot shot--b"><img src="assets/golem-of-prague-mikolas-ales.jpg" alt="Golem of Prague illustration"></div>
+      </div>
+      <div class="bbm-label bbm-label--warm bbm-label--automata">
+        <span class="bbm-label-mark" aria-hidden="true"></span>
+        <span class="bbm-label-text">Early Automata</span>
+      </div>
+
+      <div class="bbm-cluster bbm-researchers">
+        <img src="assets/dartmouth_conference-aifounders.avif" alt="AI researchers at the Dartmouth conference commemorative gathering">
+      </div>
+      <div class="bbm-label bbm-label--researchers">
+        <span class="bbm-label-mark" aria-hidden="true"></span>
+        <span class="bbm-label-text">AI Researchers</span>
+      </div>
+
+      <div class="bbm-cluster bbm-labor" aria-label="Labor for data centers">
+        <div class="bbm-labor-bg">
+          <img src="assets/DataCenterLarge-EDIT.png" alt="">
+        </div>
+        <div class="bbm-labor-inset">
+          <img src="assets/datacenter/labor-workers.png" alt="Construction and maintenance crew">
+        </div>
+      </div>
+      <div class="bbm-label bbm-label--labor">
+        <span class="bbm-label-mark" aria-hidden="true"></span>
+        <span class="bbm-label-text">Labor for Data Centers</span>
+      </div>
+
+      <div class="bbm-cluster bbm-datasets" aria-label="People in datasets">
+        <div class="shot"><img src="assets/MNIST_dataset_example.png" alt="MNIST handwritten digits"></div>
+        <div class="shot"><img src="assets/irisflower-unsplash.jpg" alt="Iris flower"></div>
+        <div class="shot"><img src="assets/The_Pima_Indians_-_pg_85.png" alt="Pima Indians archival photograph"></div>
+      </div>
+      <div class="bbm-label bbm-label--datasets">
+        <span class="bbm-label-mark" aria-hidden="true"></span>
+        <span class="bbm-label-text">PeoplE in Datasets</span>
       </div>
     </div>
   </div>
@@ -3509,26 +3972,7 @@
 <section id="s-ai-positives" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>People are embracing AI for different reasons.</p>
-      <p class="lede" data-scroll-reveal data-editable>**include &#8220;AI positives&#8221;</p>
-    </div>
-  </div>
-</section>
-
-<section id="s-ai-everywhere" class="beat beat--dark lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>Even if for those who don&#8217;t personally use AI, AI is a little bit everywhere.</p>
-      <p class="lede" data-scroll-reveal data-editable>*include AI in research papers, AI in everyday spoken english, etc</p>
-    </div>
-  </div>
-</section>
-
-<section id="s-built-by-many" class="beat beat--dark lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>And built from the contributions of a LOT of people.</p>
-      <p class="lede" data-scroll-reveal data-editable>*summarize scroller (early imaginations, researchers, data sets, people posting internet, people clearing data, people using/fighting ai)</p>
+      <p class="lede" data-scroll-reveal data-editable>And now that the technology is here, we have the opportunity to decide what it ought to used for. </p>
     </div>
   </div>
 </section>
