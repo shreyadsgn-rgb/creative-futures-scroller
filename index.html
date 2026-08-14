@@ -2356,9 +2356,11 @@
      (Figma 493:292, artboard 1440×944). Positions are % of stage.
      ============================================================ */
   .s-built-by-many {
-    height: calc(var(--lede-beat) * 2 + 100vh);
+    height: calc(var(--lede-beat) * 2.6 + 100vh);
+    padding-bottom: 0;
     background: var(--purple);
     color: #fff;
+    --p: 0;
   }
   .s-built-by-many .pin {
     padding: 0;
@@ -2424,6 +2426,28 @@
   .bbm-label-text { display: flex; flex-direction: column; line-height: 1; }
 
   .bbm-cluster { position: absolute; z-index: 2; }
+
+  /* Staggered scrub reveal: automata → researchers → datasets →
+     human ideas → internet → data centers (labor). Lede stays put. */
+  .bbm-automata,
+  .bbm-label--automata { --bbm-i: 0; }
+  .bbm-researchers,
+  .bbm-label--researchers { --bbm-i: 1; }
+  .bbm-datasets,
+  .bbm-label--datasets { --bbm-i: 2; }
+  .bbm-parallax,
+  .bbm-label--ideas { --bbm-i: 3; }
+  .bbm-internet-wrap,
+  .bbm-label--internet { --bbm-i: 4; }
+  .bbm-labor,
+  .bbm-label--labor { --bbm-i: 5; }
+  .bbm-cluster,
+  .bbm-label {
+    --bbm-delay: calc(0.06 + var(--bbm-i, 0) * 0.14);
+    --bbm-dur: 0.11;
+    --bbm-show: clamp(0, (var(--p) - var(--bbm-delay)) / var(--bbm-dur), 1);
+    opacity: var(--bbm-show);
+  }
 
   /* Human ideas — parallax placeholder (494:351) */
   .bbm-parallax {
@@ -2772,6 +2796,8 @@
       aspect-ratio: 1;
     }
     .bbm-label { margin-top: -8px; white-space: normal; }
+    .bbm-cluster,
+    .bbm-label { opacity: 1; }
   }
 
   /* ============================================================
@@ -2884,6 +2910,100 @@
       color: var(--warm);
     }
     .aip-tag--cat:first-child { margin-top: 0; }
+  }
+
+  /* ============================================================
+     ASK STUDENTS — black stage + white ethics panel placeholder
+     (Figma 499:410).
+     ============================================================ */
+  .s-ask-students {
+    height: calc(var(--lede-beat) * 2 + 100vh);
+    padding-bottom: 0;
+    background: #000;
+    color: #fff;
+  }
+  .s-ask-students .pin {
+    padding: 0;
+    align-content: stretch;
+    background: #000;
+    overflow: hidden;
+  }
+  .ask-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .ask-lede,
+  .ask-sub {
+    position: absolute;
+    left: calc(8.33% + 3.6vw);
+    width: min(448px, 36vw);
+    margin: 0;
+    z-index: 2;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+  }
+  .ask-lede { top: 21.19%; }
+  .ask-sub { top: 28.71%; }
+  .ask-panel {
+    position: absolute;
+    left: 18.06%;
+    top: 36.97%;
+    width: 63.82%;
+    height: 48.83%;
+    background: #fff;
+    z-index: 1;
+  }
+  .ask-note {
+    position: absolute;
+    left: 36.88%;
+    top: 88.98%;
+    width: min(448px, 40vw);
+    margin: 0;
+    z-index: 2;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .s-ask-students {
+      height: auto;
+      min-height: 0;
+      padding: 10vh 7vw 12vh;
+      box-sizing: border-box;
+    }
+    .s-ask-students .pin {
+      position: relative;
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
+    .ask-stage {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      max-width: 720px;
+    }
+    .ask-lede,
+    .ask-sub,
+    .ask-panel,
+    .ask-note {
+      position: static;
+      left: auto;
+      top: auto;
+      width: 100%;
+      max-width: none;
+      height: auto;
+    }
+    .ask-panel {
+      width: 100%;
+      aspect-ratio: 919 / 461;
+    }
   }
 
   /* ============================================================
@@ -4019,7 +4139,7 @@
   </div>
 </section>
 
-<section id="s-built-by-many" class="s-built-by-many lede-hold">
+<section id="s-built-by-many" class="s-built-by-many lede-hold" data-scrub>
   <div class="pin lede-hold-pin">
     <div class="bbm-stage">
       <p class="bbm-lede" data-editable>Remember, generative AI was built from the contributions of a LOT of people.</p>
@@ -4150,10 +4270,13 @@
   </div>
 </section>
 
-<section id="s-ask-students" class="beat beat--dark lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>We asked some media arts students how they felt about AI in creative spaces.</p>
+<section id="s-ask-students" class="s-ask-students lede-hold">
+  <div class="pin lede-hold-pin">
+    <div class="ask-stage">
+      <p class="ask-lede" data-editable>We asked some media arts students how they felt about AI in creative spaces.</p>
+      <p class="ask-sub" data-editable>When asked about their personal ethics towards AI usage here&#8217;s what they came up with:</p>
+      <div class="ask-panel" aria-hidden="true"></div>
+      <p class="ask-note" data-editable>n = 40, ages ranged from 9-17 across 3 classes</p>
     </div>
   </div>
 </section>
