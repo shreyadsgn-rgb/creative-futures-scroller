@@ -6,7 +6,7 @@
 <title>History — Sandbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Courier+Prime:wght@400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Courier+Prime:wght@400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Tunable variables — the dev panel writes these live.
@@ -2023,13 +2023,13 @@
     max-width: none;
     display: block;
   }
-  /* Speakers — Figma 462:636 */
+  /* Speakers — Figma 462:636 (behind houses) */
   .nearby-piece--speakers {
     left: 43.06%;
     top: 26.67%;
     width: 20%;
     height: 39.29%;
-    z-index: 2;
+    z-index: 1;
   }
   .nearby-piece--speakers img {
     left: 0;
@@ -2043,7 +2043,7 @@
     top: 34.4%;
     width: 60.28%;
     height: 55.83%;
-    z-index: 1;
+    z-index: 2;
   }
   .nearby-piece--houses img {
     left: 0;
@@ -2128,6 +2128,103 @@
     --show: clamp(0, (var(--p) - 0.64) / 0.14, 1);
   }
   .nearby-label--bills .nearby-label-text { text-align: right; }
+
+  /* ============================================================
+     BRAND CLOSER — Figma 85:50.
+     ============================================================ */
+  .s-brand-closer {
+    background: #000;
+    color: #fff;
+  }
+  .s-brand-closer > .lede-hold-pin {
+    padding: 0;
+    align-content: stretch;
+    background: #000;
+    overflow: hidden;
+  }
+  .brand-closer-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .brand-closer-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--teal);
+    opacity: 0.55;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .brand-closer-bar--top { top: 0; }
+  .brand-closer-bar--bottom { bottom: 0; }
+  .brand-closer-title {
+    position: absolute;
+    left: calc(12.5% + 7px);
+    top: calc(16.67% + 2px);
+    margin: 0;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(48px, 7.44vw, 107.2px);
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    z-index: 2;
+  }
+  .brand-closer-title span {
+    display: block;
+  }
+  .brand-closer-tag {
+    position: absolute;
+    top: calc(75% + 18px);
+    transform: translateY(-50%);
+    margin: 0;
+    font-family: 'Manrope', 'Poppins', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 18px;
+    color: #f4f6f6;
+    z-index: 2;
+    white-space: nowrap;
+  }
+  .brand-closer-tag--think { left: calc(12.5% + 7px); }
+  .brand-closer-tag--create {
+    left: calc(37.5% + 14px);
+    width: 258px;
+    white-space: normal;
+  }
+  .brand-closer-line-h {
+    position: absolute;
+    left: calc(12.5% + 4px);
+    top: calc(83.33% + 10px);
+    width: min(1256px, calc(100% - 12.5% - 4px - 4%));
+    height: 2px;
+    background: #fff;
+    z-index: 1;
+  }
+  .brand-closer-line-v {
+    position: absolute;
+    left: calc(87.5% - 4px);
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #fff;
+    opacity: 0.85;
+    z-index: 1;
+  }
+
+  @media (max-width: 800px) {
+    .brand-closer-title {
+      left: 7vw;
+      top: 18vh;
+      font-size: clamp(40px, 12vw, 72px);
+    }
+    .brand-closer-tag--think { left: 7vw; top: 72%; }
+    .brand-closer-tag--create { left: 7vw; top: 78%; width: auto; }
+    .brand-closer-line-h { left: 7vw; width: calc(100% - 14vw); }
+    .brand-closer-line-v { display: none; }
+  }
 
   @media (max-width: 800px) {
     .nearby-copy {
@@ -3123,6 +3220,14 @@
   </div>
 </section>
 
+<section id="s-communities-change" class="beat beat--warm lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>So communities are demanding change</p>
+    </div>
+  </div>
+</section>
+
 <section id="s-ai-positives" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
@@ -3150,7 +3255,64 @@
   </div>
 </section>
 
-<footer class="frame-note copy-col">— end of History section —</footer>
+<section id="s-ai-futures" class="beat beat--dark lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>Whether generative AI is here for the better or for the worse, there are many different ideas about how AI will play out</p>
+    </div>
+  </div>
+</section>
+
+<section id="s-many-involved" class="beat beat--dark lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>And we need many more people involved to define what it becomes</p>
+    </div>
+  </div>
+</section>
+
+<section id="s-ask-students" class="beat beat--dark lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>We asked some media arts students how they felt about AI in creative spaces.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s-map-unfinished" class="beat beat--dark lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>This map isn&#8217;t finished. It&#8217;s still being drawn &#8212; by researchers, by companies, by lawmakers, and by people like the students who filled this one out.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s-future-up-for-grabs" class="beat beat--dark lede-hold">
+  <div class="lede-hold-pin">
+    <div class="beat-copy">
+      <p class="lede" data-scroll-reveal data-editable>The future of AI is still up for grabs. It&#8217;s important to have a say in how it&#8217;s built, used, and questioned &#8212; not just what you get handed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Brand closer (Figma 85:50). -->
+<section id="s-brand-closer" class="s-brand-closer lede-hold">
+  <div class="lede-hold-pin">
+    <div class="brand-closer-stage">
+      <div class="brand-closer-bar brand-closer-bar--top" aria-hidden="true"></div>
+      <div class="brand-closer-bar brand-closer-bar--bottom" aria-hidden="true"></div>
+      <div class="brand-closer-line-v" aria-hidden="true"></div>
+      <div class="brand-closer-line-h" aria-hidden="true"></div>
+      <h1 class="brand-closer-title" data-editable>
+        <span>creative</span>
+        <span>futures</span>
+        <span>collaborative</span>
+      </h1>
+      <p class="brand-closer-tag brand-closer-tag--think" data-editable>Think critically.</p>
+      <p class="brand-closer-tag brand-closer-tag--create" data-editable>Create intentionally.</p>
+    </div>
+  </div>
+</section>
 
 <script>
   /* ---------- scroll engine: write --p (0→1) onto each [data-scrub] ---------- */
