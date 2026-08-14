@@ -1985,7 +1985,9 @@
      one-by-one on scrub (Figma 179:339).
      ============================================================ */
   .s-dc-nearby {
-    height: calc(var(--section-gap) * 1.5);
+    /* short scrub for the three label fades — pin stays 100vh so collage layout is unchanged */
+    height: calc(100vh + var(--lede-beat) * 1.25);
+    padding-bottom: 0;
     background: var(--warm);
     color: #000;
   }
@@ -2128,6 +2130,244 @@
     --show: clamp(0, (var(--p) - 0.64) / 0.14, 1);
   }
   .nearby-label--bills .nearby-label-text { text-align: right; }
+
+  /* ============================================================
+     COMMUNITIES CHANGE — yellow collage; cards slide in from the
+     right to settle left (Figma 458:625 → 487:178).
+     ============================================================ */
+  .s-communities-change {
+    height: calc(var(--section-gap) * 2.4);
+    padding-bottom: 0;
+    background: var(--warm);
+    color: #000;
+  }
+  .s-communities-change .pin {
+    padding: 0;
+    align-content: stretch;
+    background: var(--warm);
+    overflow: hidden;
+  }
+  .comm-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .comm-lede {
+    position: absolute;
+    left: 7vw;
+    top: 5vh;
+    width: min(420px, 28vw);
+    margin: 0;
+    z-index: 5;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000;
+    --slide: clamp(0, var(--p) / 0.06, 1);
+    opacity: calc(0.15 + var(--slide) * 0.85);
+    transform: translateX(calc((1 - var(--slide)) * 40vw));
+  }
+  .comm-item {
+    position: absolute;
+    box-sizing: border-box;
+    z-index: 2;
+    --slide: clamp(0, (var(--p) - var(--delay, 0)) / var(--dur, 0.28), 1);
+    transform: translateX(calc((1 - var(--slide)) * var(--from, 105vw)));
+    will-change: transform;
+  }
+  .comm-box {
+    border: 1px solid #000;
+    background: var(--warm);
+    padding: 22px 12px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #000;
+  }
+  .comm-box p + p { margin-top: 1em; }
+  .comm-photo {
+    border: 1px solid #000;
+    overflow: hidden;
+    background: #000;
+  }
+  .comm-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* 4 clear columns — text and photos never share the same cell */
+  .comm-box--grid {
+    left: 7vw;
+    top: 12vh;
+    width: min(280px, 20vw);
+    --delay: 0.04;
+    --dur: 0.26;
+    --from: 95vw;
+  }
+  .comm-photo--aws {
+    left: 30vw;
+    top: 10vh;
+    width: min(260px, 20vw);
+    height: 26vh;
+    --delay: 0.12;
+    --dur: 0.28;
+    --from: 100vw;
+  }
+  .comm-box--halt {
+    left: 53vw;
+    top: 8vh;
+    width: min(260px, 20vw);
+    --delay: 0.22;
+    --dur: 0.28;
+    --from: 110vw;
+  }
+  .comm-photo--tulsa {
+    left: 76vw;
+    top: 10vh;
+    width: min(220px, 18vw);
+    height: 24vh;
+    --delay: 0.32;
+    --dur: 0.3;
+    --from: 115vw;
+  }
+  .comm-photo--gov {
+    left: 7vw;
+    top: 48vh;
+    width: min(280px, 20vw);
+    height: 24vh;
+    --delay: 0.18;
+    --dur: 0.28;
+    --from: 98vw;
+  }
+  .comm-box--lancaster {
+    left: 30vw;
+    top: 42vh;
+    width: min(280px, 20vw);
+    --delay: 0.28;
+    --dur: 0.28;
+    --from: 108vw;
+  }
+  .comm-photo--sign {
+    left: 54vw;
+    top: 46vh;
+    width: min(150px, 12vw);
+    height: 26vh;
+    --delay: 0.38;
+    --dur: 0.28;
+    --from: 112vw;
+  }
+  .comm-box--tribal {
+    left: 70vw;
+    top: 42vh;
+    width: min(260px, 20vw);
+    --delay: 0.46;
+    --dur: 0.3;
+    --from: 118vw;
+  }
+  .comm-crowd {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: min(100%, 1100px);
+    height: 18vh;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+    --slide: clamp(0, (var(--p) - 0.55) / 0.28, 1);
+    opacity: calc(0.35 + var(--slide) * 0.65);
+    transform: translateX(calc((1 - var(--slide)) * 30vw));
+  }
+  .comm-crowd img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  /* Tablet + phone: leave the sticky collage — stack in document flow */
+  @media (max-width: 1200px) {
+    .s-communities-change {
+      height: auto;
+      min-height: 0;
+      padding: 8vh 5vw 10vh;
+      box-sizing: border-box;
+    }
+    .s-communities-change .pin {
+      position: relative;
+      top: auto;
+      height: auto;
+      overflow: visible;
+      display: block;
+      background: var(--warm);
+    }
+    .comm-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 20px;
+      height: auto;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .comm-lede,
+    .comm-item,
+    .comm-crowd {
+      position: static;
+      left: auto;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      width: 100%;
+      max-width: none;
+      max-height: none;
+      height: auto;
+      opacity: 1;
+      transform: none;
+      will-change: auto;
+      overflow: visible;
+    }
+    .comm-lede { margin-bottom: 4px; }
+    .comm-box {
+      font-size: 15px;
+      padding: 20px 14px;
+    }
+    .comm-photo {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+    }
+    .comm-photo--sign {
+      width: min(55%, 260px);
+      aspect-ratio: 3 / 4;
+      align-self: center;
+    }
+    .comm-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .comm-crowd {
+      order: 99;
+      width: 100%;
+      height: 22vw;
+      min-height: 140px;
+      max-height: 220px;
+      margin-top: 8px;
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .s-communities-change { padding: 7vh 5vw 9vh; }
+    .comm-stage { gap: 16px; }
+    .comm-box { font-size: 14px; padding: 18px 12px; }
+    .comm-crowd {
+      height: 32vw;
+      min-height: 110px;
+    }
+  }
 
   /* ============================================================
      BRAND CLOSER — Figma 85:50.
@@ -3169,7 +3409,7 @@
         </div>
         <div class="dc-impact-box">
           <p data-editable>Energy projects on non-tribal lands can face permitting delays of three to ten years, but projects on tribal land often move faster because tribes have sovereign authority to handle their own regulations. This incentivizes data center construction on and near this land.</p>
-          <p data-editable>Responses from Native communities is divided.</p>
+          <p data-editable>Responses from Native communities is divided. Some tribal leaders see the boom as economic opportunity in communities, while others worry about the environmental and social impacts.</p>
         </div>
       </div>
       <div class="dc-impact-step" data-dc-impact-step="3">
@@ -3220,10 +3460,48 @@
   </div>
 </section>
 
-<section id="s-communities-change" class="beat beat--warm lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>So communities are demanding change</p>
+<section id="s-communities-change" class="s-communities-change" data-scrub>
+  <div class="pin">
+    <div class="comm-stage">
+      <p class="comm-lede" data-editable>So communities are fighting back.</p>
+
+      <div class="comm-item comm-box comm-box--grid">
+        <p data-editable>Since 2025, at least 18 states have passed or introduced laws requiring data centers to pay their own electricity grid costs instead of passing them onto residents. Oregon, Texas, Oklahoma, and South Dakota have all signed this protection into law.</p>
+      </div>
+
+      <div class="comm-item comm-photo comm-photo--aws">
+        <img src="assets/AWS_servers_in_Ashburn,_group_1,_2020-10-09_5.jpg" alt="Data center building behind a grassy hill">
+      </div>
+
+      <div class="comm-item comm-box comm-box--halt">
+        <p data-editable>Some communities have halted data center construction entirely. In Warrenton, Virginia, every town council member who voted yes on an Amazon data center subsequently lost re-election. Throughout the country, at least $64 billion of data center projects have been blocked or delayed amid local opposition.</p>
+      </div>
+
+      <div class="comm-item comm-photo comm-photo--tulsa">
+        <img src="assets/TulsaCouncilMtg.png" alt="Tulsa City Council Urban and Economic Development Committee meeting">
+      </div>
+
+      <div class="comm-item comm-photo comm-photo--gov">
+        <img src="assets/governerkotek-signdatacenter.jpg" alt="Oregon officials at a podium near electrical infrastructure">
+      </div>
+
+      <div class="comm-item comm-box comm-box--lancaster">
+        <p data-editable>In Lancaster, Pennsylvania, residents negotiated a legally binding agreement called a &#8220;community benefit agreement&#8221; before a data center could break ground.</p>
+        <p data-editable>This agreement included strict noise limits, 100% renewable energy, a hard cap of 20,000 gallons of water per day (compared to the previous tenant&#8217;s 100,000&#8211;125,000), and a $20 million contribution to the city&#8217;s sustainability and economic development funds.</p>
+      </div>
+
+      <div class="comm-item comm-photo comm-photo--sign">
+        <img src="assets/Anti_ai_data_center_sign_1.jpg" alt="Handmade yard sign reading No Data Center">
+      </div>
+
+      <div class="comm-item comm-box comm-box--tribal">
+        <p data-editable>Tribal nations are asserting their own terms. The Seminole Nation voted 24&#8211;0 to permanently ban data center construction after a startup tried to bypass community consent.</p>
+        <p data-editable>In Tulsa and Oklahoma City, city officials voted to pause all incoming data center development until 2027.</p>
+      </div>
+
+      <div class="comm-crowd" aria-hidden="true">
+        <img src="assets/AI Scroller Images.png" alt="">
+      </div>
     </div>
   </div>
 </section>
