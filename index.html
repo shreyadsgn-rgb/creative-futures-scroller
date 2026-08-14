@@ -2151,10 +2151,12 @@
     position: relative;
     width: 100%;
     height: 100%;
+    /* match s-dc-nearby .nearby-copy left edge */
+    --comm-left: calc(8.33% + 3.6vw);
   }
   .comm-lede {
     position: absolute;
-    left: 7vw;
+    left: var(--comm-left);
     top: 5vh;
     width: min(420px, 28vw);
     margin: 0;
@@ -2196,9 +2198,10 @@
     height: 100%;
     object-fit: cover;
   }
-  /* 4 clear columns — text and photos never share the same cell */
+  /* 4 clear columns — text and photos never share the same cell.
+     Column offsets are relative to --comm-left (same as nearby copy). */
   .comm-box--grid {
-    left: 7vw;
+    left: var(--comm-left);
     top: 12vh;
     width: min(280px, 20vw);
     --delay: 0.04;
@@ -2206,7 +2209,7 @@
     --from: 95vw;
   }
   .comm-photo--aws {
-    left: 30vw;
+    left: calc(var(--comm-left) + 23vw);
     top: 10vh;
     width: min(260px, 20vw);
     height: 26vh;
@@ -2215,7 +2218,7 @@
     --from: 100vw;
   }
   .comm-box--halt {
-    left: 53vw;
+    left: calc(var(--comm-left) + 46vw);
     top: 8vh;
     width: min(260px, 20vw);
     --delay: 0.22;
@@ -2223,16 +2226,22 @@
     --from: 110vw;
   }
   .comm-photo--tulsa {
-    left: 76vw;
+    left: calc(var(--comm-left) + 69vw);
     top: 10vh;
-    width: min(220px, 18vw);
-    height: 24vh;
+    width: min(300px, 22vw);
+    height: auto;
+    /* native TulsaCouncilMtg.png ratio — show full frame, no crop */
+    aspect-ratio: 2940 / 1640;
     --delay: 0.32;
     --dur: 0.3;
     --from: 115vw;
   }
+  .comm-photo--tulsa img {
+    object-fit: contain;
+    object-position: center center;
+  }
   .comm-photo--gov {
-    left: 7vw;
+    left: var(--comm-left);
     top: 48vh;
     width: min(280px, 20vw);
     height: 24vh;
@@ -2241,7 +2250,7 @@
     --from: 98vw;
   }
   .comm-box--lancaster {
-    left: 30vw;
+    left: calc(var(--comm-left) + 23vw);
     top: 42vh;
     width: min(280px, 20vw);
     --delay: 0.28;
@@ -2249,7 +2258,7 @@
     --from: 108vw;
   }
   .comm-photo--sign {
-    left: 54vw;
+    left: calc(var(--comm-left) + 47vw);
     top: 46vh;
     width: min(150px, 12vw);
     height: 26vh;
@@ -2258,7 +2267,7 @@
     --from: 112vw;
   }
   .comm-box--tribal {
-    left: 70vw;
+    left: calc(var(--comm-left) + 63vw);
     top: 42vh;
     width: min(260px, 20vw);
     --delay: 0.46;
@@ -2317,6 +2326,12 @@
       width: 100%;
       height: auto;
       aspect-ratio: 16 / 10;
+    }
+    .comm-photo--tulsa {
+      aspect-ratio: 2940 / 1640;
+    }
+    .comm-photo--tulsa img {
+      object-fit: contain;
     }
     .comm-photo--sign {
       width: min(55%, 260px);
@@ -2757,6 +2772,118 @@
       aspect-ratio: 1;
     }
     .bbm-label { margin-top: -8px; white-space: normal; }
+  }
+
+  /* ============================================================
+     AI POSITIVES — black word-cloud of uses (Figma 398:502).
+     Lede visible first; scroll (--p) lifts tags from dim gray → lit
+     via color-mix (cheaper than opacity fades / layout thrash).
+     ============================================================ */
+  .s-ai-positives {
+    height: calc(var(--lede-beat) * 2.4 + 100vh);
+    padding-bottom: 0;
+    background: #000;
+    color: #fff;
+    --p: 0;
+  }
+  .s-ai-positives .pin {
+    padding: 0;
+    align-content: stretch;
+    background: #000;
+    overflow: hidden;
+  }
+  .aip-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .aip-lede {
+    position: absolute;
+    left: calc(8.33% + 3.6vw);
+    top: 21%;
+    width: min(448px, 36vw);
+    margin: 0;
+    z-index: 2;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+  }
+  .aip-cloud {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .aip-tag {
+    position: absolute;
+    margin: 0;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    white-space: nowrap;
+    /* dim on black ≈ invisible; scroll lifts to lit color */
+    --dim: #1c1c1c;
+    --lit: #f4f6f6;
+    --delay: calc(0.06 + var(--i, 0) * 0.038);
+    --dur: 0.14;
+    --reveal: clamp(0, (var(--p) - var(--delay)) / var(--dur), 1);
+    color: color-mix(
+      in srgb,
+      var(--lit) calc(var(--reveal) * 100%),
+      var(--dim) calc((1 - var(--reveal)) * 100%)
+    );
+  }
+  .aip-tag--cat {
+    --lit: var(--warm);
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  @media (max-width: 900px) {
+    .s-ai-positives {
+      height: auto;
+      min-height: 0;
+      padding: 10vh 7vw 12vh;
+      box-sizing: border-box;
+    }
+    .s-ai-positives .pin {
+      position: relative;
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
+    .aip-stage {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      max-width: 640px;
+    }
+    .aip-lede {
+      position: static;
+      width: auto;
+      max-width: 30em;
+    }
+    .aip-cloud {
+      position: static;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .aip-tag {
+      position: static;
+      white-space: normal;
+      font-size: 14px;
+      color: #f4f6f6;
+    }
+    .aip-tag--cat {
+      margin-top: 14px;
+      font-size: 20px;
+      color: var(--warm);
+    }
+    .aip-tag--cat:first-child { margin-top: 0; }
   }
 
   /* ============================================================
@@ -3969,10 +4096,40 @@
   </div>
 </section>
 
-<section id="s-ai-positives" class="beat beat--dark lede-hold">
-  <div class="lede-hold-pin">
-    <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>And now that the technology is here, we have the opportunity to decide what it ought to used for. </p>
+<section id="s-ai-positives" class="s-ai-positives lede-hold" data-scrub>
+  <div class="pin lede-hold-pin">
+    <div class="aip-stage">
+      <p class="aip-lede" data-editable>And now that the technology is here, we have the opportunity to decide what it ought to used for.</p>
+      <div class="aip-cloud" data-aip-cloud>
+        <p class="aip-tag aip-tag--cat" data-editable>Accessibility</p>
+        <p class="aip-tag" data-editable>Language Translation for Endangered Languages</p>
+        <p class="aip-tag" data-editable>Generating Audio Descriptions for Visually Impaired People</p>
+        <p class="aip-tag" data-editable>Generating Music Transcripts for Musicians to Practice With</p>
+        <p class="aip-tag" data-editable>Video Game NPCs</p>
+
+        <p class="aip-tag aip-tag--cat" data-editable>Deception</p>
+        <p class="aip-tag" data-editable>Automating Customer Service Jobs</p>
+        <p class="aip-tag" data-editable>Animating Illustrations</p>
+        <p class="aip-tag" data-editable>Placeholders for Visuals</p>
+        <p class="aip-tag" data-editable>Virtual Voice Acting</p>
+        <p class="aip-tag" data-editable>Deepfakes</p>
+
+        <p class="aip-tag aip-tag--cat" data-editable>Efficiency</p>
+        <p class="aip-tag" data-editable>Automatic Subtitles</p>
+        <p class="aip-tag" data-editable>Transcribing Meetings</p>
+
+        <p class="aip-tag aip-tag--cat" data-editable>Creativity</p>
+        <p class="aip-tag" data-editable>Rapid Prototyping with Storyboards</p>
+        <p class="aip-tag" data-editable>Color Grading Videos</p>
+        <p class="aip-tag" data-editable>Making video game NPCs that respond dynamically</p>
+        <p class="aip-tag" data-editable>Creating Promotional Material</p>
+
+        <p class="aip-tag aip-tag--cat" data-editable>Slop</p>
+        <p class="aip-tag" data-editable>Writing News Articles</p>
+        <p class="aip-tag" data-editable>Generating Stock Photography</p>
+        <p class="aip-tag" data-editable>Political Text Messages</p>
+        <p class="aip-tag" data-editable>Generating LoFi Background Music</p>
+      </div>
     </div>
   </div>
 </section>
@@ -4530,16 +4687,109 @@
     });
   }
 
+  /* ---------- ai positives: scatter Fira tags without overlap ---------- */
+  function layoutAiPositives() {
+    const stage = document.querySelector('#s-ai-positives .aip-stage');
+    const cloud = document.querySelector('[data-aip-cloud]');
+    const lede = document.querySelector('#s-ai-positives .aip-lede');
+    if (!stage || !cloud || !lede) return;
+
+    const tags = [...cloud.querySelectorAll('.aip-tag')];
+    const mobile = matchMedia('(max-width: 900px)').matches;
+
+    if (mobile) {
+      tags.forEach((t, i) => {
+        t.style.left = '';
+        t.style.top = '';
+        t.style.setProperty('--i', String(i));
+      });
+      return;
+    }
+
+    const sr = stage.getBoundingClientRect();
+    const lr = lede.getBoundingClientRect();
+    const pad = 16;
+    const gap = 14;
+    /* keep cloud flush with the lede's left edge — never left of section text */
+    const xMin = Math.max(pad, lr.left - sr.left);
+    const placed = [{
+      x: lr.left - sr.left - gap,
+      y: lr.top - sr.top - gap,
+      w: lr.width + gap * 2,
+      h: lr.height + gap * 2,
+    }];
+
+    tags.forEach(t => {
+      t.style.left = '0px';
+      t.style.top = '0px';
+    });
+
+    const order = tags.slice();
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+
+    function overlaps(a, b) {
+      return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+    }
+
+    const yMin = Math.max(pad, (lr.bottom - sr.top) + 28);
+
+    order.forEach((tag, i) => {
+      tag.style.setProperty('--i', String(i));
+      const tw = Math.ceil(tag.offsetWidth);
+      const th = Math.ceil(tag.offsetHeight);
+      const maxX = Math.max(xMin, sr.width - tw - pad);
+      const maxY = Math.max(yMin, sr.height - th - pad);
+      let box = null;
+
+      for (let attempt = 0; attempt < 120; attempt++) {
+        const x = xMin + Math.random() * Math.max(0, maxX - xMin);
+        const y = yMin + Math.random() * Math.max(0, maxY - yMin);
+        const next = { x, y, w: tw + gap, h: th + gap };
+        if (!placed.some(p => overlaps(next, p))) {
+          box = next;
+          break;
+        }
+      }
+
+      if (!box) {
+        const stepX = Math.max(40, tw + gap);
+        const stepY = Math.max(28, th + gap);
+        outer: for (let y = yMin; y <= maxY; y += stepY) {
+          for (let x = xMin; x <= maxX; x += stepX) {
+            const next = { x, y, w: tw + gap, h: th + gap };
+            if (!placed.some(p => overlaps(next, p))) {
+              box = next;
+              break outer;
+            }
+          }
+        }
+      }
+
+      if (!box) {
+        const last = placed[placed.length - 1];
+        box = { x: xMin, y: Math.min(maxY, last.y + last.h), w: tw + gap, h: th + gap };
+      }
+
+      tag.style.left = `${Math.round(box.x)}px`;
+      tag.style.top = `${Math.round(box.y)}px`;
+      placed.push(box);
+    });
+  }
+
   let queued = false;
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); layoutAiPositives(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
   updateModelCollapse();
+  layoutAiPositives();
   updateJohnniacTrack();
   updateBuildingTrack();
   updateDatacenterTrack();
