@@ -33,6 +33,18 @@
 
   * { box-sizing: border-box; margin: 0; }
 
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   body {
     background: var(--bg);
     color: var(--ink);
@@ -3107,7 +3119,7 @@
     --pt-show: clamp(0, (var(--p) - 0.42) / 0.12, 1);
     --dim: clamp(0, (var(--p) - 0.68) / 0.1, 1);
     --hi: 0;
-    opacity: calc(var(--pt-show) * (1 - var(--dim) * 0.5 * (1 - var(--hi))));
+    opacity: calc(var(--pt-show) * (1 - var(--dim) * 0.72 * (1 - var(--hi))));
   }
   .ask-pt--hi {
     --hi: 1;
@@ -3161,10 +3173,10 @@
     max-width: min(448px, 50vw);
     margin: 0;
     z-index: 2;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
     line-height: 1.5;
-    color: #fff;
+    color: var(--ink-dim);
     text-align: right;
     --note-show: clamp(0, (var(--p) - 0.12) / 0.12, 1);
     opacity: var(--note-show);
@@ -3221,6 +3233,203 @@
       font-size: 15px;
       opacity: 1;
     }
+  }
+
+  /* ============================================================
+     YOUR VOICE — interactive prompt (Figma 515:284).
+     Responses live in localStorage for now; swap save/load for API later.
+     ============================================================ */
+  .s-your-voice {
+    background: #467ff7;
+    color: #fff;
+    height: calc(100vh + var(--lede-beat) * 1.6);
+  }
+  .s-your-voice > .lede-hold-pin {
+    padding: 0;
+    align-content: stretch;
+    background: #467ff7;
+    overflow: hidden;
+  }
+  .voice-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10vh var(--ask-gutter, calc(8.33% + 3.6vw));
+    box-sizing: border-box;
+  }
+  .voice-deco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .voice-deco span {
+    position: absolute;
+    width: 40px;
+    height: 37px;
+    background: var(--purple);
+  }
+  .voice-deco span:nth-child(1) { right: calc(8.33% + 3px); top: 0; }
+  .voice-deco span:nth-child(2) { right: calc(8.33% + 43px); top: 37px; }
+  .voice-deco span:nth-child(3) { right: calc(16.67% + 52px); top: 56px; }
+  .voice-deco span:nth-child(4) { right: calc(8.33% - 37px); top: 37px; }
+  .voice-deco span:nth-child(5) { right: 3px; top: 37%; }
+  .voice-deco span:nth-child(6) { right: calc(8.33% + 3px); top: calc(32.5%); }
+  .voice-deco span:nth-child(7) { right: calc(16.67% + 12px); top: 93px; }
+  .voice-deco span:nth-child(8) { right: calc(0% - 37px); top: 130px; }
+  .voice-lede {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    width: min(448px, 100%);
+    margin: 0 0 4vh;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+  }
+  .voice-prompt {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 3.5vh;
+    max-width: 22em;
+    text-align: center;
+    font-size: clamp(28px, 2.8vw, 40px);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .voice-prompt em {
+    font-style: normal;
+    font-weight: 400;
+  }
+  .voice-form {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(811px, 100%);
+    gap: 20px;
+  }
+  .voice-form.is-hidden { display: none; }
+  .voice-input {
+    width: 100%;
+    min-height: 175px;
+    padding: 28px 33px;
+    border: 1px solid var(--warm);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #111;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  .voice-input::placeholder { color: #8d8d8d; }
+  .voice-input:focus {
+    outline: 2px solid var(--warm);
+    outline-offset: 2px;
+  }
+  .voice-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--warm);
+    color: #000;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+    cursor: pointer;
+  }
+  .voice-submit:hover { filter: brightness(1.05); }
+  .voice-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .voice-submit strong {
+    font-weight: 700;
+  }
+  .voice-thanks {
+    position: relative;
+    z-index: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: min(811px, 100%);
+    text-align: center;
+  }
+  .voice-thanks.is-visible { display: flex; }
+  .voice-thanks p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #fff;
+  }
+  .voice-thanks-note {
+    font-size: 14px !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+  .voice-again {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 6px;
+    background: transparent;
+    color: #fff;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .voice-responses {
+    position: relative;
+    z-index: 1;
+    display: none;
+    width: min(811px, 100%);
+    margin-top: 4vh;
+    max-height: 28vh;
+    overflow: auto;
+  }
+  .voice-responses.is-visible { display: block; }
+  .voice-responses-label {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .voice-response {
+    margin: 0 0 10px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.18);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #fff;
+  }
+  .voice-response:last-child { margin-bottom: 0; }
+  @media (max-width: 720px) {
+    .voice-deco { display: none; }
+    .voice-stage { padding: 8vh 7vw; justify-content: flex-start; padding-top: 12vh; }
+    .voice-lede { margin-bottom: 3vh; }
+    .voice-prompt { font-size: 26px; text-align: left; align-self: flex-start; }
+    .voice-input { min-height: 140px; padding: 20px 18px; }
+    .voice-responses { max-height: 22vh; }
   }
 
   /* ============================================================
@@ -4560,6 +4769,48 @@
   </div>
 </section>
 
+<!-- Your voice prompt (Figma 515:284). Local-only for now; API hook later. -->
+<section id="s-your-voice" class="s-your-voice lede-hold">
+  <div class="lede-hold-pin">
+    <div class="voice-stage">
+      <div class="voice-deco" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+
+      <p class="voice-lede" data-editable>Your voice is important for determining the future of AI.</p>
+      <h2 class="voice-prompt" data-editable>What is one thing you hope we get right?</h2>
+
+      <form class="voice-form" id="voice-form" novalidate>
+        <label class="visually-hidden" for="voice-input">Your response</label>
+        <textarea
+          id="voice-input"
+          class="voice-input"
+          name="response"
+          rows="5"
+          maxlength="600"
+          placeholder="Enter your response here..."
+          required
+        ></textarea>
+        <button type="submit" class="voice-submit">
+          Submit <strong>→</strong>
+        </button>
+      </form>
+
+      <div class="voice-thanks" id="voice-thanks" hidden>
+        <p data-editable>Thanks for sharing that.</p>
+        <p class="voice-thanks-note" data-editable>Your response is saved on this device for now.</p>
+        <button type="button" class="voice-again" id="voice-again">Add another →</button>
+      </div>
+
+      <div class="voice-responses" id="voice-responses" aria-live="polite" hidden>
+        <p class="voice-responses-label">Responses on this device</p>
+        <div class="voice-responses-list" id="voice-responses-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Brand closer (Figma 85:50). -->
 <section id="s-brand-closer" class="s-brand-closer lede-hold">
   <div class="lede-hold-pin">
@@ -5228,6 +5479,92 @@
     entries.forEach(e => e.target.classList.toggle('is-visible', e.isIntersecting));
   }, { threshold: 0.25 });
   document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+  /* ---------- your-voice prompt: localStorage until a backend exists ---------- */
+  (function initYourVoice() {
+    const STORAGE_KEY = 'cfc-your-voice-responses';
+    const form = document.getElementById('voice-form');
+    const input = document.getElementById('voice-input');
+    const thanks = document.getElementById('voice-thanks');
+    const again = document.getElementById('voice-again');
+    const responses = document.getElementById('voice-responses');
+    const list = document.getElementById('voice-responses-list');
+    if (!form || !input || !thanks || !again || !responses || !list) return;
+
+    function loadResponses() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveResponses(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function renderResponses() {
+      const items = loadResponses().slice().reverse();
+      list.textContent = '';
+      if (!items.length) {
+        responses.hidden = true;
+        responses.classList.remove('is-visible');
+        return;
+      }
+      for (const item of items) {
+        const p = document.createElement('p');
+        p.className = 'voice-response';
+        p.textContent = item.text;
+        list.appendChild(p);
+      }
+      responses.hidden = false;
+      responses.classList.add('is-visible');
+    }
+
+    function showThanks() {
+      form.classList.add('is-hidden');
+      thanks.hidden = false;
+      thanks.classList.add('is-visible');
+      renderResponses();
+    }
+
+    function showForm() {
+      form.classList.remove('is-hidden');
+      thanks.hidden = true;
+      thanks.classList.remove('is-visible');
+      input.focus({ preventScroll: true });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) {
+        input.focus({ preventScroll: true });
+        return;
+      }
+      const items = loadResponses();
+      items.push({
+        id: (crypto.randomUUID && crypto.randomUUID()) || `local-${Date.now()}`,
+        text,
+        createdAt: new Date().toISOString(),
+        source: 'local'
+      });
+      saveResponses(items);
+      input.value = '';
+      showThanks();
+    });
+
+    again.addEventListener('click', showForm);
+
+    // Stop page scroll while typing in the textarea (trackpads / wheel).
+    input.addEventListener('wheel', (e) => {
+      if (input.scrollHeight > input.clientHeight) e.stopPropagation();
+    }, { passive: true });
+
+    renderResponses();
+  })();
 </script>
 <script src="controls.js" defer></script>
 
