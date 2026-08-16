@@ -2913,14 +2913,16 @@
   }
 
   /* ============================================================
-     ASK STUDENTS — black stage + white ethics panel placeholder
-     (Figma 499:410).
+     ASK STUDENTS — live ethics quadrant (Figma 513:62 → 513:127 → 514:169).
+     Coords: x/y on ±5 grid (right = always good idea, up = no pressure).
      ============================================================ */
   .s-ask-students {
-    height: calc(var(--lede-beat) * 2 + 100vh);
+    height: calc(var(--lede-beat) * 4.2 + 100vh);
     padding-bottom: 0;
     background: #000;
     color: #fff;
+    --p: 0;
+    --ask-gutter: calc(8.33% + 3.6vw);
   }
   .s-ask-students .pin {
     padding: 0;
@@ -2933,55 +2935,246 @@
     width: 100%;
     height: 100%;
   }
-  .ask-lede,
-  .ask-sub {
+  .ask-lede {
     position: absolute;
-    left: calc(8.33% + 3.6vw);
+    left: var(--ask-gutter);
+    top: 18%;
     width: min(448px, 36vw);
     margin: 0;
-    z-index: 2;
+    z-index: 3;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
   }
-  .ask-lede { top: 21.19%; }
-  .ask-sub { top: 28.71%; }
-  .ask-panel {
+  .ask-chart {
     position: absolute;
-    left: 18.06%;
-    top: 36.97%;
-    width: 63.82%;
-    height: 48.83%;
-    background: #0d0d0d;
-    z-index: 1;
+    left: var(--ask-gutter);
+    right: var(--ask-gutter);
+    top: 26%;
+    width: auto;
+    height: min(756px, 72vh);
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent 0 47px,
+        rgba(255, 255, 255, 0.09) 47px 48px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 47px,
+        rgba(255, 255, 255, 0.09) 47px 48px
+      ),
+      #101010;
     overflow: hidden;
+    z-index: 1;
+    /* beat 1: chart shell */
+    --chart-show: clamp(0, (var(--p) - 0.12) / 0.12, 1);
+    opacity: var(--chart-show);
   }
-  .ask-panel img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center center;
+  .ask-plot {
+    position: absolute;
+    left: 16%;
+    right: 14%;
+    top: 12%;
+    bottom: 14%;
   }
+  .ask-axis {
+    position: absolute;
+    background: var(--teal);
+    pointer-events: none;
+  }
+  .ask-axis--x {
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1.5px;
+    transform: translateY(-50%);
+  }
+  .ask-axis--y {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1.5px;
+    transform: translateX(-50%);
+  }
+  .ask-end {
+    position: absolute;
+    z-index: 2;
+    padding: 2px 6px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .ask-end--warm {
+    background: var(--warm);
+    color: var(--purple);
+  }
+  .ask-end--purple {
+    background: var(--purple);
+    color: var(--warm);
+  }
+  .ask-end--top {
+    left: 50%;
+    top: 3.5%;
+    transform: translateX(-50%);
+  }
+  .ask-end--bottom {
+    left: 50%;
+    bottom: 3.5%;
+    transform: translateX(-50%);
+  }
+  .ask-end--left {
+    left: 4%;
+    top: 45%;
+    transform: translateY(-50%);
+  }
+  .ask-end--right {
+    right: 3%;
+    top: 46%;
+    transform: translateY(-50%);
+  }
+
+  /* Frame 1: axis explainers */
+  .ask-explain {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    z-index: 3;
+    max-width: 441px;
+    --ex-show: clamp(0, (var(--p) - 0.22) / 0.1, 1);
+    --ex-hide: clamp(0, (var(--p) - 0.38) / 0.08, 1);
+    opacity: calc(var(--ex-show) * (1 - var(--ex-hide)));
+  }
+  .ask-explain-mark {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    margin-top: 2px;
+    border: 2px solid currentColor;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    box-sizing: border-box;
+  }
+  .ask-explain-text {
+    margin: 0;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+  .ask-explain--top {
+    left: 52%;
+    top: 12%;
+    color: var(--warm);
+  }
+  .ask-explain--top .ask-explain-mark { border-color: var(--warm); }
+  .ask-explain--bottom {
+    left: 52%;
+    bottom: 12%;
+    color: #fff;
+  }
+  .ask-explain--left {
+    left: 5%;
+    top: 56%;
+    color: #fff;
+  }
+  .ask-explain--right {
+    right: 4%;
+    top: 58%;
+    text-align: right;
+    color: #fff;
+  }
+
+  /* Frame 2–3: activity points on ±5 grid */
+  .ask-pt {
+    position: absolute;
+    left: calc(50% + (var(--x) / 5) * 48%);
+    top: calc(50% - (var(--y) / 5) * 46%);
+    transform: translate(-50%, -50%);
+    margin: 0;
+    z-index: 4;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    --pt-show: clamp(0, (var(--p) - 0.42) / 0.12, 1);
+    --dim: clamp(0, (var(--p) - 0.68) / 0.1, 1);
+    --hi: 0;
+    opacity: calc(var(--pt-show) * (1 - var(--dim) * 0.5 * (1 - var(--hi))));
+  }
+  .ask-pt--hi {
+    --hi: 1;
+    color: color-mix(
+      in srgb,
+      var(--warm) calc(var(--dim) * 100%),
+      #fff calc((1 - var(--dim)) * 100%)
+    );
+    font-size: calc(14px + var(--dim) * 10px);
+  }
+
+  .ask-callout {
+    position: absolute;
+    left: 52%;
+    top: 38%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    z-index: 5;
+    max-width: 240px;
+    --call-show: clamp(0, (var(--p) - 0.72) / 0.12, 1);
+    opacity: var(--call-show);
+  }
+  .ask-callout-mark {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    margin-top: 1px;
+    border: 2px solid #fff;
+    background: rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+  }
+  .ask-callout-text {
+    margin: 0;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.15;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
   .ask-note {
     position: absolute;
-    left: 36.88%;
-    top: 88.98%;
-    width: min(448px, 40vw);
+    right: var(--ask-gutter);
+    top: calc(26% - 2.2em);
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: auto;
+    max-width: min(448px, 50vw);
     margin: 0;
     z-index: 2;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
+    text-align: right;
+    --note-show: clamp(0, (var(--p) - 0.12) / 0.12, 1);
+    opacity: var(--note-show);
   }
 
   @media (max-width: 900px) {
     .s-ask-students {
       height: auto;
       min-height: 0;
-      padding: 10vh 7vw 12vh;
+      padding: 10vh 5vw 12vh;
       box-sizing: border-box;
     }
     .s-ask-students .pin {
@@ -2994,23 +3187,39 @@
       height: auto;
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 20px;
       max-width: 720px;
     }
     .ask-lede,
-    .ask-sub,
-    .ask-panel,
+    .ask-chart,
     .ask-note {
       position: static;
       left: auto;
       top: auto;
+      right: auto;
+      bottom: auto;
       width: 100%;
       max-width: none;
       height: auto;
+      transform: none;
+      opacity: 1;
     }
-    .ask-panel {
-      width: 100%;
-      aspect-ratio: 919 / 461;
+    .ask-chart {
+      aspect-ratio: 1062 / 605;
+      height: auto;
+      min-height: 320px;
+    }
+    .ask-explain { display: none; }
+    .ask-callout { opacity: 1; position: absolute; }
+    .ask-pt {
+      opacity: 1;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 11px;
+    }
+    .ask-pt--hi {
+      color: var(--warm);
+      font-size: 15px;
+      opacity: 1;
     }
   }
 
@@ -4278,15 +4487,59 @@
   </div>
 </section>
 
-<section id="s-ask-students" class="s-ask-students lede-hold">
+<section id="s-ask-students" class="s-ask-students lede-hold" data-scrub>
   <div class="pin lede-hold-pin">
     <div class="ask-stage">
       <p class="ask-lede" data-editable>We asked some media arts students how they felt about AI in creative spaces.</p>
-      <p class="ask-sub" data-editable>When asked about their personal ethics towards AI usage here&#8217;s what they came up with:</p>
-      <div class="ask-panel">
-        <img src="assets/avgAI_ethicsquad.png" alt="Student AI ethics quadrant: pressure versus whether something is a good idea">
+
+      <div class="ask-chart" aria-label="Student ethics quadrant chart">
+        <div class="ask-end ask-end--warm ask-end--top" data-editable>no pressure</div>
+        <div class="ask-end ask-end--warm ask-end--right" data-editable>always a<br>good idea</div>
+        <div class="ask-end ask-end--purple ask-end--bottom" data-editable>lots of pressure</div>
+        <div class="ask-end ask-end--purple ask-end--left" data-editable>never a<br>good idea</div>
+
+        <div class="ask-explain ask-explain--top">
+          <span class="ask-explain-mark" aria-hidden="true"></span>
+          <p class="ask-explain-text" data-editable>no pressure from society, classrooms, products or other sources to use AI; High agency</p>
+        </div>
+        <div class="ask-explain ask-explain--bottom">
+          <span class="ask-explain-mark" aria-hidden="true"></span>
+          <p class="ask-explain-text" data-editable>High Pressure from society, classrooms, products, or other sources to use ai; Low Agency</p>
+        </div>
+        <div class="ask-explain ask-explain--left">
+          <span class="ask-explain-mark" aria-hidden="true"></span>
+          <p class="ask-explain-text" data-editable>not aligned with personal ethics or not good enough to achieve</p>
+        </div>
+        <div class="ask-explain ask-explain--right">
+          <p class="ask-explain-text" data-editable>aligned with personal ethics or good enough to achieve</p>
+          <span class="ask-explain-mark" aria-hidden="true"></span>
+        </div>
+
+        <div class="ask-plot">
+          <div class="ask-axis ask-axis--x" aria-hidden="true"></div>
+          <div class="ask-axis ask-axis--y" aria-hidden="true"></div>
+
+          <p class="ask-pt" style="--x:-3.35; --y:4.35" data-editable>write an essay</p>
+          <p class="ask-pt" style="--x:-2.35; --y:3.55" data-editable>generate an image</p>
+          <p class="ask-pt" style="--x:-2.85; --y:2.95" data-editable>design a character</p>
+          <p class="ask-pt" style="--x:-1.55; --y:3.85" data-editable>edit an image/film</p>
+          <p class="ask-pt" style="--x:0.25; --y:4" data-editable>create a storyboard</p>
+          <p class="ask-pt" style="--x:0.5; --y:2.33" data-editable>do research</p>
+          <!-- same avg coords — slight nudge so labels don&#8217;t stack -->
+          <p class="ask-pt ask-pt--hi" style="--x:-1.65; --y:2.75" data-editable>brainstorm ideas</p>
+          <p class="ask-pt ask-pt--hi" style="--x:-0.85; --y:2.15" data-editable>ask advice</p>
+          <p class="ask-pt ask-pt--hi" style="--x:-0.75; --y:-0.5" data-editable>on a Google search</p>
+          <p class="ask-pt" style="--x:2.75; --y:4" data-editable>abstaining from AI</p>
+          <p class="ask-pt" style="--x:2.75; --y:-2" data-editable>learning how to<br>regulate AI</p>
+        </div>
+
+        <div class="ask-callout">
+          <span class="ask-callout-mark" aria-hidden="true"></span>
+          <p class="ask-callout-text" data-editable>These had the highest level of disagreement across the student groups</p>
+        </div>
       </div>
-      <p class="ask-note" data-editable>n = 40, ages ranged from 9-17 across 3 classes</p>
+
+      <p class="ask-note" data-editable>n = 36, ages ranged from 9-17 across 3 classes</p>
     </div>
   </div>
 </section>
@@ -4843,8 +5096,9 @@
     const lr = lede.getBoundingClientRect();
     const pad = 16;
     const gap = 14;
-    /* keep cloud flush with the lede's left edge — never left of section text */
+    /* keep cloud between the lede left edge and a matching right gutter */
     const xMin = Math.max(pad, lr.left - sr.left);
+    const xRight = Math.max(pad, xMin);
     const placed = [{
       x: lr.left - sr.left - gap,
       y: lr.top - sr.top - gap,
@@ -4873,7 +5127,7 @@
       tag.style.setProperty('--i', String(i));
       const tw = Math.ceil(tag.offsetWidth);
       const th = Math.ceil(tag.offsetHeight);
-      const maxX = Math.max(xMin, sr.width - tw - pad);
+      const maxX = Math.max(xMin, sr.width - xRight - tw);
       const maxY = Math.max(yMin, sr.height - th - pad);
       let box = null;
 
