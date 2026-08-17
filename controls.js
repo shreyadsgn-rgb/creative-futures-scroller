@@ -149,7 +149,21 @@
       return r.top <= line && r.bottom > line;
     });
     if (!active && trackedSections.length) {
-      active = scrollY <= 0 ? trackedSections[0] : trackedSections[trackedSections.length - 1];
+      if (scrollY <= 0) {
+        active = trackedSections[0];
+      } else {
+        // nearest section to the center line — never jump to the last
+        // section (that made mid-page gaps look like "s-brand-closer")
+        let best = null;
+        let bestDist = Infinity;
+        for (const s of trackedSections) {
+          const r = s.getBoundingClientRect();
+          const mid = (r.top + r.bottom) / 2;
+          const dist = Math.abs(mid - line);
+          if (dist < bestDist) { bestDist = dist; best = s; }
+        }
+        active = best;
+      }
     }
 
     const scrollable = document.documentElement.scrollHeight - vh;

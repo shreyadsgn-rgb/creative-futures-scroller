@@ -112,12 +112,10 @@
     align-content: center;
   }
   .beat.lede-hold,
-  .s-contamination.lede-hold,
   .s-reclaim.lede-hold {
     padding: 0;
   }
   .beat.lede-hold > .lede-hold-pin,
-  .s-contamination.lede-hold > .lede-hold-pin,
   .s-reclaim.lede-hold > .lede-hold-pin {
     padding: 18vh 12vw 10vh;
   }
@@ -1407,11 +1405,14 @@
        4. on exit, white line + title hinge down ~45° with a bounce
      ============================================================ */
   .s-model-collapse {
-    height: calc(var(--section-gap) * 1.8);
+    height: calc(var(--section-gap) * 2.15);
+    padding-bottom: 0; /* no empty end-hold after p=1 */
     --lede: clamp(0, var(--p) / 0.08, 1);
-    --clear: clamp(0, (var(--p) - 0.18) / 0.1, 1);
-    --rise: clamp(0, (var(--p) - 0.22) / 0.18, 1);
-    --reveal: clamp(0, (var(--p) - 0.45) / 0.14, 1);
+    --clear: clamp(0, (var(--p) - 0.16) / 0.1, 1);
+    --rise: clamp(0, (var(--p) - 0.2) / 0.16, 1);
+    --reveal: clamp(0, (var(--p) - 0.4) / 0.12, 1);
+    /* after hinge collapse finishes, black conclude box slides up */
+    --conclude: clamp(0, (var(--p) - 0.82) / 0.1, 1);
     --title-size: clamp(40px, 4.4vw, 64px);
     --title-top: calc(50% * (1 - var(--rise)) + 12vh * var(--rise));
     --collapse-angle: 0; /* degrees; JS writes bounce-eased value on exit */
@@ -1540,12 +1541,35 @@
     letter-spacing: 0;
     font: 400 16px/1.5 'Poppins', system-ui, sans-serif;
   }
+  /* black conclude box — contamination copy slides up after hinge */
+  .model-collapse-conclude {
+    position: absolute;
+    left: 12vw;
+    right: auto;
+    bottom: 10vh;
+    z-index: 6;
+    width: min(34em, calc(100% - 24vw));
+    max-width: 34em;
+    box-sizing: border-box;
+    padding: 28px 32px;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+    transform: translateY(calc((1 - var(--conclude)) * calc(100% + 12vh)));
+    will-change: transform;
+    pointer-events: none;
+  }
+  .model-collapse-conclude .lede {
+    margin: 0;
+    color: #fff;
+    max-width: none;
+  }
 
   /* ============================================================
-     12 · CONTAMINATION RESPONSE (Figma 179:297) + 14 · RECLAIM ART
-     (Figma 179:306) — plain black full-viewport copy beats.
+     14 · RECLAIM ART (Figma 179:306) — plain black full-viewport copy beat.
      ============================================================ */
-  .s-contamination,
   .s-reclaim {
     background: #000;
     min-height: 100vh;
@@ -1554,7 +1578,6 @@
     align-content: start;
     padding: 18vh 12vw 10vh;
   }
-  .contamination-copy,
   .reclaim-copy {
     max-width: 28em;
     display: flex;
@@ -1563,41 +1586,220 @@
   }
 
   /* ============================================================
-     13 · OPT-OUT OVERVIEW (Figma 383:447) — plain black beat: copy
-     upper-left + training opt-out chart lower-right. Nothing fancy.
+     13 · OPT-OUT OVERVIEW (Figma 521:55) — purple stage: lede,
+     people grid + CTA first; Surfshark chart after a scroll beat.
      ============================================================ */
   .s-optout {
-    background: #000;
-    min-height: 100vh;
-    box-sizing: border-box;
-    position: relative;
-    padding: 18vh 12vw 8vh;
-    display: grid;
-    align-content: start;
+    background: var(--purple);
+    color: #fff;
+    height: calc(var(--lede-beat) * 2.4 + 100vh);
+    padding-bottom: 0;
+    --p: 0;
+    /* hold on people/CTA, then chart fades/slides in */
+    --chart-show: clamp(0, (var(--p) - 0.42) / 0.1, 1);
   }
-  .s-optout.lede-hold {
+  .s-optout .pin {
     padding: 0;
-    display: block;
+    align-content: stretch;
+    background: var(--purple);
+    overflow: hidden;
   }
-  .s-optout.lede-hold > .lede-hold-pin {
-    padding: 18vh 12vw 8vh;
+  .optout-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    --opt-gutter: calc(8.33% + 3.6vw);
   }
+  .optout-deco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .optout-deco span {
+    position: absolute;
+    width: 40px;
+    height: 37px;
+    background: #000;
+  }
+  .optout-deco span:nth-child(1) { right: calc(8.33% + 3px); top: 0; }
+  .optout-deco span:nth-child(2) { right: calc(8.33% + 43px); top: 37px; }
+  .optout-deco span:nth-child(3) { right: calc(16.67% + 52px); top: 56px; }
+  .optout-deco span:nth-child(4) { right: calc(8.33% - 37px); top: 37px; }
+  .optout-deco span:nth-child(5) { right: calc(16.67% + 12px); top: 93px; }
+  .optout-deco span:nth-child(6) { right: calc(0% - 37px); top: 130px; }
+
   .optout-copy {
-    max-width: 28em;
+    position: absolute;
+    left: var(--opt-gutter);
+    top: 22%;
+    width: min(448px, 36vw);
+    z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 3vh;
+    gap: 1.15em;
   }
+  .optout-copy .lede {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+    max-width: none;
+  }
+
+  .optout-people {
+    position: absolute;
+    left: calc(8.33% + 60px);
+    bottom: 10%;
+    width: min(251px, 18vw);
+    aspect-ratio: 251 / 351.4;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2.6px;
+    padding: 4px;
+    box-sizing: border-box;
+    background: var(--purple);
+  }
+  .optout-cell {
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+  }
+  .optout-cell--warm { background: var(--warm); }
+  .optout-cell--teal { background: var(--teal); }
+  .optout-cell img {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 115%;
+    height: auto;
+    max-width: none;
+    transform: translateX(-50%);
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+  /* per-cell crop nudges from Figma */
+  .optout-cell:nth-child(2) img { width: 130%; left: 42%; }
+  .optout-cell:nth-child(3) img { width: 110%; bottom: -4%; }
+  .optout-cell:nth-child(4) img { width: 140%; left: 35%; }
+  .optout-cell:nth-child(5) img { width: 100%; left: 50%; bottom: 0; }
+  .optout-cell:nth-child(6) img { width: 135%; left: 58%; }
+  .optout-cell:nth-child(7) img { width: 120%; }
+  .optout-cell:nth-child(8) img { width: 140%; left: 38%; }
+  .optout-cell:nth-child(9) img { width: 105%; left: 55%; }
+
+  .optout-cta {
+    position: absolute;
+    left: calc(25% + 90px);
+    bottom: 18%;
+    z-index: 3;
+    width: 171px;
+    height: 104px;
+  }
+  .optout-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 154px;
+    height: 49px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: #fff;
+    color: #000;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .optout-btn:hover { filter: brightness(0.96); }
+  .optout-cursor {
+    position: absolute;
+    left: 74%;
+    top: 24%;
+    width: 44px;
+    height: 79px;
+    pointer-events: none;
+  }
+  .optout-cursor img {
+    display: block;
+    width: 44px;
+    height: 79px;
+  }
+
   .optout-chart {
     position: absolute;
-    right: 6vw;
-    bottom: 6vh;
-    width: min(48vw, 677px);
+    left: 50%;
+    bottom: 8%;
+    width: min(593px, 42vw);
+    z-index: 2;
+    opacity: var(--chart-show);
+    transform: translateY(calc((1 - var(--chart-show)) * 28px));
+    will-change: opacity, transform;
+    pointer-events: none;
   }
   .optout-chart img {
     width: 100%;
     height: auto;
     display: block;
+  }
+
+  @media (max-width: 900px) {
+    .s-optout {
+      height: auto;
+      min-height: 0;
+      padding: 8vh 6vw 10vh;
+    }
+    .s-optout .pin {
+      position: relative;
+      top: auto;
+      height: auto;
+      overflow: visible;
+      display: block;
+      padding: 0;
+    }
+    .optout-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      height: auto;
+    }
+    .optout-deco { display: none; }
+    .optout-copy,
+    .optout-people,
+    .optout-cta,
+    .optout-chart {
+      position: static;
+      left: auto;
+      top: auto;
+      bottom: auto;
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+      aspect-ratio: auto;
+      opacity: 1;
+      transform: none;
+      will-change: auto;
+    }
+    .optout-people {
+      width: min(280px, 70vw);
+      aspect-ratio: 251 / 351;
+    }
+    .optout-cta {
+      width: 171px;
+      height: 104px;
+      position: relative;
+      margin-top: -40px;
+      margin-left: min(200px, 40vw);
+    }
+    .optout-chart { max-width: 100%; }
   }
 
   /* ============================================================
@@ -1652,6 +1854,9 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    /* don't insert a blank viewport before the cost beat —
+       following sections start at the same scroll offset */
+    margin-bottom: -100vh;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
@@ -2145,7 +2350,7 @@
 
   /* ============================================================
      COMMUNITIES CHANGE — yellow collage; cards slide in from the
-     right to settle left (Figma 458:625 → 487:178).
+     right (Figma 458:625 → 487:178). Lede stays put.
      ============================================================ */
   .s-communities-change {
     height: calc(var(--section-gap) * 2.4);
@@ -2163,13 +2368,21 @@
     position: relative;
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
     /* match s-dc-nearby .nearby-copy left edge */
     --comm-left: calc(8.33% + 3.6vw);
+  }
+  .comm-layout {
+    position: relative;
+    width: 100%;
+    height: min(68vh, 720px);
+    flex: 0 0 auto;
   }
   .comm-lede {
     position: absolute;
     left: var(--comm-left);
-    top: 5vh;
+    top: 0;
     width: min(420px, 28vw);
     margin: 0;
     z-index: 5;
@@ -2177,9 +2390,6 @@
     font-weight: 400;
     line-height: 1.5;
     color: #000;
-    --slide: clamp(0, var(--p) / 0.06, 1);
-    opacity: calc(0.15 + var(--slide) * 0.85);
-    transform: translateX(calc((1 - var(--slide)) * 40vw));
   }
   .comm-item {
     position: absolute;
@@ -2211,10 +2421,10 @@
     object-fit: cover;
   }
   /* 4 clear columns — text and photos never share the same cell.
-     Column offsets are relative to --comm-left (same as nearby copy). */
+     Tops are relative to the vertically centered .comm-layout. */
   .comm-box--grid {
     left: var(--comm-left);
-    top: 12vh;
+    top: 8%;
     width: min(280px, 20vw);
     --delay: 0.04;
     --dur: 0.26;
@@ -2222,16 +2432,16 @@
   }
   .comm-photo--aws {
     left: calc(var(--comm-left) + 23vw);
-    top: 10vh;
+    top: 5%;
     width: min(260px, 20vw);
-    height: 26vh;
+    height: 38%;
     --delay: 0.12;
     --dur: 0.28;
     --from: 100vw;
   }
   .comm-box--halt {
     left: calc(var(--comm-left) + 46vw);
-    top: 8vh;
+    top: 3%;
     width: min(260px, 20vw);
     --delay: 0.22;
     --dur: 0.28;
@@ -2239,7 +2449,7 @@
   }
   .comm-photo--tulsa {
     left: calc(var(--comm-left) + 69vw);
-    top: 10vh;
+    top: 5%;
     width: min(300px, 22vw);
     height: auto;
     /* native TulsaCouncilMtg.png ratio — show full frame, no crop */
@@ -2254,16 +2464,16 @@
   }
   .comm-photo--gov {
     left: var(--comm-left);
-    top: 48vh;
+    top: 55%;
     width: min(280px, 20vw);
-    height: 24vh;
+    height: 36%;
     --delay: 0.18;
     --dur: 0.28;
     --from: 98vw;
   }
   .comm-box--lancaster {
     left: calc(var(--comm-left) + 23vw);
-    top: 42vh;
+    top: 48%;
     width: min(280px, 20vw);
     --delay: 0.28;
     --dur: 0.28;
@@ -2271,16 +2481,16 @@
   }
   .comm-photo--sign {
     left: calc(var(--comm-left) + 47vw);
-    top: 46vh;
+    top: 52%;
     width: min(150px, 12vw);
-    height: 26vh;
+    height: 38%;
     --delay: 0.38;
     --dur: 0.28;
     --from: 112vw;
   }
   .comm-box--tribal {
     left: calc(var(--comm-left) + 63vw);
-    top: 42vh;
+    top: 48%;
     width: min(260px, 20vw);
     --delay: 0.46;
     --dur: 0.3;
@@ -2311,6 +2521,10 @@
       height: auto;
       max-width: 720px;
       margin: 0 auto;
+    }
+    .comm-layout {
+      display: contents;
+      height: auto;
     }
     .comm-lede,
     .comm-item {
@@ -2929,12 +3143,15 @@
      Coords: x/y on ±5 grid (right = always good idea, up = no pressure).
      ============================================================ */
   .s-ask-students {
-    height: calc(var(--lede-beat) * 4.2 + 100vh);
+    /* taller runway = each beat dwells longer in absolute scroll */
+    height: calc(var(--lede-beat) * 6.2 + 100vh);
     padding-bottom: 0;
     background: #000;
     color: #fff;
     --p: 0;
     --ask-gutter: calc(8.33% + 3.6vw);
+    /* shared fade length — keep short so holds eat most of --p */
+    --ask-fade: 0.045;
   }
   .s-ask-students .pin {
     padding: 0;
@@ -2980,8 +3197,8 @@
       #101010;
     overflow: hidden;
     z-index: 1;
-    /* beat 1: chart shell */
-    --chart-show: clamp(0, (var(--p) - 0.12) / 0.12, 1);
+    /* beat 1: chart shell — short fade, long hold */
+    --chart-show: clamp(0, (var(--p) - 0.08) / var(--ask-fade), 1);
     opacity: var(--chart-show);
   }
   .ask-plot {
@@ -3057,8 +3274,8 @@
     gap: 12px;
     z-index: 3;
     max-width: 441px;
-    --ex-show: clamp(0, (var(--p) - 0.22) / 0.1, 1);
-    --ex-hide: clamp(0, (var(--p) - 0.38) / 0.08, 1);
+    --ex-show: clamp(0, (var(--p) - 0.24) / var(--ask-fade), 1);
+    --ex-hide: clamp(0, (var(--p) - 0.44) / var(--ask-fade), 1);
     opacity: calc(var(--ex-show) * (1 - var(--ex-hide)));
   }
   .ask-explain-mark {
@@ -3116,8 +3333,8 @@
     color: #fff;
     white-space: nowrap;
     text-align: center;
-    --pt-show: clamp(0, (var(--p) - 0.42) / 0.12, 1);
-    --dim: clamp(0, (var(--p) - 0.68) / 0.1, 1);
+    --pt-show: clamp(0, (var(--p) - 0.46) / var(--ask-fade), 1);
+    --dim: clamp(0, (var(--p) - 0.72) / var(--ask-fade), 1);
     --hi: 0;
     opacity: calc(var(--pt-show) * (1 - var(--dim) * 0.72 * (1 - var(--hi))));
   }
@@ -3140,7 +3357,7 @@
     gap: 12px;
     z-index: 5;
     max-width: 240px;
-    --call-show: clamp(0, (var(--p) - 0.72) / 0.12, 1);
+    --call-show: clamp(0, (var(--p) - 0.76) / var(--ask-fade), 1);
     opacity: var(--call-show);
   }
   .ask-callout-mark {
@@ -3178,7 +3395,7 @@
     line-height: 1.5;
     color: var(--ink-dim);
     text-align: right;
-    --note-show: clamp(0, (var(--p) - 0.12) / 0.12, 1);
+    --note-show: clamp(0, (var(--p) - 0.08) / var(--ask-fade), 1);
     opacity: var(--note-show);
   }
 
@@ -3236,19 +3453,32 @@
   }
 
   /* ============================================================
-     YOUR VOICE — interactive prompt (Figma 515:284).
+     YOUR VOICE — black lede beat → blue interactive prompt (Figma 515:284).
      Responses live in localStorage for now; swap save/load for API later.
      ============================================================ */
   .s-your-voice {
-    background: #467ff7;
+    height: calc(var(--lede-beat) * 2.6 + 100vh);
+    padding-bottom: 0;
     color: #fff;
-    height: calc(100vh + var(--lede-beat) * 1.6);
+    --p: 0;
+    --ask-gutter: calc(8.33% + 3.6vw);
+    /* hold on black, then snap/fade into blue + form */
+    --voice-reveal: clamp(0, (var(--p) - 0.38) / 0.08, 1);
+    background: color-mix(
+      in srgb,
+      #467ff7 calc(var(--voice-reveal) * 100%),
+      #000 calc((1 - var(--voice-reveal)) * 100%)
+    );
   }
-  .s-your-voice > .lede-hold-pin {
+  .s-your-voice .pin {
     padding: 0;
     align-content: stretch;
-    background: #467ff7;
     overflow: hidden;
+    background: color-mix(
+      in srgb,
+      #467ff7 calc(var(--voice-reveal) * 100%),
+      #000 calc((1 - var(--voice-reveal)) * 100%)
+    );
   }
   .voice-stage {
     position: relative;
@@ -3256,9 +3486,9 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 10vh var(--ask-gutter, calc(8.33% + 3.6vw));
+    padding: 10vh var(--ask-gutter);
     box-sizing: border-box;
   }
   .voice-deco {
@@ -3266,6 +3496,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 0;
+    opacity: var(--voice-reveal);
   }
   .voice-deco span {
     position: absolute;
@@ -3283,14 +3514,32 @@
   .voice-deco span:nth-child(8) { right: calc(0% - 37px); top: 130px; }
   .voice-lede {
     position: relative;
-    z-index: 1;
-    align-self: flex-start;
+    z-index: 2;
     width: min(448px, 100%);
-    margin: 0 0 4vh;
+    margin: 0;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
+    /* stay in the final (blue-beat) spot — no scrub motion */
+    transform: translateY(-18vh);
+  }
+  .voice-rest {
+    position: absolute;
+    left: var(--ask-gutter);
+    right: var(--ask-gutter);
+    top: 50%;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    transform: translateY(-42%);
+    opacity: var(--voice-reveal);
+    pointer-events: none;
+  }
+  .s-your-voice.is-open .voice-rest {
+    pointer-events: auto;
   }
   .voice-prompt {
     position: relative;
@@ -3426,7 +3675,16 @@
   @media (max-width: 720px) {
     .voice-deco { display: none; }
     .voice-stage { padding: 8vh 7vw; justify-content: flex-start; padding-top: 12vh; }
-    .voice-lede { margin-bottom: 3vh; }
+    .voice-lede { transform: none; }
+    .voice-rest {
+      position: relative;
+      left: auto;
+      right: auto;
+      top: auto;
+      transform: none;
+      margin-top: 3vh;
+      width: 100%;
+    }
     .voice-prompt { font-size: 26px; text-align: left; align-self: flex-start; }
     .voice-input { min-height: 140px; padding: 20px 18px; }
     .voice-responses { max-height: 22vh; }
@@ -3698,6 +3956,7 @@
     .pdf-viewport { width: 86vw; height: 40vh; padding: 3vh 5vw; }
     .callout { width: 40vw; padding: 14px 16px; gap: 8px; }
     .callout-left { left: 2vw; }
+    This map is still being filled out by researchers, by companies, by lawmakers, and by people like the students who developed stances on where they didn’t want this technology involved with their creative process. 
     .callout-right { right: 2vw; }
     .human-labor-layout {
       padding-left: 7vw;
@@ -3731,19 +3990,18 @@
       grid-template-columns: 1fr;
       gap: 3vh;
     }
-    .s-contamination:not(.lede-hold),
+    .model-collapse-conclude {
+      left: 7vw;
+      right: 7vw;
+      width: auto;
+      max-width: none;
+      bottom: 6vh;
+      padding: 22px 20px;
+    }
     .s-reclaim:not(.lede-hold) { padding: 14vh 7vw 8vh; }
-    .s-contamination.lede-hold > .lede-hold-pin,
     .s-reclaim.lede-hold > .lede-hold-pin,
     .beat.lede-hold > .lede-hold-pin { padding: 14vh 7vw 8vh; }
     .s-optout:not(.lede-hold) { padding: 14vh 7vw 8vh; }
-    .s-optout.lede-hold > .lede-hold-pin { padding: 14vh 7vw 8vh; }
-    .optout-chart {
-      position: static;
-      width: 100%;
-      max-width: 520px;
-      margin-top: 4vh;
-    }
     .beat:not(.lede-hold) { padding: 14vh 7vw 8vh; }
     .beat-media-row { gap: 16px; }
     .beat-media-row .ph { width: min(200px, 55vw); height: 200px; }
@@ -4223,8 +4481,9 @@
   </section>
 </div>
 
-<!-- 11 · Model Collapse: scrub like s-naming — mid title + intro → rise/dock →
-     deeper copy + bell-curve placeholder (Figma 382:421 → 382:436). -->
+<!-- 11 · Model Collapse: mid title + intro → rise/dock → deeper copy →
+     hinge collapse → black conclude box (ex-contamination copy) slides up
+     (Figma 382:421 → 382:436 + conclude). -->
 <section id="s-model-collapse" class="s-model-collapse" data-scrub>
   <div class="pin">
     <div class="model-collapse-stage">
@@ -4244,29 +4503,50 @@
         </div>
         <div class="model-collapse-media ph" data-img-slot data-label="bell curve placeholder"></div>
       </div>
+      <div class="model-collapse-conclude">
+        <p class="lede" data-editable>Currently, some LLM companies are looking at printed material as training data that is safe from AI contamination.</p>
+        <p class="lede" data-editable>Others are leaning on synthetic data (curated artificial data) to grow and develop their models.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- 12 · Contamination response: plain black copy beat (Figma 179:297). -->
-<section id="s-contamination" class="s-contamination lede-hold">
-  <div class="lede-hold-pin">
-    <div class="contamination-copy">
-      <p class="lede" data-scroll-reveal data-editable>Currently, some LLM companies are looking at printed material as training data that is safe from AI contamination.</p>
-      <p class="lede" data-scroll-reveal data-editable>Others are leaning on synthetic data (curated artificial data) to grow and develop their models.</p>
-    </div>
-  </div>
-</section>
+<!-- 13 · Opt-out overview (Figma 521:55): people/CTA hold, then chart. -->
+<section id="s-optout" class="s-optout" data-scrub>
+  <div class="pin">
+    <div class="optout-stage">
+      <div class="optout-deco" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
 
-<!-- 13 · Opt-out overview: copy + Surfshark chart (Figma 383:447). -->
-<section id="s-optout" class="s-optout lede-hold">
-  <div class="lede-hold-pin">
-    <div class="optout-copy">
-      <p class="lede" data-scroll-reveal data-editable>As generative AI companies compete to develop better AI models, it&#8217;s becoming less clear where and how exactly they are training their models.</p>
-      <p class="lede" data-scroll-reveal data-editable>This has been a concern for people who do not want their content to be used as training material.</p>
-    </div>
-    <div class="optout-chart" data-scroll-reveal>
-      <img src="assets/ai_model_training_on_user_data_optout_overview_for_top_10_social_media_platforms.jpg" alt="AI model training on user data: opt-out overview for top 10 social media platforms &#8212; chart by Surfshark" loading="lazy">
+      <div class="optout-copy">
+        <p class="lede" data-editable>As generative AI companies compete to develop better AI models, it&#8217;s becoming less clear where and how exactly they are training their models.</p>
+        <p class="lede" data-editable>This has been a concern for people who do not want their content to be used as training material.</p>
+      </div>
+
+      <div class="optout-people" aria-hidden="true">
+        <div class="optout-cell optout-cell--warm"><img src="assets/optout/person-1.png" alt=""></div>
+        <div class="optout-cell optout-cell--teal"><img src="assets/optout/person-2.png" alt=""></div>
+        <div class="optout-cell optout-cell--warm"><img src="assets/optout/person-3.png" alt=""></div>
+        <div class="optout-cell optout-cell--teal"><img src="assets/optout/person-4.png" alt=""></div>
+        <div class="optout-cell optout-cell--warm"><img src="assets/optout/person-5.png" alt=""></div>
+        <div class="optout-cell optout-cell--teal"><img src="assets/optout/person-6.png" alt=""></div>
+        <div class="optout-cell optout-cell--teal"><img src="assets/optout/person-7.png" alt=""></div>
+        <div class="optout-cell optout-cell--teal"><img src="assets/optout/person-8.png" alt=""></div>
+        <div class="optout-cell optout-cell--warm"><img src="assets/optout/person-9.png" alt=""></div>
+      </div>
+
+      <div class="optout-cta">
+        <button type="button" class="optout-btn" data-editable>opt out</button>
+        <div class="optout-cursor" aria-hidden="true">
+          <img src="assets/optout/cursor.svg" alt="" width="44" height="79">
+        </div>
+      </div>
+
+      <div class="optout-chart">
+        <img src="assets/ai_model_training_on_user_data_optout_overview_for_top_10_social_media_platforms.jpg" alt="AI model training on user data: opt-out overview for top 10 social media platforms &#8212; chart by Surfshark" loading="lazy">
+      </div>
     </div>
   </div>
 </section>
@@ -4526,40 +4806,42 @@
 <section id="s-communities-change" class="s-communities-change" data-scrub>
   <div class="pin">
     <div class="comm-stage">
-      <p class="comm-lede" data-editable>So communities are fighting back.</p>
+      <div class="comm-layout">
+        <p class="comm-lede" data-editable>So communities are fighting back.</p>
 
-      <div class="comm-item comm-box comm-box--grid">
-        <p data-editable>Since 2025, at least 18 states have passed or introduced laws requiring data centers to pay their own electricity grid costs instead of passing them onto residents. Oregon, Texas, Oklahoma, and South Dakota have all signed this protection into law.</p>
-      </div>
+        <div class="comm-item comm-box comm-box--grid">
+          <p data-editable>Since 2025, at least 18 states have passed or introduced laws requiring data centers to pay their own electricity grid costs instead of passing them onto residents. Oregon, Texas, Oklahoma, and South Dakota have all signed this protection into law.</p>
+        </div>
 
-      <div class="comm-item comm-photo comm-photo--aws">
-        <img src="assets/AWS_servers_in_Ashburn,_group_1,_2020-10-09_5.jpg" alt="Data center building behind a grassy hill">
-      </div>
+        <div class="comm-item comm-photo comm-photo--aws">
+          <img src="assets/AWS_servers_in_Ashburn,_group_1,_2020-10-09_5.jpg" alt="Data center building behind a grassy hill">
+        </div>
 
-      <div class="comm-item comm-box comm-box--halt">
-        <p data-editable>Some communities have halted data center construction entirely. In Warrenton, Virginia, every town council member who voted yes on an Amazon data center subsequently lost re-election. Throughout the country, at least $64 billion of data center projects have been blocked or delayed amid local opposition.</p>
-      </div>
+        <div class="comm-item comm-box comm-box--halt">
+          <p data-editable>Some communities have halted data center construction entirely. In Warrenton, Virginia, every town council member who voted yes on an Amazon data center subsequently lost re-election. Throughout the country, at least $64 billion of data center projects have been blocked or delayed amid local opposition.</p>
+        </div>
 
-      <div class="comm-item comm-photo comm-photo--tulsa">
-        <img src="assets/TulsaCouncilMtg.png" alt="Tulsa City Council Urban and Economic Development Committee meeting">
-      </div>
+        <div class="comm-item comm-photo comm-photo--tulsa">
+          <img src="assets/TulsaCouncilMtg.png" alt="Tulsa City Council Urban and Economic Development Committee meeting">
+        </div>
 
-      <div class="comm-item comm-photo comm-photo--gov">
-        <img src="assets/governerkotek-signdatacenter.jpg" alt="Oregon officials at a podium near electrical infrastructure">
-      </div>
+        <div class="comm-item comm-photo comm-photo--gov">
+          <img src="assets/governerkotek-signdatacenter.jpg" alt="Oregon officials at a podium near electrical infrastructure">
+        </div>
 
-      <div class="comm-item comm-box comm-box--lancaster">
-        <p data-editable>In Lancaster, Pennsylvania, residents negotiated a legally binding agreement called a &#8220;community benefit agreement&#8221; before a data center could break ground.</p>
-        <p data-editable>This agreement included strict noise limits, 100% renewable energy, a hard cap of 20,000 gallons of water per day (compared to the previous tenant&#8217;s 100,000&#8211;125,000), and a $20 million contribution to the city&#8217;s sustainability and economic development funds.</p>
-      </div>
+        <div class="comm-item comm-box comm-box--lancaster">
+          <p data-editable>In Lancaster, Pennsylvania, residents negotiated a legally binding agreement called a &#8220;community benefit agreement&#8221; before a data center could break ground.</p>
+          <p data-editable>This agreement included strict noise limits, 100% renewable energy, a hard cap of 20,000 gallons of water per day (compared to the previous tenant&#8217;s 100,000&#8211;125,000), and a $20 million contribution to the city&#8217;s sustainability and economic development funds.</p>
+        </div>
 
-      <div class="comm-item comm-photo comm-photo--sign">
-        <img src="assets/Anti_ai_data_center_sign_1.jpg" alt="Handmade yard sign reading No Data Center">
-      </div>
+        <div class="comm-item comm-photo comm-photo--sign">
+          <img src="assets/Anti_ai_data_center_sign_1.jpg" alt="Handmade yard sign reading No Data Center">
+        </div>
 
-      <div class="comm-item comm-box comm-box--tribal">
-        <p data-editable>Tribal nations are asserting their own terms. The Seminole Nation voted 24&#8211;0 to permanently ban data center construction after a startup tried to bypass community consent.</p>
-        <p data-editable>In Tulsa and Oklahoma City, city officials voted to pause all incoming data center development until 2027.</p>
+        <div class="comm-item comm-box comm-box--tribal">
+          <p data-editable>Tribal nations are asserting their own terms. The Seminole Nation voted 24&#8211;0 to permanently ban data center construction after a startup tried to bypass community consent.</p>
+          <p data-editable>In Tulsa and Oklahoma City, city officials voted to pause all incoming data center development until 2027.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -4756,7 +5038,7 @@
 <section id="s-map-unfinished" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>This map isn&#8217;t finished. It&#8217;s still being drawn &#8212; by researchers, by companies, by lawmakers, and by people like the students who filled this one out.</p>
+      <p class="lede" data-scroll-reveal data-editable>This map is still being filled out by researchers, by companies, by lawmakers, and by people like the students who developed stances on where they didn&#8217;t want this technology involved with their creative process.</p>
     </div>
   </div>
 </section>
@@ -4769,9 +5051,9 @@
   </div>
 </section>
 
-<!-- Your voice prompt (Figma 515:284). Local-only for now; API hook later. -->
-<section id="s-your-voice" class="s-your-voice lede-hold">
-  <div class="lede-hold-pin">
+<!-- Your voice prompt (Figma 515:284). Black lede → blue form. Local-only for now. -->
+<section id="s-your-voice" class="s-your-voice" data-scrub>
+  <div class="pin">
     <div class="voice-stage">
       <div class="voice-deco" aria-hidden="true">
         <span></span><span></span><span></span><span></span>
@@ -4779,33 +5061,36 @@
       </div>
 
       <p class="voice-lede" data-editable>Your voice is important for determining the future of AI.</p>
-      <h2 class="voice-prompt" data-editable>What is one thing you hope we get right?</h2>
 
-      <form class="voice-form" id="voice-form" novalidate>
-        <label class="visually-hidden" for="voice-input">Your response</label>
-        <textarea
-          id="voice-input"
-          class="voice-input"
-          name="response"
-          rows="5"
-          maxlength="600"
-          placeholder="Enter your response here..."
-          required
-        ></textarea>
-        <button type="submit" class="voice-submit">
-          Submit <strong>→</strong>
-        </button>
-      </form>
+      <div class="voice-rest">
+        <h2 class="voice-prompt" data-editable>What is one thing you hope we get right?</h2>
 
-      <div class="voice-thanks" id="voice-thanks" hidden>
-        <p data-editable>Thanks for sharing that.</p>
-        <p class="voice-thanks-note" data-editable>Your response is saved on this device for now.</p>
-        <button type="button" class="voice-again" id="voice-again">Add another →</button>
-      </div>
+        <form class="voice-form" id="voice-form" novalidate>
+          <label class="visually-hidden" for="voice-input">Your response</label>
+          <textarea
+            id="voice-input"
+            class="voice-input"
+            name="response"
+            rows="5"
+            maxlength="600"
+            placeholder="Enter your response here..."
+            required
+          ></textarea>
+          <button type="submit" class="voice-submit">
+            Submit <strong>→</strong>
+          </button>
+        </form>
 
-      <div class="voice-responses" id="voice-responses" aria-live="polite" hidden>
-        <p class="voice-responses-label">Responses on this device</p>
-        <div class="voice-responses-list" id="voice-responses-list"></div>
+        <div class="voice-thanks" id="voice-thanks" hidden>
+          <p data-editable>Thanks for sharing that.</p>
+          <p class="voice-thanks-note" data-editable>Your response is saved on this device for now.</p>
+          <button type="button" class="voice-again" id="voice-again">Add another →</button>
+        </div>
+
+        <div class="voice-responses" id="voice-responses" aria-live="polite" hidden>
+          <p class="voice-responses-label">Responses on this device</p>
+          <div class="voice-responses-list" id="voice-responses-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -4851,6 +5136,9 @@
       const range = Math.max(1, r.height - vh - between);
       const p = Math.min(1, Math.max(0, -r.top / range));
       s.style.setProperty('--p', p.toFixed(4));
+      if (s.id === 's-your-voice') {
+        s.classList.toggle('is-open', p >= 0.42);
+      }
       const steps = s.querySelectorAll('.step');
       if (steps.length > 1) {
         // honor the section's intro lead-in (--lead) so the "front" step tracks what's actually visible
@@ -5098,7 +5386,7 @@
   function updateModelCollapse() {
     if (!sModelCollapseEl) return;
     const p = parseFloat(sModelCollapseEl.style.getPropertyValue('--p')) || 0;
-    const t = Math.min(1, Math.max(0, (p - 0.84) / 0.12));
+    const t = Math.min(1, Math.max(0, (p - 0.68) / 0.12));
     const angle = (t <= 0 ? 0 : easeOutBack(t)) * 45;
     sModelCollapseEl.style.setProperty('--collapse-angle', angle.toFixed(2));
   }
