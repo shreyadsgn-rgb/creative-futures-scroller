@@ -438,6 +438,8 @@
     width: 100%;
     max-width: 400px;
     justify-self: end;
+    opacity: var(--second);
+    transform: translateY(calc((1 - var(--second)) * 16px));
   }
   .proposal-lead-photo .ph {
     aspect-ratio: 3 / 2;
@@ -510,6 +512,7 @@
      ============================================================ */
   .s-naming {
     height: calc(var(--section-gap) * 3.2);
+    --naming-gutter: 12vw;
     --lede: clamp(0, var(--p) / 0.06, 1);
     --terms: clamp(0, (var(--p) - 0.1) / 0.08, 1);
     --zoom: clamp(0, (var(--p) - 0.24) / 0.14, 1);
@@ -574,6 +577,9 @@
   .naming-candidate {
     position: absolute;
     z-index: 1;
+    /* --x is the intended left; never sit left of section text (--naming-gutter) */
+    --x: var(--naming-gutter);
+    left: max(var(--naming-gutter), var(--x));
     color: color-mix(in srgb, var(--warm) calc(var(--blue) * 100%), #5f5f5f);
     font-size: var(--term-size);
     font-weight: 400;
@@ -584,14 +590,16 @@
     opacity: calc(var(--terms) * (1 - var(--clear)));
     transform: translateY(calc((1 - var(--terms)) * 12px - var(--clear) * 10px));
   }
-  .naming-candidate.c1 { left: 20vw; top: 32vh; }
-  .naming-candidate.c2 { left: 48vw; top: 44vh; }
-  .naming-candidate.c3 { left: 58vw; top: 26vh; max-width: 18em; }
+  .naming-candidate.c1 { --x: 20vw; top: 32vh; }
+  .naming-candidate.c2 { --x: 48vw; top: 44vh; }
+  .naming-candidate.c3 { --x: 58vw; top: 26vh; max-width: 18em; }
+  .naming-candidate.c4 { --x: 34vw; top: 20vh; max-width: 16em; }
+  .naming-candidate.c5 { --x: 12vw; top: 42vh; max-width: 14em; }
   /* AI starts as a gray term twin, grows, then rises to dock at the top */
   .naming-ai {
     position: absolute;
     z-index: 4;
-    left: 12vw;
+    left: var(--naming-gutter);
     top: calc(52vh - var(--rise) * 40vh);
     width: max-content;
     max-width: calc(100% - 16vw);
@@ -628,7 +636,7 @@
   /* post-dock reveal: copy left + parallax frames right (Figma 314:238) */
   .naming-reveal {
     position: absolute;
-    left: 12vw;
+    left: var(--naming-gutter);
     right: 8vw;
     top: calc(12vh + var(--title-size) * 1.6 + 8vh);
     bottom: 8vh;
@@ -694,7 +702,7 @@
   .naming-crosshair::after {
     content: "";
     position: absolute;
-    left: 12vw;
+    left: var(--naming-gutter);
     right: 0;
     top: calc(
       52vh - var(--rise) * 40vh
@@ -3744,8 +3752,9 @@
   .brand-closer-line-h {
     position: absolute;
     left: calc(12.5% + 4px);
+    right: 0;
     top: calc(83.33% + 10px);
-    width: min(1256px, calc(100% - 12.5% - 4px - 4%));
+    width: auto;
     height: 2px;
     background: #fff;
     z-index: 1;
@@ -3769,7 +3778,7 @@
     }
     .brand-closer-tag--think { left: 7vw; top: 72%; }
     .brand-closer-tag--create { left: 7vw; top: 78%; width: auto; }
-    .brand-closer-line-h { left: 7vw; width: calc(100% - 14vw); }
+    .brand-closer-line-h { left: 7vw; right: 0; width: auto; }
     .brand-closer-line-v { display: none; }
   }
 
@@ -3911,11 +3920,14 @@
     .s-johnniac .pin { padding-inline: 7vw; padding-bottom: 8vh; }
     .proposal-lead-photo { order: -1; max-width: 260px; justify-self: start; }
     .naming-stage { padding: 10vh 7vw 8vh; }
-    .naming-candidate.c1 { left: 8vw; top: 28vh; }
-    .naming-candidate.c2 { left: 48vw; top: 38vh; }
-    .naming-candidate.c3 { left: 14vw; top: 48vh; }
+    .s-naming { --naming-gutter: 7vw; }
+    .naming-candidate.c1 { --x: 8vw; top: 28vh; }
+    .naming-candidate.c2 { --x: 48vw; top: 38vh; }
+    .naming-candidate.c3 { --x: 14vw; top: 48vh; }
+    .naming-candidate.c4 { --x: 52vw; top: 24vh; }
+    .naming-candidate.c5 { --x: 7vw; top: 18vh; }
     .naming-ai {
-      left: 7vw;
+      left: var(--naming-gutter);
       top: calc(50vh - var(--rise) * 38vh);
       transform:
         translate(
@@ -3926,7 +3938,7 @@
     .s-naming { --title-size: clamp(28px, 9vw, 48px); }
     .naming-ai .naming-title { white-space: normal; }
     .naming-reveal {
-      left: 7vw; right: 7vw;
+      left: var(--naming-gutter); right: 7vw;
       top: calc(10vh + var(--title-size) * 1.8 + 6vh);
       grid-template-columns: 1fr;
       gap: 3vh;
@@ -3937,7 +3949,7 @@
     .naming-frame.f1 { top: 12%; left: 72%; }
     .naming-frame.f2 { top: 42%; left: 55%; }
     .naming-crosshair::before { right: 7vw; }
-    .naming-crosshair::after { left: 7vw; right: 7vw; }
+    .naming-crosshair::after { left: var(--naming-gutter); right: 7vw; }
     .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
     .pdf-viewport { width: 86vw; height: 40vh; padding: 3vh 5vw; }
     .callout { width: 40vw; padding: 14px 16px; gap: 8px; }
@@ -4188,12 +4200,15 @@
 <section id="s-naming" class="s-naming" data-scrub>
   <div class="pin">
     <div class="naming-stage">
-      <p class="naming-lede" data-editable>The researchers debated on what to call this new field.</p>
+      <p class="naming-lede" data-editable>There were many terms researchers used to describe these ideas. Some of these  were already established fields of study. 
+      </p>
       <div class="naming-field">
         <div class="naming-crosshair" aria-hidden="true"></div>
         <span class="naming-candidate c1" data-editable>Automata Studies</span>
         <span class="naming-candidate c2" data-editable>Cybernetics</span>
         <span class="naming-candidate c3" data-editable>Complex Information Processing</span>
+        <span class="naming-candidate c4" data-editable>Operations Research</span>
+        <span class="naming-candidate c5" data-editable>Machine Intelligence</span>
         <div class="naming-ai">
           <div class="naming-bar" aria-hidden="true"></div>
           <p class="naming-title" data-editable>Artificial Intelligence</p>
