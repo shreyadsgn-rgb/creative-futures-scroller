@@ -3486,7 +3486,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     padding: 10vh var(--ask-gutter);
     box-sizing: border-box;
@@ -3515,26 +3515,21 @@
   .voice-lede {
     position: relative;
     z-index: 2;
+    align-self: flex-start;
     width: min(448px, 100%);
-    margin: 0;
+    margin: 0 0 3.5vh;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
-    /* stay in the final (blue-beat) spot — no scrub motion */
-    transform: translateY(-18vh);
   }
   .voice-rest {
-    position: absolute;
-    left: var(--ask-gutter);
-    right: var(--ask-gutter);
-    top: 50%;
+    position: relative;
     z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: auto;
-    transform: translateY(-42%);
+    width: 100%;
     opacity: var(--voice-reveal);
     pointer-events: none;
   }
@@ -3675,16 +3670,7 @@
   @media (max-width: 720px) {
     .voice-deco { display: none; }
     .voice-stage { padding: 8vh 7vw; justify-content: flex-start; padding-top: 12vh; }
-    .voice-lede { transform: none; }
-    .voice-rest {
-      position: relative;
-      left: auto;
-      right: auto;
-      top: auto;
-      transform: none;
-      margin-top: 3vh;
-      width: 100%;
-    }
+    .voice-lede { margin-bottom: 3vh; }
     .voice-prompt { font-size: 26px; text-align: left; align-self: flex-start; }
     .voice-input { min-height: 140px; padding: 20px 18px; }
     .voice-responses { max-height: 22vh; }
