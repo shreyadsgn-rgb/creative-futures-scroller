@@ -567,7 +567,6 @@
     font-weight: 400;
     line-height: 1.5;
     opacity: calc(var(--lede) * (1 - var(--clear)));
-    transform: translateY(calc((1 - var(--lede)) * 16px - var(--clear) * 12px));
   }
   .naming-field {
     position: absolute;
@@ -577,7 +576,7 @@
   .naming-candidate {
     position: absolute;
     z-index: 1;
-    /* --x is the intended left; never sit left of section text (--naming-gutter) */
+    /* intended left via --x; never sit left of section text gutter */
     --x: var(--naming-gutter);
     left: max(var(--naming-gutter), var(--x));
     color: color-mix(in srgb, var(--warm) calc(var(--blue) * 100%), #5f5f5f);
@@ -588,7 +587,6 @@
     max-width: 14em;
     pointer-events: none;
     opacity: calc(var(--terms) * (1 - var(--clear)));
-    transform: translateY(calc((1 - var(--terms)) * 12px - var(--clear) * 10px));
   }
   .naming-candidate.c1 { --x: 20vw; top: 32vh; }
   .naming-candidate.c2 { --x: 48vw; top: 44vh; }
@@ -645,7 +643,6 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 4vw;
     opacity: var(--reveal);
-    transform: translateY(calc((1 - var(--reveal)) * 20px));
     pointer-events: none;
   }
   .naming-copy {
@@ -666,10 +663,13 @@
   .naming-frames {
     position: relative;
     min-height: 48vh;
+    margin-top: 10vh;
   }
   .naming-frame {
     position: absolute;
-    width: min(146px, 18vw);
+    top: 0;
+    left: 8%;
+    width: min(438px, 54vw);
     aspect-ratio: 146 / 151;
     /* stagger in, then keep drifting up like .rule-frame */
     --fin: clamp(0, (var(--reveal) - var(--i) * 0.18) / 0.55, 1);
@@ -678,9 +678,6 @@
     transform: translateY(calc(40px - var(--drift) * 160px - var(--i) * 24px));
   }
   .naming-frame .ph { width: 100%; height: 100%; }
-  .naming-frame.f0 { top: 0; left: 8%; }
-  .naming-frame.f1 { top: 18%; left: 48%; }
-  .naming-frame.f2 { top: 58%; left: 8%; }
   .naming-crosshair {
     position: absolute;
     inset: 0;
@@ -727,7 +724,7 @@
      ============================================================ */
   .s-rules { height: calc(var(--section-gap) * 2.2); }
   .s-rules .intro {
-    padding-left: 12vw; margin-bottom: 6vh;
+    padding-left: 12vw; margin-bottom: 12vh;
     --in: clamp(0, var(--p) / 0.03, 1);
     opacity: var(--in);
     transform: translateY(calc((1 - var(--in)) * 16px));
@@ -741,7 +738,7 @@
   }
   .rule-lines { padding-left: 12vw; max-width: 34em; display: flex; flex-direction: column; gap: 48px; }
   .rline {
-    font-size: clamp(21px, 2.8vw, 32px); font-weight: 400; line-height: 1.4;
+    font-size: clamp(21px, 2.8vw, 24px); font-weight: 400; line-height: 1.4;
     --fadeIn: clamp(0, calc((var(--p) - var(--ls)) / (var(--le) - var(--ls))), 1);
     --lp: min(var(--fadeIn), var(--fp));
     opacity: var(--lp);
@@ -749,7 +746,7 @@
   }
   .rline .kw { color: var(--warm); font-weight: 500; }
   .rule-frame {
-    position: absolute; width: min(15vw, 190px); aspect-ratio: 1;
+    position: absolute; width: min(22.5vw, 285px); aspect-ratio: 1;
     --fadeIn: clamp(0, calc((var(--p) - var(--ls)) / (var(--le) - var(--ls))), 1);
     --lp: min(var(--fadeIn), var(--fp));
     /* opacity still follows the fade-in/hold/fade-out envelope above, but position is its own
@@ -3914,14 +3911,14 @@
       font-size: calc(var(--tags) * 22px + var(--focus) * 18px);
     }
     .s-rules .intro, .rule-lines { padding-left: 7vw; }
-    .rule-frame { width: 22vw; }
+    .rule-frame { width: 33vw; }
     .proposal-lead-layout { grid-template-columns: 1fr; gap: 4vh; }
     .s-proposal-lead .pin { padding-inline: 7vw; }
     .s-johnniac .pin { padding-inline: 7vw; padding-bottom: 8vh; }
     .proposal-lead-photo { order: -1; max-width: 260px; justify-self: start; }
     .naming-stage { padding: 10vh 7vw 8vh; }
-    .s-naming { --naming-gutter: 7vw; }
-    .naming-candidate.c1 { --x: 8vw; top: 28vh; }
+    .s-naming { --naming-gutter: 7vw; --title-size: clamp(28px, 9vw, 48px); }
+    .naming-candidate.c1 { --x: 12vw; top: 28vh; }
     .naming-candidate.c2 { --x: 48vw; top: 38vh; }
     .naming-candidate.c3 { --x: 14vw; top: 48vh; }
     .naming-candidate.c4 { --x: 52vw; top: 24vh; }
@@ -3935,7 +3932,6 @@
           calc((1 - var(--zoom)) * 4vh)
         );
     }
-    .s-naming { --title-size: clamp(28px, 9vw, 48px); }
     .naming-ai .naming-title { white-space: normal; }
     .naming-reveal {
       left: var(--naming-gutter); right: 7vw;
@@ -3943,11 +3939,8 @@
       grid-template-columns: 1fr;
       gap: 3vh;
     }
-    .naming-frames { min-height: 28vh; }
-    .naming-frame { width: min(110px, 28vw); }
-    .naming-frame.f0 { top: 0; left: 55%; }
-    .naming-frame.f1 { top: 12%; left: 72%; }
-    .naming-frame.f2 { top: 42%; left: 55%; }
+    .naming-frames { min-height: 28vh; margin-top: 6vh; }
+    .naming-frame { width: min(330px, 84vw); top: 0; left: 30%; }
     .naming-crosshair::before { right: 7vw; }
     .naming-crosshair::after { left: var(--naming-gutter); right: 7vw; }
     .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
@@ -4215,18 +4208,12 @@
         </div>
         <div class="naming-reveal">
           <div class="naming-copy">
-            <p class="naming-outro" data-editable>Of all the options, they landed on the one that compares machines to <strong>human minds.</strong></p>
+            <p class="naming-outro" data-editable>Of all the options, the term that gained the most attention was the one that compared machines to <strong>human minds. </strong></p>
             <p class="naming-prompt" data-editable>Do you think that using a different name for this technology would make us treat it any differently?</p>
           </div>
           <div class="naming-frames">
-            <div class="naming-frame f0" style="--i: 0;">
-              <div class="ph" data-img-slot data-label="naming visual 1"></div>
-            </div>
-            <div class="naming-frame f1" style="--i: 1;">
-              <div class="ph" data-img-slot data-label="naming visual 2"></div>
-            </div>
-            <div class="naming-frame f2" style="--i: 2;">
-              <div class="ph" data-img-slot data-label="naming visual 3"></div>
+            <div class="naming-frame" style="--i: 0;">
+              <div class="ph" data-img-slot data-label="computer brain diagram"><img src="assets/computer-brain.png" alt="Diagram linking a computer to a human brain" loading="lazy"></div>
             </div>
           </div>
         </div>
@@ -4238,7 +4225,7 @@
 <!-- 3 · Rules: three worked IF/AND/THEN examples, one at a time -->
 <section id="s-rules" class="s-rules" data-scrub>
   <div class="pin">
-    <p class="lede intro" data-editable>Early AI was designed to follow rules;</p>
+    <p class="lede intro" data-editable>Early AI was designed to follow rules:</p>
 
     <div class="rules-field">
       <div class="rule-block" style="--in-start: 0; --type-start: 0.01; --type-end: 0.24; --out-end: 0.28;">
@@ -4248,10 +4235,10 @@
           <p class="rline" style="--ls: 0.11; --le: 0.14;"><span class="kw">THEN</span> take the queen</p>
         </div>
         <div class="rule-frame" style="--ls: 0.03; --le: 0.10; top: 18%; right: 22%;">
-          <div class="ph" data-img-slot data-label="chess board &#8212; queen exposed to rook"><img src="assets/kali-graphist-zKqq5M0hFsE-unsplash.jpg" alt="Chess board mid-game with pieces in play" loading="lazy"></div>
+          <div class="ph" data-img-slot data-label="chess board &#8212; queen exposed to rook"><img src="assets/chess-board.png" alt="Chess board mid-game with pieces in play" loading="lazy"></div>
         </div>
         <div class="rule-frame" style="--ls: 0.09; --le: 0.16; top: 60%; right: 6%;">
-          <div class="ph" data-img-slot data-label="chess move &#8212; rook captures queen"><img src="assets/josue-soto-C2WLgD4ELXg-unsplash.jpg" alt="Close-up of a wooden rook chess piece on the board" loading="lazy"></div>
+          <div class="ph" data-img-slot data-label="chess move &#8212; rook captures queen"><img src="assets/chess-piece.png" alt="Close-up of a wooden rook chess piece on the board" loading="lazy"></div>
         </div>
       </div>
 
@@ -4262,10 +4249,10 @@
           <p class="rline" style="--ls: 0.46; --le: 0.49;"><span class="kw">THEN</span> show more horror movies</p>
         </div>
         <div class="rule-frame" style="--ls: 0.38; --le: 0.45; top: 18%; right: 22%;">
-          <div class="ph" data-img-slot data-label="horror movie poster"></div>
+          <div class="ph" data-img-slot data-label="movie popcorn"><img src="assets/movie-popcorn.png" alt="Bucket of movie popcorn" loading="lazy"></div>
         </div>
         <div class="rule-frame" style="--ls: 0.44; --le: 0.51; top: 60%; right: 6%;">
-          <div class="ph" data-img-slot data-label="horror movie poster"></div>
+          <div class="ph" data-img-slot data-label="movie remote"><img src="assets/movie-remote.png" alt="TV remote control" loading="lazy"></div>
         </div>
       </div>
 
