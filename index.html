@@ -1597,11 +1597,14 @@
   .s-optout {
     background: var(--purple);
     color: #fff;
-    height: calc(var(--lede-beat) * 2.4 + 100vh);
+    /* hold → click → hold → chart */
+    height: calc(var(--lede-beat) * 2.8 + 100vh);
     padding-bottom: 0;
     --p: 0;
-    /* hold on people/CTA, then chart fades/slides in */
-    --chart-show: clamp(0, (var(--p) - 0.42) / 0.1, 1);
+    /* cursor travels to the button on the first scroll beat */
+    --cursor-click: clamp(0, (var(--p) - 0.28) / 0.12, 1);
+    /* chart arrives last, after the click has settled — hard cut, no fade */
+    --chart-show: clamp(0, (var(--p) - 0.62) * 10000, 1);
   }
   .s-optout .pin {
     padding: 0;
@@ -1725,6 +1728,15 @@
     cursor: pointer;
   }
   .optout-btn:hover { filter: brightness(0.96); }
+  .optout-btn.is-flash {
+    animation: optout-btn-flash 0.5s ease-out;
+  }
+  @keyframes optout-btn-flash {
+    0% { background: #fff; color: #000; }
+    12% { background: var(--teal); color: #fff; }
+    70% { background: var(--teal); color: #fff; }
+    100% { background: #fff; color: #000; }
+  }
   .optout-cursor {
     position: absolute;
     left: 74%;
@@ -1732,11 +1744,22 @@
     width: 44px;
     height: 79px;
     pointer-events: none;
+    /* start ~35px right / 25px down; settle on the button as --cursor-click → 1 */
+    transform: translate(
+      calc((1 - var(--cursor-click)) * 35px),
+      calc((1 - var(--cursor-click)) * 25px)
+    );
+    will-change: transform;
   }
   .optout-cursor img {
     display: block;
     width: 44px;
     height: 79px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .optout-cursor { transform: none; will-change: auto; }
+    .optout-btn.is-flash { animation: none; }
   }
 
   .optout-chart {
@@ -1746,8 +1769,6 @@
     width: min(593px, 42vw);
     z-index: 2;
     opacity: var(--chart-show);
-    transform: translateY(calc((1 - var(--chart-show)) * 28px));
-    will-change: opacity, transform;
     pointer-events: none;
   }
   .optout-chart img {
@@ -1804,6 +1825,7 @@
       margin-top: -40px;
       margin-left: min(200px, 40vw);
     }
+    .optout-cursor { transform: none; will-change: auto; }
     .optout-chart { max-width: 100%; }
   }
 
@@ -2045,7 +2067,12 @@
     aspect-ratio: 681 / 494;
   }
   .dc-hud--government .dc-label--zoning { left: calc(25% + 4vw); top: 11.5vh; }
-  .dc-hud--government .dc-label--gov { left: auto; right: 3vw; top: 66vh; }
+  .dc-hud--government .dc-label--gov {
+    left: auto;
+    /* align to the frame's right edge; sit just above its top */
+    right: calc(58.33% - 6.3vw - min(681px, 48vw));
+    top: calc(40.5vh - 32px);
+  }
 
   /* Labor HUD (Figma 436:38) */
   .dc-hud--labor .dc-frame--workers {
@@ -2102,12 +2129,21 @@
   .dc-chapter-flow {
     display: flex;
     flex-direction: column;
-    gap: 55vh;
-    padding: 18vh 0 70vh;
+    gap: 0;
+    padding: 0 0 40vh;
     padding-left: calc(8.33% + 3.4vw);
     box-sizing: border-box;
   }
+  /* Each black box freezes at the top for one lede-beat (like plain text holds)
+     before releasing and letting the next box take its place. */
+  .dc-box-hold {
+    position: relative;
+    height: calc(100vh + var(--lede-beat));
+    box-sizing: border-box;
+  }
   .dc-box {
+    position: sticky;
+    top: 18vh;
     width: min(448px, 86vw);
     box-sizing: border-box;
     background: rgba(0, 0, 0, 0.7);
@@ -2412,12 +2448,14 @@
     font-weight: 400;
     line-height: 1.45;
     color: #000;
+    z-index: 3;
   }
   .comm-box p + p { margin-top: 1em; }
   .comm-photo {
     border: 1px solid #000;
     overflow: hidden;
     background: #000;
+    z-index: 2;
   }
   .comm-photo img {
     display: block;
@@ -2445,9 +2483,9 @@
     --from: 100vw;
   }
   .comm-box--halt {
-    left: calc(var(--comm-left) + 46vw);
+    left: calc(var(--comm-left) + 44vw);
     top: 3%;
-    width: min(260px, 20vw);
+    width: min(320px, 24vw);
     --delay: 0.22;
     --dur: 0.28;
     --from: 110vw;
@@ -2485,16 +2523,18 @@
     --from: 108vw;
   }
   .comm-photo--sign {
-    left: calc(var(--comm-left) + 47vw);
-    top: 52%;
-    width: min(150px, 12vw);
-    height: 38%;
+    left: calc(var(--comm-left) + 52vw);
+    top: 62%;
+    width: min(140px, 11vw);
+    height: auto;
+    aspect-ratio: 3 / 4;
+    max-height: 32%;
     --delay: 0.38;
     --dur: 0.28;
     --from: 112vw;
   }
   .comm-box--tribal {
-    left: calc(var(--comm-left) + 63vw);
+    left: calc(var(--comm-left) + 64vw);
     top: 48%;
     width: min(260px, 20vw);
     --delay: 0.46;
@@ -2912,7 +2952,7 @@
     height: 100%;
     object-fit: cover;
   }
-  .bbm-label--datasets { left: 63.06%; top: 89.62%; }
+  .bbm-label--datasets { left: 63.06%; top: 96.2%; }
 
   /* empty white frames beside the building (493:335–337) */
   .bbm-frame {
@@ -3280,7 +3320,8 @@
     z-index: 3;
     max-width: 441px;
     --ex-show: clamp(0, (var(--p) - 0.24) / var(--ask-fade), 1);
-    --ex-hide: clamp(0, (var(--p) - 0.44) / var(--ask-fade), 1);
+    /* hard cut when the next beat starts — no fade-out */
+    --ex-hide: clamp(0, (var(--p) - 0.44) * 10000, 1);
     opacity: calc(var(--ex-show) * (1 - var(--ex-hide)));
   }
   .ask-explain-mark {
@@ -3817,7 +3858,9 @@
   }
 
   @media (max-width: 800px) {
-    .dc-chapter-flow { padding-left: 7vw; gap: 40vh; }
+    .dc-chapter-flow { padding-left: 7vw; }
+    .dc-box { top: 10vh; }
+    .dc-box-hold { height: calc(100vh + var(--lede-beat) * 0.75); }
     .dc-label { font-size: 12px; gap: 8px; }
     .dc-hud--water .dc-frame--cooling,
     .dc-hud--electricity .dc-frame--towers,
@@ -3828,6 +3871,10 @@
       right: 4vw;
     }
     .dc-hud--government .dc-frame--gov { width: min(88vw, 420px); }
+    .dc-hud--government .dc-label--gov {
+      right: 4vw;
+      top: calc(40.5vh - 28px);
+    }
     .dc-hud--labor .dc-frame--workers { width: min(88vw, 420px); }
   }
 
@@ -4499,7 +4546,7 @@
   </div>
 </section>
 
-<!-- 13 · Opt-out overview (Figma 521:55): people/CTA hold, then chart. -->
+<!-- 13 · Opt-out overview (Figma 521:55): people/CTA → click → chart. -->
 <section id="s-optout" class="s-optout" data-scrub>
   <div class="pin">
     <div class="optout-stage">
@@ -4649,16 +4696,22 @@
   <!-- Figma 446:337 — Water usage -->
   <section id="s-dc-water" class="dc-chapter" data-dc-hold="water">
     <div class="dc-chapter-flow">
-      <div class="dc-box">
-        <p data-editable>Servers generate a lot of heat. To keep them from failing, data centers pump water through cooling systems that absorb that heat and release it as steam through cooling towers.</p>
-        <p data-editable>A large data center can consume up to 5 million gallons of water per day, roughly equivalent to the daily water use of a town of 10,000 to 50,000 people.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box">
+          <p data-editable>Servers generate a lot of heat. To keep them from failing, data centers pump water through cooling systems that absorb that heat and release it as steam through cooling towers.</p>
+          <p data-editable>A large data center can consume up to 5 million gallons of water per day, roughly equivalent to the daily water use of a town of 10,000 to 50,000 people.</p>
+        </div>
       </div>
-      <div class="dc-box dc-box--tight">
-        <p data-editable>This water usage most directly impacts locals. In The Dalles, Oregon, Google built its first data center in 2006. By 2024, a third of the entire city's water supply went to Google's three local data center sites.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>This water usage most directly impacts locals. In The Dalles, Oregon, Google built its first data center in 2006. By 2024, a third of the entire city's water supply went to Google's three local data center sites.</p>
+        </div>
       </div>
-      <div class="dc-box dc-box--tight">
-        <p data-editable>Beyond cooling, indirect water consumption from the power plants that supply electricity can represent up to 75% of a data center's total water use.</p>
-        <p data-editable>To decrease water usage, some new approaches are being developed. For example, immersion cooling submerges servers in a non-conductive liquid, which gets rid of the need for water-based cooling. These technologies are being worked on and are not yet adopted widely.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>Beyond cooling, indirect water consumption from the power plants that supply electricity can represent up to 75% of a data center's total water use.</p>
+          <p data-editable>To decrease water usage, some new approaches are being developed. For example, immersion cooling submerges servers in a non-conductive liquid, which gets rid of the need for water-based cooling. These technologies are being worked on and are not yet adopted widely.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -4670,12 +4723,16 @@
   <!-- Figma 446:364 — Electricity -->
   <section id="s-dc-electricity" class="dc-chapter" data-dc-hold="electricity">
     <div class="dc-chapter-flow">
-      <div class="dc-box dc-box--tight">
-        <p data-editable>When you send a prompt to an non-local AI, it travels through underground fiber optic cables to reach a data center. Inside, thousands of servers process your request simultaneously. This takes electricity, which comes from the local power grid through high-voltage transmission lines.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>When you send a prompt to an non-local AI, it travels through underground fiber optic cables to reach a data center. Inside, thousands of servers process your request simultaneously. This takes electricity, which comes from the local power grid through high-voltage transmission lines.</p>
+        </div>
       </div>
-      <div class="dc-box dc-box--tight">
-        <p data-editable>Data centers can require amounts of power similar to a medium-sized city, and accounted for nearly 4.4% of U.S. annual electricity in 2023, a figure expected to grow dramatically as AI demand increases.</p>
-        <p data-editable>Since that electricity comes from the existing grid, data centers compete with homes, schools, and hospitals for power. Some companies are investing in on-site solar and wind; others purchase renewable energy credits without changing how they actually draw from the grid.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>Data centers can require amounts of power similar to a medium-sized city, and accounted for nearly 4.4% of U.S. annual electricity in 2023, a figure expected to grow dramatically as AI demand increases.</p>
+          <p data-editable>Since that electricity comes from the existing grid, data centers compete with homes, schools, and hospitals for power. Some companies are investing in on-site solar and wind; others purchase renewable energy credits without changing how they actually draw from the grid.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -4687,13 +4744,17 @@
   <!-- Figma 446:384 — Government / zoning -->
   <section id="s-dc-government" class="dc-chapter" data-dc-hold="government">
     <div class="dc-chapter-flow">
-      <div class="dc-box dc-box--tight">
-        <p data-editable>Before a single server is installed, a data center needs approval from local government: land use permits, environmental impact assessments, noise level reviews, and confirmation that the local grid and water systems can handle the load.</p>
-        <p data-editable>Zoning reviews must evaluate whether the local grid and water systems can support such loads, especially in areas with old or limited infrastructure.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>Before a single server is installed, a data center needs approval from local government: land use permits, environmental impact assessments, noise level reviews, and confirmation that the local grid and water systems can handle the load.</p>
+          <p data-editable>Zoning reviews must evaluate whether the local grid and water systems can support such loads, especially in areas with old or limited infrastructure.</p>
+        </div>
       </div>
-      <div class="dc-box dc-box--tight">
-        <p data-editable>Companies often approach local governments with offers that are hard to refuse, like investment in water or road infrastructure, property tax revenue, and promises of jobs.</p>
-        <p data-editable>Google invested almost $29 million into updating The Dalles' water system in exchange for a 92% discount on its property taxes for 15 years. These deals shape what communities get and what they give up.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>Companies often approach local governments with offers that are hard to refuse, like investment in water or road infrastructure, property tax revenue, and promises of jobs.</p>
+          <p data-editable>Google invested almost $29 million into updating The Dalles' water system in exchange for a 92% discount on its property taxes for 15 years. These deals shape what communities get and what they give up.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -4705,15 +4766,17 @@
   <!-- Figma 436:38 — Labor -->
   <section id="s-dc-labor" class="dc-chapter" data-dc-hold="labor">
     <div class="dc-chapter-flow">
-      <div class="dc-box dc-box--tight">
-        <p data-editable>Building and running a data center requires skilled workers: electricians, HVAC technicians, network engineers, construction crews, and security staff. The construction phase brings a surge of temporary jobs to an area. But once a facility is operational, most of the work is automated.</p>
+      <div class="dc-box-hold">
+        <div class="dc-box dc-box--tight">
+          <p data-editable>Building and running a data center requires skilled workers: electricians, HVAC technicians, network engineers, construction crews, and security staff. The construction phase brings a surge of temporary jobs to an area. But once a facility is operational, most of the work is automated.</p>
+        </div>
       </div>
     </div>
   </section>
 
 </div>
 
-<!-- Datacenter impact map: pinned stage, teal copy + map layers crossfade (Figma 453:417). -->
+<!-- Datacenter impact map: pinned stage, teal copy + map layers hard-cut (Figma 453:417). -->
 <section id="s-dc-impact" class="s-dc-impact" data-scrub>
   <div class="pin">
     <div class="dc-impact-stage">
@@ -4906,7 +4969,7 @@
       </div>
       <div class="bbm-label bbm-label--datasets">
         <span class="bbm-label-mark" aria-hidden="true"></span>
-        <span class="bbm-label-text">PeoplE in Datasets</span>
+        <span class="bbm-label-text">People in Datasets</span>
       </div>
     </div>
   </div>
@@ -5569,7 +5632,7 @@
     dcSetHud(hudName, hudOp * reveal);
   }
 
-  /* ---------- datacenter impact map: pin stays put; --p crossfades map+teal steps ---------- */
+  /* ---------- datacenter impact map: pin stays put; --p hard-cuts map+teal steps ---------- */
   const sDcImpactEl = document.getElementById('s-dc-impact');
   const dcImpactSteps = sDcImpactEl
     ? [...sDcImpactEl.querySelectorAll('.dc-impact-step')]
@@ -5578,26 +5641,41 @@
     if (!sDcImpactEl || !dcImpactSteps.length) return;
     const p = parseFloat(sDcImpactEl.style.getPropertyValue('--p')) || 0;
     const n = dcImpactSteps.length;
-    // Simple dissolve: hold each step, then fade the next in on top
-    // (outgoing stays opaque underneath so we never drop through to black).
+    // Hold each step, then hard-cut to the next (no crossfade overlap).
     const t = Math.min(n - 1, Math.max(0, p * (n - 1)));
     const i0 = Math.min(n - 2, Math.floor(t));
     const i1 = i0 + 1;
     const f = t - i0; // 0..1 within this pair
-    const fadeStart = 0.72; // hold most of the way, then dissolve
-    let mix = 0;
-    if (f > fadeStart) mix = (f - fadeStart) / (1 - fadeStart);
-    if (p >= 0.999) mix = 1;
+    const cutAt = 0.72; // hold most of the way, then snap
+    const showNext = p >= 0.999 || f > cutAt;
+    const active = showNext ? i1 : i0;
 
     dcImpactSteps.forEach((step, i) => {
-      let op = 0;
-      if (p >= 0.999) op = i === n - 1 ? 1 : 0;
-      else if (i === i0) op = 1;
-      else if (i === i1) op = mix;
-      step.style.setProperty('--op', op.toFixed(3));
-      step.style.zIndex = String(i === i1 ? 2 : i === i0 ? 1 : 0);
-      step.classList.toggle('is-front', op > 0.5);
+      const op = i === active ? 1 : 0;
+      step.style.setProperty('--op', String(op));
+      step.style.zIndex = String(i === active ? 2 : 0);
+      step.classList.toggle('is-front', i === active);
     });
+  }
+
+  /* ---------- opt-out: one-shot button flash when cursor finishes its click ---------- */
+  const sOptoutEl = document.getElementById('s-optout');
+  const optoutBtn = sOptoutEl?.querySelector('.optout-btn');
+  let optoutFlashArmed = true;
+  function updateOptoutClick() {
+    if (!sOptoutEl || !optoutBtn) return;
+    const p = parseFloat(sOptoutEl.style.getPropertyValue('--p')) || 0;
+    // cursor-click completes at ~0.40; flash then, chart comes later
+    const clicked = p >= 0.4;
+    if (clicked && optoutFlashArmed) {
+      optoutFlashArmed = false;
+      optoutBtn.classList.remove('is-flash');
+      void optoutBtn.offsetWidth;
+      optoutBtn.classList.add('is-flash');
+    } else if (!clicked) {
+      optoutFlashArmed = true;
+      optoutBtn.classList.remove('is-flash');
+    }
   }
 
   /* ---------- ai positives: scatter Fira tags without overlap ---------- */
@@ -5697,9 +5775,9 @@
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); PixelFocus.updateAll(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); layoutAiPositives(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); layoutAiPositives(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
   updateModelCollapse();
@@ -5708,6 +5786,7 @@
   updateBuildingTrack();
   updateDatacenterTrack();
   updateDcImpact();
+  updateOptoutClick();
   PixelFocus.updateAll();
 
   /* ---------- split [data-highlight] text into indexed word spans ---------- */
