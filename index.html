@@ -132,6 +132,13 @@
     align-content: center;
     padding-block: 8vh;
   }
+  /* human-labor / ai-flood copy lines up with the top of the sticky people-building */
+  .s-human-labor.lede-hold > .lede-hold-pin,
+  .s-ai-flood.lede-hold > .lede-hold-pin {
+    align-content: start;
+    padding-block: 0;
+    padding-top: calc(100vh - min(30vw, 382px) * 535 / 382);
+  }
 
   /* ---------- scroll-linked reveal (vs. [data-reveal]'s fixed-duration transition) ----------
      [data-reveal]'s opacity plays over a fixed time (--anim-duration) once triggered, so a fast
@@ -1065,14 +1072,11 @@
      else in the section.
      ============================================================ */
   .s-internet {
-    /* phase 1 (p 0–0.5): intro copy holds, backdrop + building + posts settle in, as before.
-       phase 2 (p 0.5–1, Figma 378:214): intro exits, building + posts pan left into a new
-       layout, new copy + graph fade in on the right. Doubling the original 1.4x height gives
-       phase 2 the same amount of scroll room phase 1 had. */
+    /* phase 1: intro + digital posts; phase 2 pan earlier so print-* can follow after. */
     height: calc(var(--section-gap) * 2.8);
-    --old-out: clamp(0, (0.58 - var(--p)) / 0.08, 1);
-    --pan2: clamp(0, (var(--p) - 0.55) / 0.2, 1);
-    --new-in: clamp(0, (var(--p) - 0.72) / 0.18, 1);
+    --old-out: clamp(0, (0.38 - var(--p)) / 0.08, 1);
+    --pan2: clamp(0, (var(--p) - 0.34) / 0.16, 1);
+    --new-in: clamp(0, (var(--p) - 0.52) / 0.16, 1);
   }
   .s-internet .pin { background: var(--bg); }
   /* grid-background layer — same dot/line-grid idiom as .s-ai-kinds .pin::before,
@@ -1274,38 +1278,71 @@
     aspect-ratio: 115 / 140;
     border: 1px solid #fff;
     box-sizing: border-box;
+    overflow: hidden;
+    background: transparent;
+  }
+  .building-track-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
   }
   .building-track-frame.f0 { left: 2.5vw; bottom: 6vh; }
   .building-track-frame.f1 { left: calc(12vw + min(30vw, 382px) + 4vw); bottom: 22vh; }
   .building-track-frame.f2 { left: calc(12vw + min(30vw, 382px) + 14vw); bottom: 10vh; }
 
-  /* ---------- parallax posts: placeholder stack on the right of the building, rising
-     continuously off --p at a steeper rate than any other motion in the section — stacked
-     deep enough (8 items) that the climb never runs out before the scrub ends. ---------- */
+  /* ---------- parallax posts: training-data stream rising on the right.
+     Digital/web posts first; print-* assets trail at the end on the far right.
+     Column sits clear of the people-building (starts after its right edge). ---------- */
   .internet-posts {
     position: absolute;
     z-index: 4;
     top: 0;
     bottom: 0;
-    right: 3vw;
-    width: min(13.5vw, 180px); /* 1.5x the original min(9vw, 120px) */
+    /* clear the building's phase-1 column (52vw + building width) with a gap */
+    left: calc(52vw + min(30vw, 382px) + 2.5vw);
+    right: 2vw;
+    width: auto;
+    min-width: 0;
+    /* stay hidden until p clears the intro beat */
+    --posts-show: clamp(0, (var(--p) - 0.083) * 10000, 1);
+    opacity: var(--posts-show);
     /* stays put through phase 2 — building pans left, outro lands in the middle, posts
        keep the far-right column so the order reads building / text+graph / posts */
   }
   .internet-post {
     position: absolute;
     left: 0;
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    /* conveyor loop, not a one-shot climb: each item's position is p's progress plus its
-       own phase offset, wrapped by the column's full cycle length (mod()) — so once an
-       item exits off the top it re-enters at the bottom instead of just drifting away and
-       leaving the column empty for the rest of the scrub. */
-    --spacing: 55vh;      /* gap between consecutive items in the stream */
-    --cycle: calc(8 * var(--spacing));
-    --phase: calc(var(--i) * var(--spacing));
-    transform: translateY(calc(100vh - mod(var(--p) * 480vh + var(--phase), var(--cycle))));
+    width: min(14vw, 200px);
+    /* assets are 1440×1080 — don't force a portrait crop */
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: transparent;
+    /* digital posts climb through phase 1; print-* use a later --climb-start */
+    --spacing: 42vh;
+    --climb-start: 0.083;
+    --climb-speed: 1050vh;
+    transform: translateY(calc(
+      100vh
+      + var(--i) * var(--spacing)
+      - max(0, (var(--p) - var(--climb-start))) * var(--climb-speed)
+    ));
     will-change: transform;
+  }
+  .internet-post img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  /* print sources: far right, only after the building has finished panning left */
+  .internet-post--print {
+    left: auto;
+    right: 0;
+    --climb-start: 0.52;
+    --climb-speed: 550vh;
   }
 
   /* ============================================================
@@ -1336,6 +1373,7 @@
     display: flex;
     flex-direction: column;
     gap: 3vh;
+    margin-top: 40px;
   }
   .training-gaps-copy .subtext { color: rgba(255, 255, 255, 0.75); }
   .training-gaps-copy .subtext em { color: var(--ink); }
@@ -1352,8 +1390,8 @@
     min-height: 100vh;
     box-sizing: border-box;
     display: grid;
-    align-content: center;
-    padding-block: 8vh;
+    align-content: start;
+    padding-block: 0;
     position: relative;
   }
   .human-labor-layout {
@@ -1361,7 +1399,8 @@
     /* clears the sticky building's own column (12vw page margin + its width + gap) */
     padding-left: calc(12vw + min(30vw, 382px) + 8vw);
     padding-right: 12vw;
-    min-height: 70vh;
+    /* fill the band beside the building (bottom-aligned graphic) */
+    min-height: calc(min(30vw, 382px) * 535 / 382);
   }
   .human-labor-copy {
     max-width: 28em;
@@ -1388,15 +1427,15 @@
     min-height: 100vh;
     box-sizing: border-box;
     display: grid;
-    align-content: center;
-    padding-block: 8vh;
+    align-content: start;
+    padding-block: 0;
     position: relative;
   }
   .ai-flood-layout {
     position: relative;
     padding-left: calc(12vw + min(30vw, 382px) + 8vw);
     padding-right: 12vw;
-    min-height: 70vh;
+    min-height: calc(min(30vw, 382px) * 535 / 382);
   }
   .ai-flood-copy {
     max-width: 28em;
@@ -2720,20 +2759,36 @@
     opacity: var(--bbm-show);
   }
 
-  /* Human ideas — parallax placeholder (494:351) */
+  /* Human ideas — same training-data stream as s-internet (494:351) */
   .bbm-parallax {
     left: 2.22%;
     top: 33.05%;
     width: 12.57%;
     height: 56.57%;
-    background: #fff;
-    color: #000;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    font-size: 16px;
-    line-height: 1.5;
+    overflow: hidden;
+    background: transparent;
     z-index: 1;
+  }
+  .bbm-parallax-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* scrub drifts the stack up so the full list can pass through the frame */
+    transform: translateY(calc(8% - var(--p) * 72%));
+    will-change: transform;
+  }
+  .bbm-parallax-shot {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .bbm-parallax-shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
   }
   .bbm-label--ideas { left: 3.54%; top: 92.16%; }
 
@@ -2845,13 +2900,15 @@
   /* clear of automata shots + researchers */
   .bbm-label--automata { left: 52%; top: 51.8%; }
 
-  /* AI researchers (493:281) */
+  /* AI researchers (493:281) — landscape frame so the group photo isn't cropped */
   .bbm-researchers {
     left: 71.5%;
     top: 33.58%;
     width: 26.67%;
-    height: 28.23%;
+    height: auto;
+    aspect-ratio: 3 / 2;
     overflow: hidden;
+    background: transparent;
     z-index: 3;
   }
   .bbm-researchers img {
@@ -2859,7 +2916,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: center center;
   }
   .bbm-label--researchers { left: 85.14%; top: 63.5%; }
 
@@ -2954,13 +3011,22 @@
   }
   .bbm-label--datasets { left: 63.06%; top: 96.2%; }
 
-  /* empty white frames beside the building (493:335–337) */
+  /* white frames beside the building — same portraits as human-labor (493:335–337) */
   .bbm-frame {
     position: absolute;
     border: 1px solid rgba(255, 255, 255, 0.85);
     pointer-events: none;
     z-index: 2;
     box-sizing: border-box;
+    overflow: hidden;
+    background: transparent;
+  }
+  .bbm-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
   }
   .bbm-frame--a {
     left: 0;
@@ -3021,8 +3087,9 @@
     .bbm-frame { display: none; }
     .bbm-parallax {
       width: 100%;
-      height: 180px;
+      height: 280px;
     }
+    .bbm-parallax-stream { transform: none; }
     .bbm-internet-wrap {
       width: min(100%, 320px);
       height: 420px;
@@ -4001,6 +4068,10 @@
       padding-right: 7vw;
       min-height: 0;
     }
+    .s-human-labor.lede-hold > .lede-hold-pin {
+      padding-top: 8vh;
+      align-content: start;
+    }
     .human-labor-stat {
       position: static;
       margin-top: 4vh;
@@ -4011,6 +4082,10 @@
       padding-left: 7vw;
       padding-right: 7vw;
       min-height: 0;
+    }
+    .s-ai-flood.lede-hold > .lede-hold-pin {
+      padding-top: 8vh;
+      align-content: start;
     }
     .model-collapse-stage { padding: 10vh 7vw 8vh; }
     .model-collapse-crosshair::before { right: 7vw; }
@@ -4427,9 +4502,15 @@
       <div class="cell"><img src="assets/building/box9.png" alt="Woman relaxed in an armchair holding a mug" loading="lazy"></div>
     </div>
     <div class="building-track-frames">
-      <div class="building-track-frame f0"></div>
-      <div class="building-track-frame f1"></div>
-      <div class="building-track-frame f2"></div>
+      <div class="building-track-frame f0">
+        <img src="assets/misc%20people/18.png" alt="Portrait of a person" loading="lazy">
+      </div>
+      <div class="building-track-frame f1">
+        <img src="assets/misc%20people/19.png" alt="Portrait of a person" loading="lazy">
+      </div>
+      <div class="building-track-frame f2">
+        <img src="assets/misc%20people/20.png" alt="Portrait of a person" loading="lazy">
+      </div>
     </div>
   </div>
 
@@ -4457,14 +4538,33 @@
       <img class="internet-cityscape" src="assets/cityscape.png" alt="City skyline silhouette" loading="lazy">
 
       <div class="internet-posts" aria-hidden="true">
-        <div class="internet-post ph" data-img-slot data-label="post 1" style="--i: 0;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 2" style="--i: 1;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 3" style="--i: 2;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 4" style="--i: 3;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 5" style="--i: 4;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 6" style="--i: 5;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 7" style="--i: 6;"></div>
-        <div class="internet-post ph" data-img-slot data-label="post 8" style="--i: 7;"></div>
+        <div class="internet-post" style="--i: 0;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/post.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post" style="--i: 1;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/post_text.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post" style="--i: 2;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/code.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post" style="--i: 3;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/captcha.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post" style="--i: 4;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/vid_thumbnail.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post internet-post--print" style="--i: 0;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/print-books.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post internet-post--print" style="--i: 1;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/print-documents.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post internet-post--print" style="--i: 2;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/print-files.png" alt="" loading="lazy">
+        </div>
+        <div class="internet-post internet-post--print" style="--i: 3;">
+          <img src="assets/fake%20posts%20%3A%20training%20data/print-photographs.png" alt="" loading="lazy">
+        </div>
       </div>
 
       <div class="internet-outro">
@@ -4903,8 +5003,36 @@
     <div class="bbm-stage">
       <p class="bbm-lede" data-editable>Remember, generative AI was built from the contributions of a LOT of people.</p>
 
-      <div class="bbm-cluster bbm-parallax" aria-hidden="true">
-        <p>(placeholder for<br>parallax scroll)</p>
+      <div class="bbm-cluster bbm-parallax" aria-label="Human ideas and creativity">
+        <div class="bbm-parallax-stream">
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/print-photographs.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/print-files.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/print-documents.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/print-books.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/vid_thumbnail.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/captcha.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/code.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/post_text.png" alt="" loading="lazy">
+          </div>
+          <div class="bbm-parallax-shot">
+            <img src="assets/fake%20posts%20%3A%20training%20data/post.png" alt="" loading="lazy">
+          </div>
+        </div>
       </div>
       <div class="bbm-label bbm-label--ideas">
         <span class="bbm-label-mark" aria-hidden="true"></span>
@@ -4923,9 +5051,15 @@
           <div class="cell"><img src="assets/building/box8.png" alt=""></div>
           <div class="cell"><img src="assets/building/box9.png" alt=""></div>
         </div>
-        <div class="bbm-frame bbm-frame--a" aria-hidden="true"></div>
-        <div class="bbm-frame bbm-frame--b" aria-hidden="true"></div>
-        <div class="bbm-frame bbm-frame--c" aria-hidden="true"></div>
+        <div class="bbm-frame bbm-frame--a">
+          <img src="assets/misc%20people/18.png" alt="Portrait of a person" loading="lazy">
+        </div>
+        <div class="bbm-frame bbm-frame--b">
+          <img src="assets/misc%20people/19.png" alt="Portrait of a person" loading="lazy">
+        </div>
+        <div class="bbm-frame bbm-frame--c">
+          <img src="assets/misc%20people/20.png" alt="Portrait of a person" loading="lazy">
+        </div>
       </div>
       <div class="bbm-label bbm-label--internet">
         <span class="bbm-label-mark" aria-hidden="true"></span>
@@ -5463,7 +5597,7 @@
      s-training-gaps → s-human-labor → s-ai-flood — see the .building-track CSS block)
      lives outside those sections' DOM subtrees, so it can't inherit their CSS custom
      properties directly. Instead:
-       --pan2      from #s-internet's --p (mirrors the 0.55/0.2 --pan2 window).
+       --pan2      from #s-internet's --p (mirrors the 0.34/0.16 --pan2 window).
        --reveal    from .training-gaps-copy (scroll-reveal window).
        --ai-cells  from .ai-flood-copy (corner-cell flip, Figma 382:365).
        --hl-frames from #s-human-labor (fade in once that section owns the viewport). ---------- */
@@ -5484,7 +5618,7 @@
     if (!buildingTrackBuilding && !buildingTrackFrames) return;
     if (sInternetEl && buildingTrackBuilding) {
       const p = parseFloat(getComputedStyle(sInternetEl).getPropertyValue('--p')) || 0;
-      const pan2 = Math.min(1, Math.max(0, (p - 0.55) / 0.2));
+      const pan2 = Math.min(1, Math.max(0, (p - 0.34) / 0.16));
       buildingTrackBuilding.style.setProperty('--pan2', pan2.toFixed(4));
     }
     if (buildingTrackBuilding) {
