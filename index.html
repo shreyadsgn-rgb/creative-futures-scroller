@@ -132,7 +132,8 @@
     align-content: center;
     padding-block: 8vh;
   }
-  /* human-labor / ai-flood copy lines up with the top of the sticky people-building */
+  /* training-gaps / human-labor / ai-flood copy lines up with the top of the sticky people-building */
+  .s-training-gaps.lede-hold > .lede-hold-pin,
   .s-human-labor.lede-hold > .lede-hold-pin,
   .s-ai-flood.lede-hold > .lede-hold-pin {
     align-content: start;
@@ -1382,11 +1383,14 @@
     display: flex;
     flex-direction: column;
     gap: 3vh;
-    margin-top: 40px;
   }
   .training-gaps-copy .subtext { color: rgba(255, 255, 255, 0.75); }
   .training-gaps-copy .subtext em { color: var(--ink); }
-  .training-gaps-graph { width: 100%; aspect-ratio: 1778 / 1164; }
+  .training-gaps-graph {
+    width: 100%;
+    aspect-ratio: 1778 / 1164;
+    opacity: var(--graph-in, 0);
+  }
   .training-gaps-graph img { object-fit: contain; }
 
   /* ============================================================
@@ -1417,6 +1421,7 @@
     flex-direction: column;
     gap: 3vh;
   }
+  .human-labor-copy .subtext { color: rgba(255, 255, 255, 0.75); }
 
   /* ============================================================
      10 · AI FLOOD (Figma 382:365) — purple full-viewport beat. Building
@@ -1447,16 +1452,18 @@
      11 · MODEL COLLAPSE (Figma 382:421 → 382:436) — scrub like s-naming:
        1. intro copy + mid-field title on the crosshair
        2. intro drifts up out of view; title rises and docks at the top
-       3. deeper copy + bell-curve placeholder reveal below
+       3. deeper copy + pre-bellcurve reveal below; after a beat it becomes post-bellcurve
        4. on exit, white line + title hinge down ~45° with a bounce
      ============================================================ */
   .s-model-collapse {
-    height: calc(var(--section-gap) * 2.15);
+    height: calc(var(--section-gap) * 2.4);
     padding-bottom: 0; /* no empty end-hold after p=1 */
     --lede: clamp(0, var(--p) / 0.08, 1);
     --clear: clamp(0, (var(--p) - 0.16) / 0.1, 1);
     --rise: clamp(0, (var(--p) - 0.2) / 0.16, 1);
     --reveal: clamp(0, (var(--p) - 0.4) / 0.12, 1);
+    /* after the media is in, hold a beat then crossfade pre → post curve */
+    --curve: clamp(0, (var(--p) - 0.54) / 0.12, 1);
     /* after hinge collapse finishes, black conclude box slides up */
     --conclude: clamp(0, (var(--p) - 0.82) / 0.1, 1);
     --title-size: clamp(40px, 4.4vw, 64px);
@@ -1574,18 +1581,23 @@
     gap: 3vh;
   }
   .model-collapse-media {
+    position: relative;
     width: 100%;
-    aspect-ratio: 525 / 304;
-    background: #fff;
-    color: #000;
+    aspect-ratio: 1762 / 1148;
+    overflow: hidden;
+    background: transparent;
     border: none;
   }
-  .model-collapse-media::before {
-    color: #000;
-    content: attr(data-label);
-    text-transform: none;
-    letter-spacing: 0;
-    font: 400 16px/1.5 'Poppins', system-ui, sans-serif;
+  .model-collapse-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .model-collapse-media .curve-post {
+    opacity: var(--curve);
   }
   /* black conclude box — contamination copy slides up after hinge */
   .model-collapse-conclude {
@@ -4070,6 +4082,7 @@
       padding-right: 7vw;
       min-height: 0;
     }
+    .s-training-gaps.lede-hold > .lede-hold-pin,
     .s-human-labor.lede-hold > .lede-hold-pin {
       padding-top: 8vh;
       align-content: start;
@@ -4572,7 +4585,7 @@
         <div class="training-gaps-copy">
           <p class="lede" data-scroll-reveal data-editable>Some languages, cultures, and communities are represented more in training data than others.</p>
           <p class="subtext" data-scroll-reveal data-editable>Common Crawl&#8217;s crawling process prioritizes pages on <em>popular</em> websites, which means smaller websites and sites in non-English languages are not as represented.</p>
-          <div class="training-gaps-graph ph" data-img-slot data-scroll-reveal data-label="graph — node and link diagram"><img src="assets/trainingLanguages.png" alt="Bubble chart of language representation in training data, with English at 40.6 percent" loading="lazy"></div>
+          <div class="training-gaps-graph ph" data-img-slot data-label="graph — node and link diagram"><img src="assets/trainingLanguages.png" alt="Bubble chart of language representation in training data, with English at 40.6 percent" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -4586,6 +4599,7 @@
         <div class="human-labor-copy">
           <p class="lede" data-scroll-reveal data-editable>It takes more than data to train these models.</p>
           <p class="lede" data-scroll-reveal data-editable>Behind the scenes, millions of people help prepare data, review outputs, and improve models.</p>
+          <p class="subtext" data-scroll-reveal data-editable>Many receive little pay and difficult working conditions as companies race to conduct training.</p>
         </div>
       </div>
     </div>
@@ -4624,7 +4638,10 @@
           <p class="lede" data-editable>When this happens, it&#8217;s the things that show up less often in training data, like unique styles of phrasing, niche topics, and uncommon perspectives that disappear while the most common information survives.</p>
           <p class="lede" data-editable>This further impacts whoever was already underrepresented in the data to begin with.</p>
         </div>
-        <div class="model-collapse-media ph" data-img-slot data-label="bell curve placeholder"></div>
+        <div class="model-collapse-media">
+          <img class="curve-pre" src="assets/pre_bell-curve.png" alt="Bell curve of common versus niche styles, with unique hats at the tails" loading="lazy">
+          <img class="curve-post" src="assets/post_bell-curve.png" alt="Collapsed bell curve where uncommon styles have disappeared" loading="lazy">
+        </div>
       </div>
       <div class="model-collapse-conclude">
         <p class="lede" data-editable>Currently, some LLM companies are looking at printed material as training data that is safe from AI contamination.</p>
@@ -5566,6 +5583,17 @@
     }
   }
 
+  /* training-gaps chart: stay hidden through the first sticky beat, then fade in */
+  const sTrainingGapsEl = document.getElementById('s-training-gaps');
+  const trainingGapsGraph = document.querySelector('.training-gaps-graph');
+  function updateTrainingGapsGraph() {
+    if (!sTrainingGapsEl || !trainingGapsGraph) return;
+    const hold = Math.max(1, sTrainingGapsEl.offsetHeight - innerHeight);
+    const p = Math.min(1, Math.max(0, -sTrainingGapsEl.getBoundingClientRect().top / hold));
+    const g = Math.min(1, Math.max(0, (p - 0.5) / 0.2));
+    trainingGapsGraph.style.setProperty('--graph-in', g.toFixed(4));
+  }
+
   /* ---------- model-collapse exit: hinge line + title down ~45° with a bounce ---------- */
   const sModelCollapseEl = document.getElementById('s-model-collapse');
   function easeOutBack(t) {
@@ -5914,11 +5942,12 @@
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); PixelFocus.updateAll(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateTrainingGapsGraph(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); layoutAiPositives(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateTrainingGapsGraph(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); layoutAiPositives(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
+  updateTrainingGapsGraph();
   updateModelCollapse();
   layoutAiPositives();
   updateJohnniacTrack();
