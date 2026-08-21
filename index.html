@@ -6,7 +6,7 @@
 <title>History — Sandbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Courier+Prime:wght@400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Tunable variables — the dev panel writes these live.
@@ -395,9 +395,6 @@
     font: 500 10px/1 ui-monospace, Menlo, monospace;
     letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim);
   }
-  .pdf-caption { font-size: 12px; color: var(--ink-dim); }
-  .pdf-caption a { color: var(--teal); }
-
   .callout {
     position: absolute; top: 50%; width: min(20vw, 240px);
     background: var(--gray-panel); border-radius: 6px;
@@ -412,7 +409,7 @@
   .callout-right { right: 1vw; }
   .callout-quote { font-style: italic; color: var(--ink-dim); font-size: 13.5px; line-height: 1.6; }
   .callout-prompt {
-    font-family: 'Courier Prime', ui-monospace, Menlo, monospace;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
     font-size: 13.5px; line-height: 1.6; color: var(--ink);
   }
 
@@ -774,7 +771,7 @@
      ============================================================ */
   .s-datasets {
     height: calc(var(--section-gap) * 2.4);
-    --cards: 3;                          /* last card index (4 cards → 0..3) */
+    --cards: 2;                          /* last card index (3 cards → 0..2) */
     --focus: calc(var(--p) * var(--cards));
     --gap: 12.5px;
     --card-w: 270px;
@@ -785,11 +782,25 @@
   .s-datasets .pin {
     align-content: start;
     padding: 18vh 0 0;
+    background: var(--bg);
+  }
+  .s-datasets .pin::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.3;
+    background: url("assets/BACKGROUNDTraining - Data Sets.png") center / cover no-repeat;
+  }
+  .s-datasets .pin > * {
+    position: relative;
+    z-index: 1;
   }
   .s-datasets .datasets-intro {
     padding-left: 12vw;
     margin-bottom: 4vh;
-    max-width: 28em;
+    max-width: calc(12vw + 480px);
   }
   .dataset-track {
     display: flex;
@@ -815,7 +826,6 @@
   .dataset-card .media {
     width: calc(var(--card-w) + var(--prox) * (var(--card-w-on) - var(--card-w)));
     height: calc(var(--card-h) + var(--prox) * (var(--card-h-on) - var(--card-h)));
-    opacity: calc(0.42 + var(--prox) * 0.58);
   }
   .dataset-card .media .ph { height: 100%; }
   .dataset-card figcaption {
@@ -1100,7 +1110,6 @@
     padding-left: 12vw;
     --in: clamp(0, var(--p) / 0.05, 1);
     opacity: calc(var(--in) * var(--old-out));
-    transform: translateY(calc((1 - var(--in)) * 16px));
   }
   .s-internet .intro p + p { margin-top: 2vh; }
 
@@ -1117,10 +1126,10 @@
     flex-direction: column;
     gap: 3vh;
     opacity: var(--new-in);
-    transform: translateY(calc((1 - var(--new-in)) * 16px));
     pointer-events: none;
   }
-  .internet-outro-graph { width: 100%; aspect-ratio: 423 / 272; }
+  .internet-outro-graph { width: 100%; aspect-ratio: 1118 / 1046; }
+  .internet-outro-graph img { object-fit: contain; }
 
   /* ---------- clouds: two alternating cutouts, stretched, scattered across a strip
      wider than the viewport so the drift never visibly runs out mid-scrub; the whole
@@ -1377,13 +1386,13 @@
   }
   .training-gaps-copy .subtext { color: rgba(255, 255, 255, 0.75); }
   .training-gaps-copy .subtext em { color: var(--ink); }
-  .training-gaps-graph { width: 100%; aspect-ratio: 423 / 272; }
+  .training-gaps-graph { width: 100%; aspect-ratio: 1778 / 1164; }
+  .training-gaps-graph img { object-fit: contain; }
 
   /* ============================================================
      9 · HUMAN LABOR (Figma 382:286) — purple full-viewport beat after
      training-gaps. Building stays sticky via .building-track. White
-     outline frames float near the building; body copy + a lower-right
-     statistic note sit in the cleared right column.
+     outline frames float near the building; body copy sits in the cleared right column.
      ============================================================ */
   .s-human-labor {
     background: var(--purple);
@@ -1407,13 +1416,6 @@
     display: flex;
     flex-direction: column;
     gap: 3vh;
-  }
-  .human-labor-stat {
-    position: absolute;
-    right: 12vw;
-    bottom: 0;
-    max-width: 18em;
-    color: var(--ink);
   }
 
   /* ============================================================
@@ -4072,11 +4074,6 @@
       padding-top: 8vh;
       align-content: start;
     }
-    .human-labor-stat {
-      position: static;
-      margin-top: 4vh;
-      max-width: none;
-    }
     .building-track-frames { display: none; }
     .ai-flood-layout {
       padding-left: 7vw;
@@ -4283,7 +4280,6 @@
             </div>
           </div>
         </div>
-        <p class="pdf-caption">Source: <a href="assets/pdfs/dartmouth_aifoundations.pdf" target="_blank" rel="noopener">dartmouth_aifoundations.pdf</a></p>
       </div>
 
       <div class="callout callout-left" style="--in-start: 0.03; --hold-start: 0.06; --hold-end: 0.15; --out-end: 0.18;">
@@ -4357,10 +4353,10 @@
           <p class="rline" style="--ls: 0.11; --le: 0.14;"><span class="kw">THEN</span> take the queen</p>
         </div>
         <div class="rule-frame" style="--ls: 0.03; --le: 0.10; top: 18%; right: 22%;">
-          <div class="ph" data-img-slot data-label="chess board &#8212; queen exposed to rook"><img src="assets/chess-board.png" alt="Chess board mid-game with pieces in play" loading="lazy"></div>
+          <div class="ph" data-img-slot data-pixel-focus data-label="chess board &#8212; queen exposed to rook"><img src="assets/early-rules/chess-board.png" alt="Chess board mid-game with pieces in play" loading="lazy"><canvas aria-hidden="true"></canvas></div>
         </div>
         <div class="rule-frame" style="--ls: 0.09; --le: 0.16; top: 60%; right: 6%;">
-          <div class="ph" data-img-slot data-label="chess move &#8212; rook captures queen"><img src="assets/chess-piece.png" alt="Close-up of a wooden rook chess piece on the board" loading="lazy"></div>
+          <div class="ph" data-img-slot data-pixel-focus data-label="chess move &#8212; rook captures queen"><img src="assets/early-rules/chess-piece.png" alt="Wooden rook chess piece" loading="lazy"><canvas aria-hidden="true"></canvas></div>
         </div>
       </div>
 
@@ -4371,10 +4367,10 @@
           <p class="rline" style="--ls: 0.46; --le: 0.49;"><span class="kw">THEN</span> show more horror movies</p>
         </div>
         <div class="rule-frame" style="--ls: 0.38; --le: 0.45; top: 18%; right: 22%;">
-          <div class="ph" data-img-slot data-label="movie popcorn"><img src="assets/movie-popcorn.png" alt="Bucket of movie popcorn" loading="lazy"></div>
+          <div class="ph" data-img-slot data-pixel-focus data-label="movie popcorn"><img src="assets/early-rules/movie-popcorn.png" alt="Popcorn bucket and film clapperboard" loading="lazy"><canvas aria-hidden="true"></canvas></div>
         </div>
         <div class="rule-frame" style="--ls: 0.44; --le: 0.51; top: 60%; right: 6%;">
-          <div class="ph" data-img-slot data-label="movie remote"><img src="assets/movie-remote.png" alt="TV remote control" loading="lazy"></div>
+          <div class="ph" data-img-slot data-pixel-focus data-label="movie remote"><img src="assets/early-rules/movie-remote.png" alt="TV remote control" loading="lazy"><canvas aria-hidden="true"></canvas></div>
         </div>
       </div>
 
@@ -4385,10 +4381,10 @@
           <p class="rline" style="--ls: 0.81; --le: 0.84;"><span class="kw">THEN</span> label area as &#8220;face&#8221;</p>
         </div>
         <div class="rule-frame" style="--ls: 0.73; --le: 0.80; top: 18%; right: 22%;">
-          <div class="ph" data-img-slot data-label="oval + two circles diagram"></div>
+          <div class="ph" data-img-slot data-pixel-focus data-label="oval + two circles diagram"><img src="assets/early-rules/face1.png" alt="Marble face fragment" loading="lazy"><canvas aria-hidden="true"></canvas></div>
         </div>
         <div class="rule-frame" style="--ls: 0.79; --le: 0.86; top: 60%; right: 6%;">
-          <div class="ph" data-img-slot data-label="detected face outline"></div>
+          <div class="ph" data-img-slot data-pixel-focus data-label="detected face outline"><img src="assets/early-rules/face2.png" alt="Person with face-detection lines projected on their face" loading="lazy"><canvas aria-hidden="true"></canvas></div>
         </div>
       </div>
     </div>
@@ -4406,7 +4402,7 @@
 <!-- 5 · Datasets: stationary row — scroll focuses/enlarges each card -->
 <section id="s-datasets" class="s-datasets" data-scrub>
   <div class="pin">
-    <p class="lede datasets-intro" data-editable>This type of machine learning started with datasets.</p>
+    <p class="lede datasets-intro" data-editable>This type of machine learning started with datasets, many of which contained information about people.</p>
     <div class="dataset-track">
       <figure class="dataset-card" style="--i: 0;">
         <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="MNIST handwritten digits"><img src="assets/MNIST_dataset_example.png" alt="Grid of handwritten digit samples from the MNIST dataset" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
@@ -4427,13 +4423,6 @@
         <figcaption>
           <span class="name" data-editable>Pima Indians Diabetes</span>
           <span class="desc" data-editable>Health records used to predict medical outcomes.</span>
-        </figcaption>
-      </figure>
-      <figure class="dataset-card" style="--i: 3;">
-        <div class="media"><div class="ph" data-img-slot data-label="Chess endgame positions visual"></div></div>
-        <figcaption>
-          <span class="name" data-editable>Chess Endgame Positions</span>
-          <span class="desc" data-editable>Board states that taught machines to evaluate moves.</span>
         </figcaption>
       </figure>
     </div>
@@ -4569,8 +4558,8 @@
 
       <div class="internet-outro">
         <p class="lede" data-editable>in addition to other things in its giant collection of human-created content.</p>
-        <div class="internet-outro-graph ph" data-img-slot data-label="graph — most common training sources for GPT-2"></div>
-        <p class="subtext" data-editable>Most common training sources for GPT2.</p>
+        <div class="internet-outro-graph ph" data-img-slot data-label="graph — most common training sources for GPT-2"><img src="assets/toptrainedsites.png" alt="Chart of the top web domains in LLM training data and their share of tokens" loading="lazy"></div>
+        <p class="subtext" data-editable>Top domains for training in 2023. Current LLM models still scrape platforms like these. </p>
       </div>
     </div>
   </section>
@@ -4583,7 +4572,7 @@
         <div class="training-gaps-copy">
           <p class="lede" data-scroll-reveal data-editable>Some languages, cultures, and communities are represented more in training data than others.</p>
           <p class="subtext" data-scroll-reveal data-editable>Common Crawl&#8217;s crawling process prioritizes pages on <em>popular</em> websites, which means smaller websites and sites in non-English languages are not as represented.</p>
-          <div class="training-gaps-graph ph" data-img-slot data-scroll-reveal data-label="graph — node and link diagram"></div>
+          <div class="training-gaps-graph ph" data-img-slot data-scroll-reveal data-label="graph — node and link diagram"><img src="assets/trainingLanguages.png" alt="Bubble chart of language representation in training data, with English at 40.6 percent" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -4598,7 +4587,6 @@
           <p class="lede" data-scroll-reveal data-editable>It takes more than data to train these models.</p>
           <p class="lede" data-scroll-reveal data-editable>Behind the scenes, millions of people help prepare data, review outputs, and improve models.</p>
         </div>
-        <p class="subtext human-labor-stat" data-scroll-reveal data-editable>*Insert statistic about how many people are doing this for little pay in other countries.</p>
       </div>
     </div>
   </section>
@@ -5501,7 +5489,7 @@
   })();
 
   /* ---------- dataset cards: wire pixel-focus to the same --prox each card already
-     uses for its size/opacity swell (mirrored here in JS since getComputedStyle
+     uses for its size swell (mirrored here in JS since getComputedStyle
      can't resolve a calc()/clamp() custom property back into a number — see the
      --focus note on updateAiKindsFlight above for the same constraint). ---------- */
   document.querySelectorAll('.dataset-card').forEach(card => {
@@ -5519,6 +5507,23 @@
       // re-pixelating as it shrinks back out of frame (Math.max(0, -d) collapses to 0 here).
       const approach = Math.max(0, -d);
       return 1 - Math.max(0, approach - hold) / (1 - hold);
+    }, f => f ** 3);
+  });
+
+  /* ---------- s-rules frames: de-pixelate across each frame's own --ls → --le
+     fade-in window. Cap short of fully crisp — calibrated to the popcorn frame
+     (ls=0.38, le=0.45) at p=0.447, which is still slightly pixelated. ---------- */
+  const RULES_FOCUS_CAP = (0.447 - 0.38) / (0.45 - 0.38);
+  document.querySelectorAll('.s-rules .rule-frame').forEach(frame => {
+    const slot = frame.querySelector('[data-pixel-focus]');
+    const section = frame.closest('[data-scrub]');
+    if (!slot || !section) return;
+    const ls = parseFloat(frame.style.getPropertyValue('--ls')) || 0;
+    const le = parseFloat(frame.style.getPropertyValue('--le')) || 1;
+    const span = le - ls || 1;
+    PixelFocus.register(slot, () => {
+      const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
+      return Math.min(RULES_FOCUS_CAP, Math.max(0, (p - ls) / span));
     }, f => f ** 3);
   });
 
