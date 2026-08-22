@@ -228,6 +228,8 @@
   .zoom-item.img.size-lg { width: min(26vw, 320px); aspect-ratio: 2 / 3; }
   .zoom-item.img.size-md { width: min(18vw, 230px); aspect-ratio: 3 / 4; }
   .zoom-item.img.size-sm { width: min(12vw, 150px); aspect-ratio: 1 / 1; }
+  .zoom-item.img.size-wide { width: min(28vw, 380px); aspect-ratio: 16 / 9; position: relative; top: 40px; }
+  .zoom-item.img.size-wide img { object-fit: contain; }
 
   /* ============================================================
      1 · OLD DREAMS — 4-step fade-forward sequence
@@ -791,7 +793,7 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.3;
+    opacity: 0.2;
     background: url("assets/BACKGROUNDTraining - Data Sets.png") center / cover no-repeat;
   }
   .s-datasets .pin > * {
@@ -4142,8 +4144,8 @@
            past the camera. Waves start every ~0.10 and stagger ~0.04 within, so ~6–8
            items share the screen at mid-scrub. -->
       <!-- wave 1 -->
-      <div class="zoom-item img size-lg" style="grid-row: 1; grid-column: 1;" data-zoom-item="0.020,0.080,0.220,0.280">
-        <div class="ph" data-img-slot data-label="AI everywhere — image 1"></div>
+      <div class="zoom-item img size-wide" style="grid-row: 1; grid-column: 1;" data-zoom-item="0.020,0.080,0.220,0.280">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 1"><img src="assets/glowing_waveform.jpeg" alt="Colorful glowing audio waveforms on a black background" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 4; grid-column: 3;" data-zoom-item="0.060,0.120,0.260,0.320" data-editable>recommendation engines</div>
       <div class="zoom-item img size-md" style="grid-row: 2; grid-column: 5;" data-zoom-item="0.100,0.160,0.300,0.360">
