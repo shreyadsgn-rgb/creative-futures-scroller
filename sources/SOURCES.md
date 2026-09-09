@@ -1,0 +1,39 @@
+# Sources
+
+- Alexander, Bassett, Blackwell, and Walton (2021). *Ghosts, Robots, Automatic Writing: An AI Level Study Guide.* Cambridge Digital Humanities: Cambridge, UK.
+- arxiv.org, "Language Models are Few-Shot Learners" (the GPT-3 paper), arxiv.org/pdf/2005.14165
+- Clean Energy Group, "States Are Stepping Up to Protect Households From Rising Energy Bills Due to Data Centers," cleanegroup.org
+- Climate Law Blog, "Community Benefits Agreements and Data Center Development"
+- Common Crawl, "Common Crawl Language Statistics" — Apache License 2.0
+- Data Center Knowledge, "Zoning and Land Use Considerations for Data Centers," by Alan Hall (Industry Perspectives), datacenterknowledge.com
+- datacenterwatch.org, "Report" (source for the $64 billion in halted/delayed data center construction stat), datacenterwatch.org/report
+- HISTORY, "What Are the Origins of the Golem Legend?," history.com
+- IBM, "Examining Synthetic Data: The Promise, Risks and Realities," ibm.com
+- IOPscience, "The Environmental Footprint of Data Centers in the United States," iopscience.iop.org
+- John McCarthy, "Review of *The Question of Artificial Intelligence* (ed. Brian Bloomfield)," Stanford University, www-formal.stanford.edu
+- Kaggle, "Iris Flower Dataset"
+- Kaggle, "Pima Indians Diabetes Database"
+- Kapor Foundation, "The Unequal Burden of Data Centers," kaporfoundation.org
+- KOSU, "Tulsa Will Pause New Data Center Construction for 9 Months After Council Vote," by Phillip Jackson of Tulsa Flyer (originally published on Tulsa Flyer; also carried by NPR)
+- Michael I. Jordan, "Artificial Intelligence—The Revolution Hasn't Happened Yet" — CC BY 4.0
+- MIT News, "Explained: Generative AI," news.mit.edu
+- MIT Technology Review, "We Did the Math on AI's Energy Footprint. Here's the Story You Haven't Heard."
+- NACo, "Informational Primer and County Considerations: Data Centers," naco.org
+- Nature, "AI Models Collapse When Trained on Recursively Generated Data," nature.com
+- OPB, "As Google's Water Demands Grow, The Dalles Aims to Pull More From Mount Hood Forest," opb.org
+- pecva.org (Piedmont Environmental Council), "Virginia Data Center Reform Coalition"
+- Pew Research Center, "Most New Data Centers in the U.S. Are Coming to Rural Areas," pewresearch.org
+- Sabin Center for Climate Change Law, "Community Benefits Agreements Database," climate.law.columbia.edu
+- State and Hyperlocal Tech Policy Program, Ford School, University of Michigan, "What Happens When Data Centers Come to Town?," by Terry Nguyen and Ben Green, in partnership with the Michigan Environmental Justice Coalition, stpp.fordschool.umich.edu
+- Steers Global Real Assets, "The Geography of AI: Where Are Data Centers Located?"
+- Submer, "AI Data Centers: Water Myths," submer.com
+- Submer, "How Data Centers Use Water," submer.com
+- Surfshark, "AI Training on Social Media: Can You Really Say No?," surfshark.com/research/chart/social-media-ai-training — chart/visual licensed under CC BY 4.0, attributed to the Surfshark research team
+- The Conversation, "AI Was Born at a US Summer Camp 68 Years Ago. Here's Why That Event Still Matters Today," by Sandra Peter, Director of Sydney Executive Plus, University of Sydney
+- The Mechanical Art & Design Museum, "Automata During the Middle Ages"
+- The New York Times, "Big Tech Is Now Targeting Native American Land for Massive Data Centers"
+- University of Illinois, "Traditional AI vs. Generative AI: What's the Difference?"
+- vpm.org, "2026 Data Center Bills: Thomas HB155, McAuliffe HB503, PJM, Dominion Energy"
+- Washington Post, "Inside the Secret List of Websites That Make AI Like ChatGPT Sound Smart"
+- Wikimedia Commons, "A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence" (McCarthy et al., 1955)
+- Wikipedia, "MNIST Database"

@@ -6,7 +6,7 @@
 <title>History — Sandbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Tunable variables — the dev panel writes these live.
@@ -3911,7 +3911,40 @@
     .brand-closer-line-v { display: none; }
   }
 
+  /* ============================================================
+     CREDITS — two-column source + image list after the closer.
+     ============================================================ */
+  .s-credits {
+    background: #000;
+    color: var(--ink);
+    padding: 18vh 12vw 16vh;
+    box-sizing: border-box;
+  }
+  .s-credits h2 {
+    margin: 0 0 3.5vh;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .credits-block + .credits-block { margin-top: 8vh; }
+  .credits-list {
+    column-count: 2;
+    column-gap: 5vw;
+  }
+  .credits-list p {
+    margin: 0 0 1.15em;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    max-width: none;
+    break-inside: avoid;
+  }
+  .credits-list a { color: inherit; text-underline-offset: 2px; }
+
   @media (max-width: 800px) {
+    .s-credits { padding: 14vh 7vw 12vh; }
+    .credits-list { column-count: 1; }
     .nearby-copy {
       left: 7vw;
       top: 8vh;
@@ -4185,8 +4218,8 @@
         <div class="ph" data-img-slot data-label="AI everywhere — image 7"><img src="assets/ChatGPT%20Image%20Aug%2026%2C%202026%2C%2012_01_45%20PM.png" alt="Young inventor reaching toward a glowing machine in a cluttered workshop" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 4; grid-column: 1;" data-zoom-item="0.460,0.520,0.660,0.720" data-editable>spam filters</div>
-      <div class="zoom-item img size-md" style="grid-row: 5; grid-column: 5;" data-zoom-item="0.500,0.560,0.700,0.760">
-        <div class="ph" data-img-slot data-label="AI everywhere — image 8"></div>
+      <div class="zoom-item img size-wide" style="grid-row: 5; grid-column: 5;" data-zoom-item="0.500,0.560,0.700,0.760">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 8"><img src="assets/Anti_ai_data_center_sign_2.jpg" alt="Pickup truck with a NO NO NO DATA CENTER protest sign in the rear window" loading="lazy"></div>
       </div>
       <!-- wave 6 -->
       <div class="zoom-item word" style="grid-row: 2; grid-column: 1;" data-zoom-item="0.520,0.580,0.720,0.780" data-editable>autocomplete</div>
@@ -4195,8 +4228,8 @@
       </div>
       <div class="zoom-item word" style="grid-row: 4; grid-column: 4;" data-zoom-item="0.600,0.660,0.800,0.860" data-editable>self-driving cars</div>
       <!-- wave 7 -->
-      <div class="zoom-item img size-lg" style="grid-row: 5; grid-column: 1;" data-zoom-item="0.640,0.700,0.840,0.900">
-        <div class="ph" data-img-slot data-label="AI everywhere — image 10"></div>
+      <div class="zoom-item img size-sm" style="grid-row: 5; grid-column: 1;" data-zoom-item="0.640,0.700,0.840,0.900">
+        <div class="ph" data-img-slot data-label="AI everywhere — image 10"><img src="assets/Wikimedia_Foundation_Servers-8055_03_square%20(1).jpg" alt="Close-up of a data center server rack packed with cables and indicator lights" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 2; grid-column: 3;" data-zoom-item="0.680,0.740,0.880,0.940" data-editable>AI-generated art</div>
     </div>
@@ -5311,6 +5344,69 @@
       </h1>
       <p class="brand-closer-tag brand-closer-tag--think" data-editable>Think critically.</p>
       <p class="brand-closer-tag brand-closer-tag--create" data-editable>Create intentionally.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Credits: sources + image credits from /sources -->
+<section id="s-credits" class="s-credits">
+  <div class="credits-block">
+    <h2>Sources</h2>
+    <div class="credits-list">
+      <p>Alexander, Bassett, Blackwell, and Walton (2021). <em>Ghosts, Robots, Automatic Writing: An AI Level Study Guide.</em> Cambridge Digital Humanities: Cambridge, UK.</p>
+      <p>arxiv.org, &#8220;Language Models are Few-Shot Learners&#8221; (the GPT-3 paper), <a href="https://arxiv.org/pdf/2005.14165" target="_blank" rel="noopener">arxiv.org/pdf/2005.14165</a></p>
+      <p>Clean Energy Group, &#8220;States Are Stepping Up to Protect Households From Rising Energy Bills Due to Data Centers,&#8221; cleanegroup.org</p>
+      <p>Climate Law Blog, &#8220;Community Benefits Agreements and Data Center Development&#8221;</p>
+      <p>Common Crawl, &#8220;Common Crawl Language Statistics&#8221; &#8212; Apache License 2.0</p>
+      <p>Data Center Knowledge, &#8220;Zoning and Land Use Considerations for Data Centers,&#8221; by Alan Hall (Industry Perspectives), datacenterknowledge.com</p>
+      <p>datacenterwatch.org, &#8220;Report&#8221; (source for the $64 billion in halted/delayed data center construction stat), datacenterwatch.org/report</p>
+      <p>HISTORY, &#8220;What Are the Origins of the Golem Legend?,&#8221; history.com</p>
+      <p>IBM, &#8220;Examining Synthetic Data: The Promise, Risks and Realities,&#8221; ibm.com</p>
+      <p>IOPscience, &#8220;The Environmental Footprint of Data Centers in the United States,&#8221; iopscience.iop.org</p>
+      <p>John McCarthy, &#8220;Review of <em>The Question of Artificial Intelligence</em> (ed. Brian Bloomfield),&#8221; Stanford University, www-formal.stanford.edu</p>
+      <p>Kaggle, &#8220;Iris Flower Dataset&#8221;</p>
+      <p>Kaggle, &#8220;Pima Indians Diabetes Database&#8221;</p>
+      <p>Kapor Foundation, &#8220;The Unequal Burden of Data Centers,&#8221; kaporfoundation.org</p>
+      <p>KOSU, &#8220;Tulsa Will Pause New Data Center Construction for 9 Months After Council Vote,&#8221; by Phillip Jackson of Tulsa Flyer (originally published on Tulsa Flyer; also carried by NPR)</p>
+      <p>Michael I. Jordan, &#8220;Artificial Intelligence&#8212;The Revolution Hasn&#8217;t Happened Yet&#8221; &#8212; CC BY 4.0</p>
+      <p>MIT News, &#8220;Explained: Generative AI,&#8221; news.mit.edu</p>
+      <p>MIT Technology Review, &#8220;We Did the Math on AI&#8217;s Energy Footprint. Here&#8217;s the Story You Haven&#8217;t Heard.&#8221;</p>
+      <p>NACo, &#8220;Informational Primer and County Considerations: Data Centers,&#8221; naco.org</p>
+      <p>Nature, &#8220;AI Models Collapse When Trained on Recursively Generated Data,&#8221; nature.com</p>
+      <p>OPB, &#8220;As Google&#8217;s Water Demands Grow, The Dalles Aims to Pull More From Mount Hood Forest,&#8221; opb.org</p>
+      <p>pecva.org (Piedmont Environmental Council), &#8220;Virginia Data Center Reform Coalition&#8221;</p>
+      <p>Pew Research Center, &#8220;Most New Data Centers in the U.S. Are Coming to Rural Areas,&#8221; pewresearch.org</p>
+      <p>Sabin Center for Climate Change Law, &#8220;Community Benefits Agreements Database,&#8221; climate.law.columbia.edu</p>
+      <p>State and Hyperlocal Tech Policy Program, Ford School, University of Michigan, &#8220;What Happens When Data Centers Come to Town?,&#8221; by Terry Nguyen and Ben Green, in partnership with the Michigan Environmental Justice Coalition, stpp.fordschool.umich.edu</p>
+      <p>Steers Global Real Assets, &#8220;The Geography of AI: Where Are Data Centers Located?&#8221;</p>
+      <p>Submer, &#8220;AI Data Centers: Water Myths,&#8221; submer.com</p>
+      <p>Submer, &#8220;How Data Centers Use Water,&#8221; submer.com</p>
+      <p>Surfshark, &#8220;AI Training on Social Media: Can You Really Say No?,&#8221; <a href="https://surfshark.com/research/chart/social-media-ai-training" target="_blank" rel="noopener">surfshark.com/research/chart/social-media-ai-training</a> &#8212; chart/visual licensed under CC BY 4.0, attributed to the Surfshark research team</p>
+      <p>The Conversation, &#8220;AI Was Born at a US Summer Camp 68 Years Ago. Here&#8217;s Why That Event Still Matters Today,&#8221; by Sandra Peter, Director of Sydney Executive Plus, University of Sydney</p>
+      <p>The Mechanical Art &amp; Design Museum, &#8220;Automata During the Middle Ages&#8221;</p>
+      <p>The New York Times, &#8220;Big Tech Is Now Targeting Native American Land for Massive Data Centers&#8221;</p>
+      <p>University of Illinois, &#8220;Traditional AI vs. Generative AI: What&#8217;s the Difference?&#8221;</p>
+      <p>vpm.org, &#8220;2026 Data Center Bills: Thomas HB155, McAuliffe HB503, PJM, Dominion Energy&#8221;</p>
+      <p>Washington Post, &#8220;Inside the Secret List of Websites That Make AI Like ChatGPT Sound Smart&#8221;</p>
+      <p>Wikimedia Commons, &#8220;A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence&#8221; (McCarthy et al., 1955)</p>
+      <p>Wikipedia, &#8220;MNIST Database&#8221;</p>
+    </div>
+  </div>
+
+  <div class="credits-block">
+    <h2>Image credits</h2>
+    <div class="credits-list">
+      <p>Al-Jazari Music Robot Band &#8212; by Farrukh ibn Abd al-Latif, via Google Arts &amp; Culture, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=635055" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>Anti-Data Center on Truck (Rural Kansas) &#8212; by Catboy69, Own work, CC BY 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=192900058" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>Anti-Data Center Sign (Rural Kansas) &#8212; by Catboy69, Own work, CC BY 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=192900057" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>Aerial drone photo, data center campus, The Dalles, Oregon &#8212; Adobe Stock</p>
+      <p>Dartmouth Conference photo (Trenchard More, John McCarthy, Marvin Minsky, Oliver Selfridge, Ray Solomonoff) &#8212; CC BY 4.0. Moor, James H. &#8220;The Dartmouth College Artificial Intelligence Conference: The Next Fifty Years.&#8221; <em>AI Magazine</em> 27 (2006): 87-91.</p>
+      <p>Golem of Prague &#8212; by Mikol&#225;&#353; Ale&#353;, The Research Library in Hradec Kralove, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=176755601" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>JOHNNIAC &#8212; Wikimedia/Flickr, CC BY 2.0</p>
+      <p>Jaquet-Droz Automata &#8212; by Rama, Own work, <a href="https://commons.wikimedia.org/w/index.php?curid=481562" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>MNIST Data Set &#8212; by Suvanjanprasai, Own work, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=156115980" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>PIMA Indians Data Set (historical image) &#8212; by Frank Russell, via archive.org, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=147172285" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
+      <p>Za&#8217;irajah &#8212; by Hayani-maghrebi, Own work, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=77529914" target="_blank" rel="noopener">commons.wikimedia.org</a></p>
     </div>
   </div>
 </section>
