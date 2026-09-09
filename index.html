@@ -277,7 +277,7 @@
     left: 12vw;
     z-index: 2;
   }
-  .s-dreams .intro .lede {
+  .s-dreams .intro .lede:not(.outro) {
     /* appears first: fade + rise in, then holds through the rest of --lead */
     --in: clamp(0, var(--p) / 0.05, 1);
     opacity: var(--in);
@@ -291,6 +291,20 @@
     opacity: var(--in);
     transform: translateY(calc((1 - var(--in)) * 24px));
   }
+  .desc-more {
+    display: none;
+    margin: 0;
+    padding: 0.05em 0.12em;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 700;
+    color: var(--warm);
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+  .desc-rest { display: inline; }
   .step {
     position: absolute; inset: 0;
     display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
@@ -1049,8 +1063,8 @@
   .ai-kinds-col-right .ai-kinds-examples {
     position: relative;
     z-index: 8;
-    /* hard-cut the instant --copy turns on — no fade / collapse animation */
-    --ex-hide: clamp(0, (var(--copy) - 0.001) * 1000, 1);
+    /* hold through the first generative-focus beat (--copy), then hard-cut */
+    --ex-hide: clamp(0, (var(--copy) - 0.999) * 1000, 1);
     opacity: calc(var(--ex-box) * (1 - var(--ex-hide)));
     max-height: calc((1 - var(--ex-hide)) * 100vmax);
     overflow: hidden;
@@ -1400,6 +1414,9 @@
     width: 100%;
     aspect-ratio: 1778 / 1164;
     opacity: var(--graph-in, 0);
+    max-height: calc(var(--graph-in, 0) * 70vh);
+    overflow: hidden;
+    transform: translateY(calc((1 - var(--graph-in, 0)) * 18px));
   }
   .training-gaps-graph img { object-fit: contain; }
 
@@ -1877,16 +1894,13 @@
       transform: none;
       will-change: auto;
     }
-    .optout-people {
-      width: min(280px, 70vw);
-      aspect-ratio: 251 / 351;
-    }
+    .optout-people { display: none; }
     .optout-cta {
       width: 171px;
       height: 104px;
       position: relative;
-      margin-top: -40px;
-      margin-left: min(200px, 40vw);
+      margin-top: 0;
+      margin-left: 0;
     }
     .optout-cursor { transform: none; will-change: auto; }
     .optout-chart { max-width: 100%; }
@@ -4006,7 +4020,55 @@
   @media (max-width: 800px) {
     .s-intro .zoom-field { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(7, 1fr); }
     .copy-col { padding-inline: 7vw; max-width: none; }
+    /* s-internet: reuse the intro copy column for phase-2 text + graph */
+    .s-internet .intro {
+      padding-left: 7vw;
+      padding-right: 7vw;
+    }
+    .s-internet {
+      z-index: clamp(0, (var(--new-in) - 0.001) * 10000, 12);
+    }
+    .s-internet .pin {
+      background: rgb(5 10 10 / calc(1 - var(--new-in)));
+    }
+    .s-internet .pin::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: #000;
+      opacity: calc(var(--new-in) * 0.8);
+      pointer-events: none;
+    }
+    .internet-outro {
+      left: 7vw;
+      right: 7vw;
+      width: auto;
+      top: 100px;
+      bottom: 0;
+      justify-content: center;
+      justify-content: safe center;
+      gap: 2vh;
+    }
+    .internet-outro-graph { width: 100%; max-height: 38vh; }
     .s-dreams .intro { left: 7vw; right: 7vw; }
+    /* hide the opening lede while cards are on screen; bring it back with the outro */
+    .s-dreams .intro .lede:not(.outro) {
+      --hold: calc(
+        1
+        - clamp(0, (var(--p) - var(--lead)) / 0.05, 1)
+        + clamp(0, (var(--p) - var(--exit-end)) / 0.04, 1)
+      );
+      opacity: calc(var(--in) * var(--hold));
+    }
+    .s-dreams .step .subtext:not(.is-expanded) .desc-rest { display: none; }
+    .s-dreams .step .subtext:not(.is-expanded) .desc-more { display: inline; }
+    .s-dreams .step.is-desc-open .media { height: 22vh; }
+    .s-dreams .step.is-desc-open .copy {
+      max-height: 48vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
     .step { grid-template-columns: 1fr; gap: 20px; padding: 22vh 7vw 8vh; align-items: end; }
     .step .media {
       height: 32vh; width: min(100%, 280px); order: -1; justify-self: end;
@@ -4089,6 +4151,7 @@
     .proposal-lead-photo { order: -1; max-width: 260px; justify-self: start; }
     .naming-stage { padding: 10vh 7vw 8vh; }
     .s-naming { --naming-gutter: 7vw; --title-size: clamp(28px, 9vw, 48px); }
+    .naming-field { top: 100px; }
     .naming-candidate.c1 { --x: 12vw; top: 28vh; }
     .naming-candidate.c2 { --x: 48vw; top: 38vh; }
     .naming-candidate.c3 { --x: 14vw; top: 48vh; }
@@ -4106,7 +4169,7 @@
     .naming-ai .naming-title { white-space: normal; }
     .naming-reveal {
       left: var(--naming-gutter); right: 7vw;
-      top: calc(10vh + var(--title-size) * 1.8 + 6vh);
+      top: calc(10vh + var(--title-size) * 1.8 + 6vh + 50px);
       grid-template-columns: 1fr;
       gap: 3vh;
     }
@@ -4116,29 +4179,53 @@
     .naming-crosshair::after { left: var(--naming-gutter); right: 7vw; }
     .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
     .pdf-viewport { width: 86vw; height: 40vh; padding: 3vh 5vw; }
-    .callout { width: 40vw; padding: 14px 16px; gap: 8px; }
+    .callout { width: 75%; padding: 14px 16px; gap: 8px; }
     .callout-left { left: 2vw; }
-    This map is still being filled out by researchers, by companies, by lawmakers, and by people like the students who developed stances on where they didn’t want this technology involved with their creative process. 
     .callout-right { right: 2vw; }
+    .training-gaps-layout {
+      padding-left: 7vw;
+      padding-right: 7vw;
+    }
+    .training-gaps-copy {
+      max-width: none;
+      width: 100%;
+    }
     .human-labor-layout {
       padding-left: 7vw;
       padding-right: 7vw;
       min-height: 0;
     }
-    .s-training-gaps.lede-hold > .lede-hold-pin,
-    .s-human-labor.lede-hold > .lede-hold-pin {
-      padding-top: 8vh;
+    .s-training-gaps {
+      z-index: clamp(0, (var(--graph-in, 0) - 0.001) * 10000, 12);
+      background: rgb(79 30 219 / calc(1 - var(--graph-in, 0)));
+    }
+    .s-training-gaps .lede-hold-pin::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: #000;
+      opacity: calc(var(--graph-in, 0) * 0.8);
+      pointer-events: none;
+    }
+    .s-training-gaps .training-gaps-layout { position: relative; z-index: 1; }
+    .s-training-gaps.lede-hold > .lede-hold-pin {
+      padding-top: 100px;
       align-content: start;
     }
-    .building-track-frames { display: none; }
+    .s-human-labor.lede-hold > .lede-hold-pin,
+    .s-ai-flood.lede-hold > .lede-hold-pin {
+      padding-top: 0;
+      align-content: center;
+    }
+    .building-track-frame { width: min(66px, 16.5vw); } /* 0.75× prior 88px / 22vw */
+    .building-track-frame.f0 { left: 3vw; bottom: 5vh; }
+    .building-track-frame.f1 { left: calc(12vw + min(30vw, 382px) + 3vw); bottom: 20vh; }
+    .building-track-frame.f2 { left: calc(12vw + min(30vw, 382px) + 10vw); bottom: 7vh; }
     .ai-flood-layout {
       padding-left: 7vw;
       padding-right: 7vw;
       min-height: 0;
-    }
-    .s-ai-flood.lede-hold > .lede-hold-pin {
-      padding-top: 8vh;
-      align-content: start;
     }
     .model-collapse-stage { padding: 10vh 7vw 8vh; }
     .model-collapse-crosshair::before { right: 7vw; }
@@ -5438,9 +5525,18 @@
       const steps = s.querySelectorAll('.step');
       if (steps.length > 1) {
         // honor the section's intro lead-in (--lead) so the "front" step tracks what's actually visible
-        const lead = parseFloat(getComputedStyle(s).getPropertyValue('--lead')) || 0;
-        const tp = lead < 1 ? Math.min(1, Math.max(0, (p - lead) / (1 - lead))) : 0;
-        const k = Math.round(tp * (steps.length - 1));
+        const cs = getComputedStyle(s);
+        const lead = parseFloat(cs.getPropertyValue('--lead')) || 0;
+        const stepsEnd = parseFloat(cs.getPropertyValue('--steps-end'));
+        let k;
+        if (stepsEnd > lead) {
+          /* match CSS --t so the visible card (not the outro-inclusive estimate) gets clicks */
+          const t = Math.min(steps.length - 1, (p - lead) / (stepsEnd - lead) * steps.length - 1);
+          k = Math.min(steps.length - 1, Math.max(0, Math.round(t)));
+        } else {
+          const tp = lead < 1 ? Math.min(1, Math.max(0, (p - lead) / (1 - lead))) : 0;
+          k = Math.round(tp * (steps.length - 1));
+        }
         steps.forEach((st, i) => st.classList.toggle('is-front', i === k));
       }
       s.querySelectorAll('[data-zoom-item]').forEach(el => updateZoomItem(el, p));
@@ -5650,12 +5746,36 @@
     }, f => f ** 3);
   });
 
-  /* ---------- s-dreams steps: same idea — pixel-focus tied to each step's own
-     --behind depth, the same value .step .media uses for its scale(1 - behind*0.25)
-     shrink. behind 0 (front, full size) → focus 1; behind 2 (deepest visible ghost,
-     half size) → focus 0. Mirrored in JS for the same reason as the dataset cards
-     (and updateAiKindsFlight above): --t/--exit/--behind are calc()-derived, so
-     getComputedStyle can't hand back a resolved number for them. ---------- */
+  /* ---------- s-dreams mobile: first sentence + "...more" on step blurbs ----------
+     Desktop keeps the full paragraph. On small screens the rest is clipped until
+     the yellow "...more" control is tapped. Lives in this file so the copy stays
+     a single data-editable source. */
+  document.querySelectorAll('.s-dreams .step .copy .subtext').forEach(p => {
+    const text = p.textContent.replace(/\s+/g, ' ').trim();
+    const m = text.match(/^(.+?[.!?])(\s+.+)$/);
+    if (!m) return;
+    p.textContent = '';
+    p.append(m[1] + ' ');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'desc-more';
+    btn.textContent = '...more';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('contenteditable', 'false');
+    const rest = document.createElement('span');
+    rest.className = 'desc-rest';
+    rest.textContent = m[2].trim();
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const on = p.classList.toggle('is-expanded');
+      p.closest('.step')?.classList.toggle('is-desc-open', on);
+      btn.setAttribute('aria-expanded', String(on));
+    });
+    p.append(btn, ' ', rest);
+  });
+
+  /* ---------- s-dreams steps: pixel-focus tied to each step's own --behind depth ---------- */
   document.querySelectorAll('.s-dreams .step').forEach(step => {
     const slot = step.querySelector('.media [data-pixel-focus]');
     const section = step.closest('[data-scrub]');
@@ -5698,6 +5818,7 @@
     const p = Math.min(1, Math.max(0, -sTrainingGapsEl.getBoundingClientRect().top / hold));
     const g = Math.min(1, Math.max(0, (p - 0.5) / 0.2));
     trainingGapsGraph.style.setProperty('--graph-in', g.toFixed(4));
+    sTrainingGapsEl.style.setProperty('--graph-in', g.toFixed(4));
   }
 
   /* ---------- model-collapse exit: hinge line + title down ~45° with a bounce ---------- */
