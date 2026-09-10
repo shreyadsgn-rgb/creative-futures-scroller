@@ -2455,13 +2455,13 @@
   }
   .nearby-label--carbon {
     left: 26.04%;
-    top: 86.67%;
+    top: calc(86.67% - 125px);
     --show: clamp(0, (var(--p) - 0.38) / 0.14, 1);
   }
   .nearby-label--carbon .nearby-label-text { text-align: right; }
   .nearby-label--bills {
     left: 74.1%;
-    top: 92.74%;
+    top: calc(92.74% - 125px);
     --show: clamp(0, (var(--p) - 0.64) / 0.14, 1);
   }
   .nearby-label--bills .nearby-label-text { text-align: right; }
@@ -2626,6 +2626,7 @@
       min-height: 0;
       padding: 8vh 5vw 10vh;
       box-sizing: border-box;
+      overflow-x: hidden;
     }
     .s-communities-change .pin {
       position: relative;
@@ -2659,11 +2660,18 @@
       max-width: none;
       max-height: none;
       height: auto;
+      overflow: visible;
+      z-index: 1;
+    }
+    .comm-lede {
       opacity: 1;
       transform: none;
       will-change: auto;
-      overflow: visible;
-      z-index: 1;
+    }
+    .comm-item {
+      opacity: 1;
+      transform: translateX(calc((1 - var(--rp, 0)) * 85vw));
+      will-change: transform;
     }
     .comm-lede { margin-bottom: 4px; }
     .comm-box {
@@ -3089,27 +3097,67 @@
     .s-built-by-many {
       height: auto;
       min-height: 0;
-      padding: 8vh 5vw 10vh;
+      padding: 0;
       box-sizing: border-box;
+      background: var(--purple);
+    }
+    /* freeze purple + grid full-bleed; images in the pin scroll over it */
+    .s-built-by-many::before {
+      content: "";
+      display: block;
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      margin-bottom: -100vh;
+      z-index: 0;
+      pointer-events: none;
+      background-color: var(--purple);
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0 47px,
+          rgba(0, 0, 0, 0.14) 47px 48px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0 47px,
+          rgba(0, 0, 0, 0.14) 47px 48px
+        );
     }
     .s-built-by-many .pin {
       position: relative;
+      top: auto;
       height: auto;
       overflow: visible;
       display: block;
+      background: transparent;
+      z-index: 1;
     }
     .bbm-stage {
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      align-items: stretch;
+      gap: 48px;
       height: auto;
-      max-width: 720px;
-      margin: 0 auto;
+      max-width: none;
+      margin: 0;
+      padding: 18vh 0 24vh;
       background-image: none;
     }
-    .bbm-lede,
+    .bbm-lede {
+      display: block;
+      position: static;
+      left: auto;
+      top: auto;
+      width: auto;
+      max-width: 28em;
+      margin: 0 7vw 8px;
+      z-index: 1;
+    }
+    .bbm-label { display: none; }
     .bbm-cluster,
-    .bbm-label,
     .bbm-frame,
     .bbm-internet-wrap {
       position: static;
@@ -3117,21 +3165,34 @@
       top: auto;
       right: auto;
       bottom: auto;
-      width: 100%;
+      width: 50%;
       max-width: none;
       height: auto;
       transform: none;
     }
     .bbm-frame { display: none; }
+    .bbm-parallax,
+    .bbm-automata,
+    .bbm-labor {
+      align-self: flex-start;
+      margin-left: 7vw;
+      margin-right: auto;
+    }
+    .bbm-internet-wrap,
+    .bbm-researchers,
+    .bbm-datasets {
+      align-self: flex-end;
+      margin-left: auto;
+      margin-right: 7vw;
+    }
     .bbm-parallax {
-      width: 100%;
-      height: 280px;
+      width: 50%;
+      height: 140px;
     }
     .bbm-parallax-stream { transform: none; }
     .bbm-internet-wrap {
-      width: min(100%, 320px);
-      height: 420px;
-      align-self: center;
+      width: min(50%, 160px);
+      height: 210px;
       position: relative;
     }
     .bbm-internet {
@@ -3139,25 +3200,25 @@
       width: 100%;
     }
     .bbm-automata {
-      width: 100%;
-      height: 280px;
+      width: 50%;
+      height: 140px;
       position: relative;
     }
     .bbm-automata .shot--a,
     .bbm-automata .shot--b { position: absolute; }
     .bbm-researchers {
-      width: 100%;
+      width: 50%;
       height: auto;
       aspect-ratio: 384 / 266;
     }
     .bbm-labor {
-      width: 100%;
+      width: 50%;
       height: auto;
       aspect-ratio: 520 / 325;
       position: relative;
     }
     .bbm-datasets {
-      width: 100%;
+      width: 50%;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
@@ -3171,9 +3232,7 @@
       height: auto;
       aspect-ratio: 1;
     }
-    .bbm-label { margin-top: -8px; white-space: normal; }
-    .bbm-cluster,
-    .bbm-label { opacity: 1; }
+    .bbm-cluster { opacity: 1; }
   }
 
   /* ============================================================
@@ -3239,53 +3298,83 @@
   }
   .aip-tag--cat {
     --lit: var(--warm);
-    font-size: 24px;
-    line-height: 1;
+    font-size: 16px;
+    line-height: 1.5;
   }
 
   @media (max-width: 900px) {
     .s-ai-positives {
-      height: auto;
+      height: calc(100vh + 240vh);
       min-height: 0;
-      padding: 10vh 7vw 12vh;
+      padding: 0;
       box-sizing: border-box;
     }
     .s-ai-positives .pin {
-      position: relative;
-      height: auto;
-      overflow: visible;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
       display: block;
     }
     .aip-stage {
-      height: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-      max-width: 640px;
+      height: 100%;
+      max-width: none;
+      display: block;
     }
     .aip-lede {
-      position: static;
+      position: absolute;
+      left: 7vw;
+      right: 7vw;
+      top: 100px;
       width: auto;
-      max-width: 30em;
+      max-width: none;
+      z-index: 4;
+    }
+    /* black veil with a ~150px full-width window in the vertical middle */
+    .aip-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        #000 0,
+        #000 calc(50% - 95px),
+        rgba(0, 0, 0, 0.85) calc(50% - 75px),
+        transparent calc(50% - 55px),
+        transparent calc(50% + 55px),
+        rgba(0, 0, 0, 0.85) calc(50% + 75px),
+        #000 calc(50% + 95px),
+        #000 100%
+      );
     }
     .aip-cloud {
-      position: static;
+      position: absolute;
+      left: 7vw;
+      right: 7vw;
+      top: 0;
+      z-index: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      gap: 16px;
+      will-change: transform;
+      transform: translateY(calc(50vh + 75px - var(--aip-shift, 0) * 1px));
     }
     .aip-tag {
       position: static;
       white-space: normal;
-      font-size: 14px;
-      color: #f4f6f6;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--lit, #f4f6f6);
     }
     .aip-tag--cat {
-      margin-top: 14px;
-      font-size: 20px;
-      color: var(--warm);
+      margin-top: 0;
+      font-size: 16px;
+      color: var(--lit, var(--warm));
     }
-    .aip-tag--cat:first-child { margin-top: 0; }
   }
 
   /* ============================================================
@@ -3552,54 +3641,75 @@
 
   @media (max-width: 900px) {
     .s-ask-students {
-      height: auto;
-      min-height: 0;
-      padding: 10vh 5vw 12vh;
-      box-sizing: border-box;
+      padding: 0;
     }
     .s-ask-students .pin {
-      position: relative;
-      height: auto;
-      overflow: visible;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
       display: block;
     }
     .ask-stage {
-      height: auto;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      max-width: 720px;
+      height: 100%;
+      padding: 80px 7vw 6vh;
+      gap: 10px;
+      box-sizing: border-box;
+      max-width: none;
     }
-    .ask-lede,
-    .ask-chart,
+    .ask-lede {
+      position: static;
+      left: auto;
+      top: auto;
+      width: auto;
+      max-width: none;
+      flex: 0 0 auto;
+      margin: 0;
+    }
+    .ask-chart {
+      position: relative;
+      left: auto;
+      top: auto;
+      right: auto;
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
+      aspect-ratio: auto;
+    }
     .ask-note {
       position: static;
       left: auto;
       top: auto;
       right: auto;
-      bottom: auto;
-      width: 100%;
+      width: auto;
       max-width: none;
-      height: auto;
-      transform: none;
-      opacity: 1;
+      text-align: left;
+      flex: 0 0 auto;
     }
-    .ask-chart {
-      aspect-ratio: 1062 / 605;
-      height: auto;
-      min-height: 320px;
+    .ask-callout {
+      max-width: 38%;
+      gap: 6px;
     }
-    .ask-explain { display: none; }
-    .ask-callout { opacity: 1; position: absolute; }
+    .ask-callout-mark { width: 8px; height: 8px; }
+    .ask-callout-text { font-size: 9px; }
+    .ask-explain { max-width: 46%; gap: 6px; }
+    .ask-explain-text { font-size: 9px; }
+    .ask-explain-mark { width: 8px; height: 8px; }
+    .ask-end {
+      font-size: 10px;
+      padding: 1px 4px;
+    }
+    .ask-axis--x { height: 1px; }
+    .ask-axis--y { width: 1px; }
     .ask-pt {
-      opacity: 1;
-      color: rgba(255, 255, 255, 0.55);
-      font-size: 11px;
+      font-size: 8px;
+      line-height: 1.1;
     }
     .ask-pt--hi {
-      color: var(--warm);
-      font-size: 15px;
-      opacity: 1;
+      font-size: calc(8px + var(--dim) * 4px);
     }
   }
 
@@ -3965,34 +4075,42 @@
       transform: none;
       width: min(346px, 86vw);
     }
+    .nearby-piece img { object-fit: cover; }
+    /* keep Figma crop ratios (1440×900 stage); height follows width so pieces aren't stretched */
     .nearby-piece--speakers {
       left: 48%;
       top: 22%;
       width: 28%;
-      height: 28%;
+      height: auto;
+      aspect-ratio: 288 / 354;
     }
     .nearby-piece--houses {
       left: 8%;
       top: 36%;
       width: 90%;
-      height: 42%;
+      height: auto;
+      aspect-ratio: 868 / 502;
     }
     .nearby-piece--bins {
       left: 28%;
-      top: 68%;
+      top: auto;
+      bottom: 8%;
       width: 32%;
-      height: 22%;
+      height: auto;
+      aspect-ratio: 281 / 240;
     }
     .nearby-piece--mailbox {
       left: 78%;
-      top: 72%;
+      top: auto;
+      bottom: 6%;
       width: 12%;
-      height: 18%;
+      height: auto;
+      aspect-ratio: 81 / 159;
     }
     .nearby-label { font-size: 12px; gap: 8px; }
     .nearby-label--noise { left: 52%; top: 18%; }
-    .nearby-label--carbon { left: 4vw; top: 88%; }
-    .nearby-label--bills { left: auto; right: 4vw; top: 90%; }
+    .nearby-label--carbon { left: 4vw; top: calc(88% - 125px); }
+    .nearby-label--bills { left: auto; right: 4vw; top: calc(90% - 125px); }
   }
 
   @media (max-width: 800px) {
@@ -5099,20 +5217,16 @@
           <p data-editable>Since 2025, at least 18 states have passed or introduced laws requiring data centers to pay their own electricity grid costs instead of passing them onto residents. Oregon, Texas, Oklahoma, and South Dakota have all signed this protection into law.</p>
         </div>
 
-        <div class="comm-item comm-photo comm-photo--aws">
-          <img src="assets/AWS_servers_in_Ashburn,_group_1,_2020-10-09_5.jpg" alt="Data center building behind a grassy hill">
+        <div class="comm-item comm-photo comm-photo--gov">
+          <img src="assets/governerkotek-signdatacenter.jpg" alt="Oregon officials at a podium near electrical infrastructure">
         </div>
 
         <div class="comm-item comm-box comm-box--halt">
           <p data-editable>Some communities have halted data center construction entirely. In Warrenton, Virginia, every town council member who voted yes on an Amazon data center subsequently lost re-election. Throughout the country, at least $64 billion of data center projects have been blocked or delayed amid local opposition.</p>
         </div>
 
-        <div class="comm-item comm-photo comm-photo--tulsa">
-          <img src="assets/TulsaCouncilMtg.png" alt="Tulsa City Council Urban and Economic Development Committee meeting">
-        </div>
-
-        <div class="comm-item comm-photo comm-photo--gov">
-          <img src="assets/governerkotek-signdatacenter.jpg" alt="Oregon officials at a podium near electrical infrastructure">
+        <div class="comm-item comm-photo comm-photo--aws">
+          <img src="assets/AWS_servers_in_Ashburn,_group_1,_2020-10-09_5.jpg" alt="Data center building behind a grassy hill">
         </div>
 
         <div class="comm-item comm-box comm-box--lancaster">
@@ -5127,6 +5241,10 @@
         <div class="comm-item comm-box comm-box--tribal">
           <p data-editable>Tribal nations are asserting their own terms. The Seminole Nation voted 24&#8211;0 to permanently ban data center construction after a startup tried to bypass community consent.</p>
           <p data-editable>In Tulsa and Oklahoma City, city officials voted to pause all incoming data center development until 2027.</p>
+        </div>
+
+        <div class="comm-item comm-photo comm-photo--tulsa">
+          <img src="assets/TulsaCouncilMtg.png" alt="Tulsa City Council Urban and Economic Development Committee meeting">
         </div>
       </div>
     </div>
@@ -5798,7 +5916,7 @@
   /* ---------- [data-scroll-reveal]: --rp (0→1) from each element's own scroll position ----------
      0 while its top is still near the bottom of the viewport (90vh), 1 once it's scrolled up to
      55vh — a ~35vh reveal window tied directly to scroll position, so it can't be outrun. */
-  const scrollReveals = [...document.querySelectorAll('[data-scroll-reveal]')];
+  const scrollReveals = [...document.querySelectorAll('[data-scroll-reveal], .s-communities-change .comm-item')];
   function updateScrollReveals() {
     const vh = innerHeight;
     const start = vh * 0.9, end = vh * 0.55;
@@ -6072,7 +6190,11 @@
     }
   }
 
-  /* ---------- ai positives: scatter Fira tags without overlap ---------- */
+  /* ---------- ai positives: scatter Fira tags without overlap;
+     on mobile, scroll them through a mid-viewport window ---------- */
+  const sAiPositivesEl = document.getElementById('s-ai-positives');
+  const AIP_MOBILE_COLORS = ['#EBFE9B', '#0097A7', '#b0b0b0', '#7a7a7a', '#d8d8d8', '#5a9aa3'];
+  let aipMobileColorsReady = false;
   function layoutAiPositives() {
     const stage = document.querySelector('#s-ai-positives .aip-stage');
     const cloud = document.querySelector('[data-aip-cloud]');
@@ -6088,8 +6210,21 @@
         t.style.top = '';
         t.style.setProperty('--i', String(i));
       });
+      if (!aipMobileColorsReady) {
+        tags.forEach(t => {
+          const c = AIP_MOBILE_COLORS[Math.floor(Math.random() * AIP_MOBILE_COLORS.length)];
+          t.style.setProperty('--lit', c);
+        });
+        aipMobileColorsReady = true;
+      }
+      const travel = Math.max(cloud.scrollHeight + 150, innerHeight);
+      if (sAiPositivesEl) sAiPositivesEl.style.height = `${innerHeight + travel}px`;
+      updateAiPositivesScroll();
       return;
     }
+
+    aipMobileColorsReady = false;
+    tags.forEach(t => t.style.removeProperty('--lit'));
 
     const sr = stage.getBoundingClientRect();
     const lr = lede.getBoundingClientRect();
@@ -6165,18 +6300,29 @@
     });
   }
 
+  function updateAiPositivesScroll() {
+    if (!sAiPositivesEl || !matchMedia('(max-width: 900px)').matches) return;
+    const cloud = document.querySelector('[data-aip-cloud]');
+    if (!cloud) return;
+    const hold = Math.max(1, sAiPositivesEl.offsetHeight - innerHeight);
+    const p = Math.min(1, Math.max(0, -sAiPositivesEl.getBoundingClientRect().top / hold));
+    const travel = Math.max(0, cloud.scrollHeight + 150);
+    cloud.style.setProperty('--aip-shift', (p * travel).toFixed(1));
+  }
+
   let queued = false;
   addEventListener('scroll', () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateTrainingGapsGraph(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); PixelFocus.updateAll(); queued = false; });
+    requestAnimationFrame(() => { updateScrubs(); updateScrollReveals(); updateTrainingGapsGraph(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); updateAiPositivesScroll(); PixelFocus.updateAll(); queued = false; });
   }, { passive: true });
-  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateTrainingGapsGraph(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); layoutAiPositives(); PixelFocus.updateAll(); });
+  addEventListener('resize', () => { updateScrubs(); updateScrollReveals(); updateTrainingGapsGraph(); updateModelCollapse(); updateJohnniacTrack(); updateBuildingTrack(); updateDatacenterTrack(); updateDcImpact(); updateOptoutClick(); layoutAiPositives(); updateAiPositivesScroll(); PixelFocus.updateAll(); });
   updateScrubs();
   updateScrollReveals();
   updateTrainingGapsGraph();
   updateModelCollapse();
   layoutAiPositives();
+  updateAiPositivesScroll();
   updateJohnniacTrack();
   updateBuildingTrack();
   updateDatacenterTrack();
