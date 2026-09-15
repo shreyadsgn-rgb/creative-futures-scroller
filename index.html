@@ -215,14 +215,18 @@
     color: var(--ink-dim); white-space: nowrap;
   }
   .zoom-item.center-hold {
-    /* pulled out of the grid and centered with symmetric auto margins, so it sits
-       at the true center of the field at any width (no left:50% shrink-to-fit quirk) */
-    position: absolute; inset: 0; margin: auto;
-    width: max-content; height: max-content;
-    max-width: min(26ch, 90vw);
-    transform: translateZ(var(--z, -1000px));
-    font-size: clamp(18px, 2.4vw, 26px); font-weight: 400;
-    color: var(--ink); text-align: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(26ch, 92%);
+    max-width: 92%;
+    margin: 0;
+    transform: translate(-50%, -50%) translateZ(var(--z, -1000px));
+    font-size: clamp(18px, 2.4vw, 26px);
+    font-weight: 400;
+    color: var(--ink);
+    text-align: center;
+    white-space: normal;
   }
   .zoom-item.img .ph { width: 100%; height: 100%; }
   .zoom-item.img.size-lg { width: min(26vw, 320px); aspect-ratio: 2 / 3; }
