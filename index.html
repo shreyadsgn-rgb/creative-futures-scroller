@@ -5509,8 +5509,8 @@
   </div>
 </section>
 
-<!-- Your voice prompt (Figma 515:284). Black lede → blue form. Local-only for now. -->
-<section id="s-your-voice" class="s-your-voice" data-scrub>
+<!-- Your voice prompt (Figma 515:284). Hidden until a backend exists. -->
+<section id="s-your-voice" class="s-your-voice" data-scrub hidden>
   <div class="pin">
     <div class="voice-stage">
       <div class="voice-deco" aria-hidden="true">
@@ -5638,7 +5638,7 @@
 
 <script>
   /* ---------- scroll engine: write --p (0→1) onto each [data-scrub] ---------- */
-  const scrubs = [...document.querySelectorAll('[data-scrub]')];
+  const scrubs = [...document.querySelectorAll('[data-scrub]:not([hidden])')];
 
   function sectionBetweenPx(vh) {
     const raw = getComputedStyle(document.documentElement)
@@ -6398,6 +6398,7 @@
 
   /* ---------- your-voice prompt: localStorage until a backend exists ---------- */
   (function initYourVoice() {
+    if (document.getElementById('s-your-voice')?.hidden) return;
     const STORAGE_KEY = 'cfc-your-voice-responses';
     const form = document.getElementById('voice-form');
     const input = document.getElementById('voice-input');
