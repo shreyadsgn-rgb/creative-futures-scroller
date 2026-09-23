@@ -57,7 +57,7 @@
   /* ---------- shared layout ---------- */
   .copy-col { padding-left: 12vw; max-width: calc(12vw + 480px); }
 
-  .lede { font-size: 17px; font-weight: 400; max-width: 30em; }
+  .lede { font-size: 18px; font-weight: 400; max-width: 30em; }
   .subtext { font-size: 13.5px; color: var(--ink-dim); max-width: 34em; }
 
   /* ---------- pinned scrub sections ----------
@@ -611,7 +611,7 @@
     z-index: 2;
     max-width: 28em;
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     opacity: calc(var(--lede) * (1 - var(--clear)));
@@ -702,7 +702,7 @@
   .naming-outro,
   .naming-prompt {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
@@ -984,7 +984,7 @@
   }
   .ai-kinds-focus-lead {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
@@ -992,7 +992,7 @@
   }
   .ai-kinds-focus-more {
     margin: calc(var(--more) * 24px) 0 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
@@ -1059,7 +1059,7 @@
   }
   .ai-kinds-blurb {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
@@ -1748,7 +1748,7 @@
   }
   .optout-copy .lede {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -2363,7 +2363,7 @@
     transform: translateY(-50%);
     width: min(346px, 34vw);
     z-index: 4;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #000;
@@ -2386,6 +2386,7 @@
     width: 20%;
     height: 39.29%;
     z-index: 1;
+    transform-origin: 55% 18%;
   }
   .nearby-piece--speakers img {
     left: 0;
@@ -2484,6 +2485,55 @@
     --show: clamp(0, (var(--p) - 0.64) / 0.14, 1);
   }
   .nearby-label--bills .nearby-label-text { text-align: right; }
+  .nearby-sound {
+    position: absolute;
+    left: calc(8.33% + 3.6vw);
+    top: calc(48.5% + 5.4em);
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: #000;
+    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .nearby-sound-mark {
+    flex: 0 0 auto;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7px 0 7px 12px;
+    border-color: transparent transparent transparent #000;
+    background: none;
+    box-sizing: border-box;
+  }
+  .nearby-sound[aria-pressed="true"] .nearby-sound-mark {
+    width: 11px;
+    height: 12px;
+    border: 0;
+    background:
+      linear-gradient(#000, #000) left center / 3.5px 100% no-repeat,
+      linear-gradient(#000, #000) right center / 3.5px 100% no-repeat;
+  }
+  .nearby-piece--speakers.is-playing {
+    animation: nearby-speakers-pulse 1.35s ease-in-out infinite;
+  }
+  @keyframes nearby-speakers-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nearby-piece--speakers.is-playing { animation: none; }
+  }
 
   /* ============================================================
      COMMUNITIES CHANGE — yellow collage; cards slide in from the
@@ -2523,7 +2573,7 @@
     width: min(420px, 28vw);
     margin: 0;
     z-index: 5;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #000;
@@ -2769,7 +2819,7 @@
     max-width: 448px;
     margin: 0;
     z-index: 6;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -3285,7 +3335,7 @@
     width: min(448px, 36vw);
     margin: 0;
     z-index: 2;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -3429,7 +3479,7 @@
     width: min(448px, 36vw);
     margin: 0;
     z-index: 3;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -3798,7 +3848,7 @@
     align-self: flex-start;
     width: min(448px, 100%);
     margin: 0 0 3.5vh;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -4130,6 +4180,12 @@
     .nearby-label--noise { left: 52%; top: 18%; }
     .nearby-label--carbon { left: 4vw; top: calc(88% - 125px); }
     .nearby-label--bills { left: auto; right: 4vw; top: calc(90% - 125px); }
+    .nearby-sound {
+      left: 7vw;
+      top: 20vh;
+      font-size: 12px;
+      gap: 8px;
+    }
   }
 
   @media (max-width: 800px) {
@@ -5210,6 +5266,12 @@
       </div>
 
       <p class="nearby-copy" data-editable>When community well-being isn&#8217;t prioritized, the introduction of a data center can be <em>jarring</em>.</p>
+
+      <button type="button" class="nearby-sound" id="nearby-sound-toggle" aria-pressed="false">
+        <span class="nearby-sound-mark" aria-hidden="true"></span>
+        <span class="nearby-sound-text">play sound</span>
+      </button>
+      <audio id="nearby-audio" src="assets/datacenter/nearby/fake-data-center.mp3" loop preload="auto"></audio>
 
       <div class="nearby-label nearby-label--noise">
         <span class="nearby-label-mark" aria-hidden="true"></span>
@@ -6481,6 +6543,106 @@
     }, { passive: true });
 
     renderResponses();
+  })();
+
+  /* Nearby noise: try autoplay when the section is on screen; otherwise the
+     play button starts it. Either way it fades out after you scroll past. */
+  (function initNearbySound() {
+    const section = document.getElementById('s-dc-nearby');
+    const audio = document.getElementById('nearby-audio');
+    const toggle = document.getElementById('nearby-sound-toggle');
+    const speakers = section && section.querySelector('.nearby-piece--speakers');
+    if (!section || !audio || !toggle || !speakers) return;
+
+    const LABEL_PLAY = 'play sound';
+    const LABEL_PAUSE = 'pause sound';
+    let userPaused = false;
+    let wantPlaying = false;
+    let fadeToken = 0;
+
+    function setPlayingUI(on) {
+      speakers.classList.toggle('is-playing', on);
+      toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const text = toggle.querySelector('.nearby-sound-text');
+      if (text) text.textContent = on ? LABEL_PAUSE : LABEL_PLAY;
+    }
+
+    function fadeVolume(to, ms) {
+      const token = ++fadeToken;
+      const from = Number(audio.volume) || 0;
+      const start = performance.now();
+      return new Promise((resolve) => {
+        function tick(now) {
+          if (token !== fadeToken) return resolve(false);
+          const k = ms <= 0 ? 1 : Math.min(1, (now - start) / ms);
+          audio.volume = from + (to - from) * k;
+          if (k < 1) requestAnimationFrame(tick);
+          else resolve(true);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    async function startSound() {
+      if (wantPlaying && !audio.paused && audio.volume >= 0.99) return;
+      wantPlaying = true;
+      try {
+        if (audio.paused) {
+          audio.volume = 0;
+          await audio.play();
+        }
+        if (!wantPlaying) return;
+        setPlayingUI(true);
+        const faded = await fadeVolume(1, 420);
+        if (wantPlaying && (faded || audio.volume < 1)) audio.volume = 1;
+      } catch {
+        wantPlaying = false;
+        audio.pause();
+        setPlayingUI(false);
+      }
+    }
+
+    async function stopSound(fadeMs) {
+      wantPlaying = false;
+      const ok = await fadeVolume(0, fadeMs);
+      if (!ok && wantPlaying) return;
+      if (wantPlaying) return;
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 1;
+      setPlayingUI(false);
+    }
+
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!audio.paused) {
+        userPaused = true;
+        stopSound(180);
+      } else {
+        userPaused = false;
+        startSound();
+      }
+    });
+
+    let leaveTimer = 0;
+    let pinInView = false;
+    const pin = section.querySelector('.pin');
+    const io = new IntersectionObserver((entries) => {
+      const inView = !!(entries[0] && entries[0].isIntersecting);
+      if (inView === pinInView) return;
+      pinInView = inView;
+      if (inView) {
+        clearTimeout(leaveTimer);
+        if (!userPaused) startSound();
+      } else {
+        clearTimeout(leaveTimer);
+        leaveTimer = setTimeout(() => {
+          if (wantPlaying || !audio.paused) stopSound(800);
+        }, 120);
+      }
+    }, { threshold: 0 });
+
+    io.observe(pin || section);
   })();
 </script>
 
