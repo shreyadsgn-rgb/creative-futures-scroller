@@ -4148,43 +4148,54 @@
     /* keep Figma crop ratios (1440×900 stage); height follows width so pieces aren't stretched */
     .nearby-piece--speakers {
       left: 48%;
-      top: 22%;
+      top: calc(8vh + 138px);
       width: 28%;
       height: auto;
       aspect-ratio: 288 / 354;
     }
     .nearby-piece--houses {
       left: 8%;
-      top: 36%;
+      top: calc(8vh + 220px);
       width: 90%;
       height: auto;
       aspect-ratio: 868 / 502;
     }
     .nearby-piece--bins {
       left: 28%;
-      top: auto;
-      bottom: 8%;
+      top: calc(8vh + 320px);
+      bottom: auto;
       width: 32%;
       height: auto;
       aspect-ratio: 281 / 240;
     }
     .nearby-piece--mailbox {
       left: 78%;
-      top: auto;
-      bottom: 6%;
+      top: calc(8vh + 350px);
+      bottom: auto;
       width: 12%;
       height: auto;
       aspect-ratio: 81 / 159;
     }
     .nearby-label { font-size: 12px; gap: 8px; }
-    .nearby-label--noise { left: 52%; top: 18%; }
-    .nearby-label--carbon { left: 4vw; top: calc(88% - 125px); }
-    .nearby-label--bills { left: auto; right: 4vw; top: calc(90% - 125px); }
+    .nearby-label--noise { left: 52%; top: calc(8vh + 135px); }
+    .nearby-label--carbon {
+      left: 4vw;
+      top: calc(8vh + 455px);
+      bottom: auto;
+    }
+    .nearby-label--bills {
+      left: auto;
+      right: 4vw;
+      top: calc(8vh + 455px);
+      bottom: auto;
+    }
     .nearby-sound {
       left: 7vw;
-      top: 20vh;
+      top: calc(8vh + 92px);
       font-size: 12px;
       gap: 8px;
+      padding: 8px 10px;
+      border: 1px dotted #000;
     }
   }
 
