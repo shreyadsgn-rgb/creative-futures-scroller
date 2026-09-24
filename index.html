@@ -15,11 +15,11 @@
      ============================================================ */
   :root {
     --section-gap: 440vh;      /* scroll distance of each pinned (scrubbed) section */
-    --section-between: 140vh;  /* end-hold after a scrub finishes (p=1) before the next section */
+    --section-between: 350vh;  /* end-hold after a scrub finishes (p=1) before the next section */
     --anim-duration: 0.6s;     /* entry animation duration for flow sections */
     --anim-delay: 0.1s;        /* entry animation delay */
     --stagger: 150ms;          /* per-item offset in the dataset gallery */
-    --lede-beat: 160vh;        /* one sticky dwell beat for plain lede sections */
+    --lede-beat: 210vh;        /* one sticky dwell beat for plain lede sections */
     --section-copy: 32px;      /* body copy in each section; boxed captions stay smaller */
 
     --bg: #050A0A;
@@ -334,11 +334,11 @@
      snaps on when its card is front so the ghosts aren't killed by text opacity.
      ============================================================ */
   .s-dreams {
-    /* taller scrub: intro lead + spaced steps + long outro linger */
-    height: calc(var(--section-gap) * 4.8);
-    --lead: 0.26;                     /* front slice: intro text alone, no images yet */
-    --steps-end: 0.78;                /* --t reaches 3 (last step fully in) by this point */
-    --exit-end: 0.84;                 /* last step finishes receding; outro fades in after */
+    /* intro lead stays the same length; each step-to-step gap is ~3 scroll beats */
+    height: calc(var(--section-gap) * 4.8 + var(--lede-beat) * 6);
+    --lead: 0.172;                    /* front slice: intro text alone, no images yet */
+    --steps-end: 0.850;               /* --t reaches 3 (last step fully in) by this point */
+    --exit-end: 0.890;                /* last step finishes receding; outro fades in after */
     /* gate steps until after --lead so copy/media can't peek in during the intro */
     --step-gate: clamp(0, (var(--p) - var(--lead)) / 0.05, 1);
     /* only cap the upper bound at 3 — must stay negative (not clamped to 0) while
@@ -527,7 +527,7 @@
     right: 28%;
     clip-path: polygon(0 0, 100% 0, 0 100%);
   }
-  .callout-quote { font-style: italic; color: #fff; font-size: 20px; line-height: 1.6; }
+  .callout-quote { font-style: normal; font-weight: 600; color: #fff; font-size: 20px; line-height: 1.6; }
 
   /* ============================================================
      2 · PROPOSAL LEAD — pin the researchers photo centered, dwell,
@@ -856,7 +856,7 @@
     --fade-out: clamp(0, calc((var(--out-end) - var(--p)) / (var(--out-end) - var(--type-end))), 1);
     --fp: min(var(--fade-in), var(--fade-out));
   }
-  .rule-lines { padding-left: 12vw; max-width: 34em; display: flex; flex-direction: column; gap: 48px; }
+  .rule-lines { padding-left: 12vw; max-width: 68em; display: flex; flex-direction: column; gap: 48px; }
   .rline {
     font-size: clamp(32px, 4vw, 40px); font-weight: 400; line-height: 1.4;
     --fadeIn: clamp(0, calc((var(--p) - var(--ls)) / (var(--le) - var(--ls))), 1);
@@ -3143,7 +3143,7 @@
   /* Early automata — overlapping bordered frames (493:342) */
   .bbm-automata {
     left: calc(47.5% + 150px);
-    top: calc(17.58% + 200px);
+    top: calc(17.58% + 100px);
     width: 21.6%;
     height: 31.46%;
     z-index: 4;
@@ -3176,7 +3176,7 @@
     z-index: 2;
   }
   /* clear of automata shots + researchers */
-  .bbm-label--automata { left: calc(52% + 150px); top: calc(51.8% + 200px); }
+  .bbm-label--automata { left: calc(52% + 150px); top: calc(51.8% + 100px); }
 
   /* AI researchers (493:281) — landscape frame so the group photo isn't cropped */
   .bbm-researchers {
@@ -4650,16 +4650,16 @@
            past the camera. Waves start every ~0.10 and stagger ~0.04 within, so ~6–8
            items share the screen at mid-scrub. -->
       <!-- wave 1 -->
-      <div class="zoom-item img size-wide nudge-240" style="grid-row: 1; grid-column: 1;" data-zoom-item="0.020,0.080,0.220,0.280">
+      <div class="zoom-item img size-wide" style="grid-row: 1; grid-column: 1; position: relative; top: 340px;" data-zoom-item="0.020,0.080,0.220,0.280">
         <div class="ph" data-img-slot data-label="AI everywhere — image 1"><img src="assets/intro/waveform.jpeg" alt="Colorful glowing audio waveforms on a black background" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 4; grid-column: 3;" data-zoom-item="0.060,0.120,0.260,0.320" data-editable>recommendation engines</div>
-      <div class="zoom-item img size-md" style="grid-row: 2; grid-column: 5;" data-zoom-item="0.100,0.160,0.300,0.360">
+      <div class="zoom-item img size-md" style="grid-row: 2; grid-column: 5; position: relative; top: 50px; left: -100px;" data-zoom-item="0.100,0.160,0.300,0.360">
         <div class="ph" data-img-slot data-label="AI everywhere — image 2"><img src="assets/intro/phone-chat.png" alt="Smartphone showing a chatLLM conversation interface" loading="lazy"></div>
       </div>
       <!-- wave 2 -->
       <div class="zoom-item word" style="grid-row: 5; grid-column: 2;" data-zoom-item="0.120,0.180,0.320,0.380" data-editable>voice assistants</div>
-      <div class="zoom-item img size-sm" style="grid-row: 3; grid-column: 4;" data-zoom-item="0.160,0.220,0.360,0.420">
+      <div class="zoom-item img size-sm" style="grid-row: 3; grid-column: 4; position: relative; left: -50px;" data-zoom-item="0.160,0.220,0.360,0.420">
         <div class="ph" data-img-slot data-label="AI everywhere — image 3"><img src="assets/intro/orange-cafe.png" alt="Anthropomorphic orange sitting in a cafe with a latte" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 3; grid-column: 1;" data-zoom-item="0.200,0.260,0.400,0.460" data-editable>predictive text</div>
@@ -4668,7 +4668,7 @@
         <div class="ph" data-img-slot data-label="AI everywhere — image 4"><img src="assets/intro/speech.png" alt="Speech draft document with selected text and an edit with AI button" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 4; grid-column: 5;" data-zoom-item="0.260,0.320,0.460,0.520" data-editable>deepfakes</div>
-      <div class="zoom-item img size-sm nudge-120" style="grid-row: 1; grid-column: 3;" data-zoom-item="0.300,0.360,0.500,0.560">
+      <div class="zoom-item img size-sm" style="grid-row: 1; grid-column: 3; position: relative; top: 270px; left: -150px;" data-zoom-item="0.300,0.360,0.500,0.560">
         <div class="ph" data-img-slot data-label="AI everywhere — image 5"><img src="assets/intro/song-rec.png" alt="Discover Daily song recommendations based on listening history" loading="lazy"></div>
       </div>
       <!-- wave 4 -->
@@ -4683,7 +4683,7 @@
         <div class="ph" data-img-slot data-label="AI everywhere — image 7"><img src="assets/intro/inventor-workshop.png" alt="Young inventor reaching toward a glowing machine in a cluttered workshop" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 4; grid-column: 1;" data-zoom-item="0.460,0.520,0.660,0.720" data-editable>spam filters</div>
-      <div class="zoom-item img size-wide" style="grid-row: 5; grid-column: 5;" data-zoom-item="0.500,0.560,0.700,0.760">
+      <div class="zoom-item img size-wide" style="grid-row: 5; grid-column: 5; position: relative; top: -100px; left: -50px;" data-zoom-item="0.500,0.560,0.700,0.760">
         <div class="ph" data-img-slot data-label="AI everywhere — image 8"><img src="assets/intro/protest-truck.jpg" alt="Pickup truck with a NO NO NO DATA CENTER protest sign in the rear window" loading="lazy"></div>
       </div>
       <!-- wave 6 -->
@@ -4765,7 +4765,7 @@
         <p class="lede proposal-lead-second" data-editable>In 1955, a small group of researchers wrote a proposal to study how machines might reason, use language, and solve problems normally reserved for people.</p>
       </div>
       <div class="proposal-lead-photo">
-        <div class="ph" data-img-slot data-label="the researchers who debated the name &#8212; group photo"><img src="assets/history/dartmouth-conference.avif" alt="McCarthy, Minsky, Rochester, and Shannon at the 2006 Dartmouth conference 50th-anniversary commemoration" loading="lazy"></div>
+        <div class="ph" data-img-slot data-label="the researchers who debated the name &#8212; group photo"><img src="assets/history/dartmouth-conference.png" alt="McCarthy, Minsky, Rochester, and Shannon at the 2006 Dartmouth conference 50th-anniversary commemoration" loading="lazy"></div>
       </div>
     </div>
   </div>
@@ -5293,10 +5293,17 @@
     </div>
   </div>
 
-  <section id="s-datacenters-cost" class="beat beat--dark lede-hold s-dc-name">
+  <section id="s-datacenters-piece" class="beat beat--dark lede-hold">
     <div class="lede-hold-pin">
       <div class="beat-copy">
         <p class="lede" data-scroll-reveal data-editable>There is one more significant piece to generative AI.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-datacenters-cost" class="beat beat--dark lede-hold s-dc-name">
+    <div class="lede-hold-pin">
+      <div class="beat-copy">
         <p class="lede" data-scroll-reveal data-editable>Every AI request sent through the internet travels to physical computers. Those computers require electricity, cooling systems, networking equipment, and buildings called data centers.</p>
       </div>
     </div>
@@ -5429,7 +5436,7 @@
           <img src="assets/datacenter/maps/low-income.png" alt="United States map with data centers and poverty ratio overlay">
         </div>
         <div class="dc-impact-box">
-          <p data-editable>Data centers are disproportionately located in communities that already face unhealthy air quality, groundwater threats, and high concentrations of hazardous waste.</p>
+          <p data-editable><span class="text-highlight-dark">Data centers are disproportionately distributed</span> in communities that already face unhealthy air quality, groundwater threats, and high concentrations of hazardous waste.</p>
           <p data-editable>In California alone, nearly one-third of all data centers are in the state's most polluted neighborhoods.</p>
         </div>
       </div>
@@ -5605,7 +5612,7 @@
       </div>
 
       <div class="bbm-cluster bbm-researchers">
-        <img src="assets/history/dartmouth-conference.avif" alt="AI researchers at the Dartmouth conference commemorative gathering">
+        <img src="assets/history/dartmouth-conference.png" alt="AI researchers at the Dartmouth conference commemorative gathering">
       </div>
       <div class="bbm-label bbm-label--researchers">
         <span class="bbm-label-mark" aria-hidden="true"></span>
@@ -5752,7 +5759,7 @@
 <section id="s-map-unfinished" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable> Stances like these are still being formed by researchers, by companies, by lawmakers, and by people like the students who want a say in how this technology interacts with their creative process.</p>
+      <p class="lede" data-scroll-reveal data-editable> Stances like these are still being formed by researchers, by companies, by lawmakers, and by people like you.</p>
     </div>
   </div>
 </section>
@@ -6070,10 +6077,21 @@
     gen.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
   }
 
-  /* ---------- zoom field: translateZ/opacity/blur from a "inStart,inEnd,outStart,outEnd" range ----------
-     Opacity/blur use the trapezoid (fade in → sharp → fade out). Z travels continuously
-     from -1000 → +1000 across the whole lifetime so items drift past instead of freezing
-     at the focal plane. Items with outStart >= outEnd (center-hold) ease in and stay. */
+  /* ---------- zoom field: one translateZ from a "inStart,inEnd,outStart,outEnd" range ----------
+     Opacity/blur use the trapezoid (fade in → sharp → fade out). Depth is the only motion:
+     items begin near the vanishing point (about 12% of the way out to their grid seat) and
+     the same zoom carries them out to that seat by mid-life, then on past the camera.
+     Matches .zoom-field { perspective: 1000px }. Center-hold eases in and stays. */
+  function zoomZ(t) {
+    const P = 1000;
+    const f0 = 0.12;
+    const u = Math.min(1, Math.max(0, t));
+    if (u <= 0.5) {
+      const f = f0 + (1 - f0) * (u / 0.5);
+      return P * (1 - 1 / f);
+    }
+    return P * ((u - 0.5) / 0.5);
+  }
   function updateZoomItem(el, p) {
     const [inStart, inEnd, outStart, outEnd] = el.dataset.zoomItem.split(',').map(Number);
     let op, blur;
@@ -6094,15 +6112,14 @@
     let z;
     const neverExits = outStart >= outEnd;
     if (neverExits) {
-      if (p <= inStart) z = -1000;
-      else if (p < inEnd) z = -1000 + 1000 * ((p - inStart) / (inEnd - inStart));
-      else z = 0;
+      const u = p <= inStart ? 0 : p >= inEnd ? 1 : (p - inStart) / (inEnd - inStart || 1);
+      z = u >= 1 ? 0 : zoomZ(u * 0.5);
     } else if (p <= inStart) {
-      z = -1000;
+      z = zoomZ(0);
     } else if (p >= outEnd) {
-      z = 1000;
+      z = zoomZ(1);
     } else {
-      z = -1000 + 2000 * ((p - inStart) / (outEnd - inStart));
+      z = zoomZ((p - inStart) / (outEnd - inStart || 1));
     }
 
     el.style.setProperty('--z', z.toFixed(1) + 'px');
@@ -6202,9 +6219,7 @@
   });
 
   /* ---------- s-rules frames: de-pixelate across each frame's own --ls → --le
-     fade-in window. Cap short of fully crisp — calibrated to the popcorn frame
-     (ls=0.38, le=0.45) at p=0.447, which is still slightly pixelated. ---------- */
-  const RULES_FOCUS_CAP = (0.447 - 0.38) / (0.45 - 0.38);
+     fade-in window, ending fully crisp. ---------- */
   document.querySelectorAll('.s-rules .rule-frame').forEach(frame => {
     const slot = frame.querySelector('[data-pixel-focus]');
     const section = frame.closest('[data-scrub]');
@@ -6214,8 +6229,8 @@
     const span = le - ls || 1;
     PixelFocus.register(slot, () => {
       const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
-      return Math.min(RULES_FOCUS_CAP, Math.max(0, (p - ls) / span));
-    }, f => f ** 3);
+      return Math.min(1, Math.max(0, (p - ls) / span));
+    });
   });
 
   /* ---------- s-dreams mobile: first sentence + "...more" on step blurbs ----------
