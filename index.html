@@ -82,6 +82,17 @@
     font-size: inherit;
     font-weight: 600;
   }
+  .text-highlight-dark {
+    display: inline;
+    padding: 0.1em 0.25em;
+    background: #000;
+    color: #fff;
+    font-size: inherit;
+    font-weight: 600;
+    line-height: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
 
   @media (max-width: 800px) {
     :root { --section-copy: 18px; }
@@ -1615,14 +1626,15 @@
        4. on exit, white line + title hinge down ~45° with a bounce
      ============================================================ */
   .s-model-collapse {
-    height: calc(var(--section-gap) * 2.4);
+    /* extra scroll so the curve can finish before the title falls and the box rises */
+    height: calc(var(--section-gap) * 3.5);
     padding-bottom: 0; /* no empty end-hold after p=1 */
     --lede: clamp(0, var(--p) / 0.08, 1);
     --clear: clamp(0, (var(--p) - 0.16) / 0.1, 1);
     --rise: clamp(0, (var(--p) - 0.2) / 0.16, 1);
     --reveal: clamp(0, (var(--p) - 0.4) / 0.12, 1);
-    /* after hinge collapse finishes, black conclude box slides up */
-    --conclude: clamp(0, (var(--p) - 0.82) / 0.1, 1);
+    /* JS sets this once the video has finished and the hinge has fallen */
+    --conclude: 0;
     --title-size: clamp(40px, 4.4vw, 64px);
     --title-top: calc(50% * (1 - var(--rise)) + 12vh * var(--rise));
     --collapse-angle: 0; /* degrees; JS writes bounce-eased value on exit */
@@ -1715,13 +1727,13 @@
     letter-spacing: -0.02em;
     white-space: nowrap;
   }
-  /* post-dock reveal: full-bleed bell-curve video, one sentence over it at a time (Figma 750:47) */
+  /* post-dock reveal: bell-curve video topped on the white line, one sentence over it at a time */
   .model-collapse-reveal {
     position: absolute;
     left: 0;
     right: 0;
-    top: calc(var(--title-top) + var(--title-size) * 0.55);
-    bottom: 0;
+    top: var(--title-top);
+    height: min(90vh, calc(100vh - var(--title-top)));
     z-index: 3;
     opacity: var(--reveal);
     pointer-events: none;
@@ -1729,28 +1741,28 @@
   .model-collapse-copy {
     position: absolute;
     left: 12vw;
-    top: 3vh;
+    top: calc(var(--title-size) * 0.7 + 2vh);
     width: min(939px, 66vw);
     z-index: 4;
     margin: 0;
   }
-  .model-collapse-copy .lede {
+  .model-collapse-copy .subheading {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     margin: 0;
-    max-width: none;
+    max-width: 40em;
     color: #fff;
   }
-  .model-collapse-copy .lede:nth-child(1) {
-    --sin: clamp(0, (var(--p) - 0.40) / 0.06, 1);
-    --sout: clamp(0, (var(--p) - 0.58) / 0.05, 1);
+  .model-collapse-copy .subheading:nth-child(1) {
+    --sin: clamp(0, (var(--p) - 0.40) / 0.05, 1);
+    --sout: clamp(0, (var(--p) - var(--mc-text2, 0.62)) / 0.04, 1);
     opacity: calc(var(--sin) * (1 - var(--sout)));
   }
-  .model-collapse-copy .lede:nth-child(2) {
-    --sin: clamp(0, (var(--p) - 0.64) / 0.06, 1);
-    --sout: clamp(0, (var(--p) - 0.80) / 0.04, 1);
+  .model-collapse-copy .subheading:nth-child(2) {
+    --sin: clamp(0, (var(--p) - var(--mc-text2, 0.62)) / 0.05, 1);
+    --sout: clamp(0, (var(--p) - var(--mc-play-end, 0.85)) / 0.04, 1);
     opacity: calc(var(--sin) * (1 - var(--sout)));
   }
   .model-collapse-media {
@@ -1761,13 +1773,11 @@
   }
   .model-collapse-media video {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center bottom;
+    object-fit: contain;
+    object-position: center top;
     display: block;
   }
   /* black conclude box — contamination copy slides up after hinge */
@@ -1808,16 +1818,32 @@
     padding: 18vh 12vw 10vh;
   }
   .reclaim-copy {
-    max-width: 28em;
+    max-width: 56em;
     display: flex;
     flex-direction: column;
     gap: 3vh;
   }
+  .s-reclaim .lede {
+    max-width: none;
+  }
 
   /* ============================================================
-     13 · OPT-OUT OVERVIEW (Figma 521:55) — purple stage: lede,
-     people grid + CTA first; Surfshark chart after a scroll beat.
+     13 · OPT-OUT — opening sentence is its own purple lede hold.
+     The next section is the second sentence plus people, CTA, and chart.
      ============================================================ */
+  .s-optout-lede {
+    background: var(--purple);
+    color: #fff;
+  }
+  .s-optout-lede.lede-hold > .lede-hold-pin {
+    padding: 22vh 8vw 10vh calc(8.33% + 3.6vw);
+  }
+  .s-optout-lede .lede {
+    width: min(896px, 72vw);
+    max-width: none;
+    margin: 0;
+    color: #fff;
+  }
   .s-optout {
     background: var(--purple);
     color: #fff;
@@ -1865,7 +1891,7 @@
     position: absolute;
     left: var(--opt-gutter);
     top: 22%;
-    width: min(448px, 36vw);
+    width: min(896px, 72vw);
     z-index: 2;
     display: flex;
     flex-direction: column;
@@ -2022,6 +2048,10 @@
       height: auto;
     }
     .optout-deco { display: none; }
+    .s-optout-lede.lede-hold > .lede-hold-pin {
+      padding: 14vh 6vw 8vh;
+    }
+    .s-optout-lede .lede { width: 100%; max-width: 520px; }
     .optout-copy,
     .optout-people,
     .optout-cta,
@@ -4584,7 +4614,8 @@
     }
     .model-collapse-reveal {
       left: 0; right: 0;
-      top: calc(var(--title-top) + var(--title-size) * 0.7);
+      top: var(--title-top);
+      height: min(90vh, calc(100vh - var(--title-top)));
     }
     .model-collapse-copy {
       left: 7vw;
@@ -5112,22 +5143,29 @@
       </div>
       <div class="model-collapse-reveal">
         <div class="model-collapse-copy">
-          <p class="lede" data-editable>When this happens, it&#8217;s the things that show up less often in training data, like unique styles of phrasing, niche topics, and uncommon perspectives that disappear while the most common information survives.</p>
-          <p class="lede" data-editable>This further impacts whoever was already underrepresented in the data to begin with.</p>
+          <p class="subheading" data-editable>When this happens, it&#8217;s the things that show up less often in training data, like unique styles of phrasing, niche topics, and uncommon perspectives that disappear while the most common information survives.</p>
+          <p class="subheading" data-editable>This further impacts whoever was already underrepresented in the data to begin with.</p>
         </div>
         <div class="model-collapse-media">
           <video class="curve-video" src="assets/training/bell-curve.mp4" muted playsinline preload="auto" aria-label="Bell curve of common versus uncommon styles collapsing toward what shows up most often"></video>
         </div>
       </div>
       <div class="model-collapse-conclude">
-        <p class="lede" data-editable>Currently, some LLM companies are looking at printed material as training data that is safe from AI contamination.</p>
-        <p class="lede" data-editable>Others are leaning on synthetic data (curated artificial data) to grow and develop their models.</p>
+        <p class="subheading" data-editable>In response, some LLM companies are currently looking at printed material as training data that is safe from AI contamination.</p>
+        <p class="subheading" data-editable>Others are leaning on synthetic data (curated artificial data) to grow and develop their models.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 13 · Opt-out overview (Figma 521:55): people/CTA → click → chart. -->
+<!-- 13a · Opt-out opening line, alone on purple. -->
+<section id="s-optout-lede" class="s-optout-lede lede-hold">
+  <div class="lede-hold-pin">
+    <p class="lede" data-scroll-reveal data-editable>As generative AI companies compete to develop better AI models, it&#8217;s becoming less clear where and how exactly they are training their models.</p>
+  </div>
+</section>
+
+<!-- 13 · Opt-out overview (Figma 521:55): second sentence, people/CTA → click → chart. -->
 <section id="s-optout" class="s-optout" data-scrub>
   <div class="pin">
     <div class="optout-stage">
@@ -5137,7 +5175,6 @@
       </div>
 
       <div class="optout-copy">
-        <p class="lede" data-editable>As generative AI companies compete to develop better AI models, it&#8217;s becoming less clear where and how exactly they are training their models.</p>
         <p class="lede" data-editable>This has been a concern for people who do not want their content to be used as training material.</p>
       </div>
 
@@ -5375,7 +5412,7 @@
         </div>
         <div class="dc-impact-box">
           <p data-editable>Over 1,500 new data centers are currently in development across the United States, with more expected as AI demand increases.</p>
-          <p data-editable>67% of planned data centers are in rural areas. The South alone accounts for nearly half of all planned construction.</p>
+          <p data-editable>67% of planned data centers are in rural areas. <span class="text-highlight-dark">The South alone accounts for nearly half of all planned construction.</span></p>
         </div>
       </div>
       <div class="dc-impact-step" data-dc-impact-step="2">
@@ -5384,7 +5421,7 @@
         </div>
         <div class="dc-impact-box">
           <p data-editable>Energy projects on non-tribal lands can face permitting delays of three to ten years, but projects on tribal land often move faster because tribes have sovereign authority to handle their own regulations. This incentivizes data center construction on and near this land.</p>
-          <p data-editable>Responses from Native communities is divided. Some tribal leaders see the boom as economic opportunity in communities, while others worry about the environmental and social impacts.</p>
+          <p data-editable><span class="text-highlight-dark">Responses from Native communities is divided.</span> Some tribal leaders see the boom as economic opportunity in communities, while others worry about the environmental and social impacts.</p>
         </div>
       </div>
       <div class="dc-impact-step" data-dc-impact-step="3">
@@ -5902,8 +5939,12 @@
     }
   }
 
-  /* bell-curve video: frame follows scroll through the model-collapse reveal */
+  /* bell-curve video: hold the first frame for 2 scroll beats after the
+     overlay text appears, then advance with scroll. The file has a single
+     keyframe, so forward motion is playback and any rewind restarts at 0. */
   const curveVideo = document.querySelector('#s-model-collapse .curve-video');
+  let curveTarget = 0;
+  let curveChasing = false;
   if (curveVideo) {
     curveVideo.pause();
     curveVideo.addEventListener('loadedmetadata', () => {
@@ -5912,13 +5953,67 @@
       scrubCurveVideo(p);
     });
   }
+  /* first line → one scroll beat → second line → video → title falls → black box */
+  function modelCollapseMarks() {
+    const vh = window.innerHeight;
+    const beatRaw = getComputedStyle(document.documentElement).getPropertyValue('--lede-beat').trim();
+    const beat = beatRaw.endsWith('vh') ? (parseFloat(beatRaw) || 0) * vh / 100 : (parseFloat(beatRaw) || 0);
+    const section = document.getElementById('s-model-collapse');
+    const between = sectionBetweenPx(vh);
+    const range = Math.max(1, (section ? section.offsetHeight : 0) - vh - between);
+    const b = beat / range;
+    const text1 = 0.4;
+    const text2 = text1 + b;
+    const playStart = text2 + 0.05;
+    const playEnd = playStart + b;
+    const fallEnd = playEnd + b * 0.55;
+    const boxStart = fallEnd;
+    if (section) {
+      section.style.setProperty('--mc-text2', text2.toFixed(4));
+      section.style.setProperty('--mc-play-end', playEnd.toFixed(4));
+    }
+    return { playStart, playEnd, fallEnd, boxStart };
+  }
   function scrubCurveVideo(p) {
     if (!curveVideo || !curveVideo.duration || !isFinite(curveVideo.duration)) return;
-    const t = Math.min(1, Math.max(0, (p - 0.4) / 0.6));
-    const time = Math.min(Math.max(0, curveVideo.duration - 0.04), t * curveVideo.duration);
-    if (Math.abs(curveVideo.currentTime - time) > 0.03) {
-      curveVideo.currentTime = time;
-    }
+    const { playStart, playEnd } = modelCollapseMarks();
+    const span = Math.max(0.04, playEnd - playStart);
+    const t = Math.min(1, Math.max(0, (p - playStart) / span));
+    curveTarget = t * Math.max(0, curveVideo.duration - 0.001);
+    chaseCurveVideo();
+  }
+  function chaseCurveVideo() {
+    if (curveChasing || !curveVideo) return;
+    curveChasing = true;
+    const step = () => {
+      const v = curveVideo;
+      if (!v || !v.duration) { curveChasing = false; return; }
+      const target = curveTarget;
+      const cur = v.currentTime;
+      if (target < 0.03) {
+        if (!v.paused) v.pause();
+        if (cur > 0.04 && !v.seeking) v.currentTime = 0;
+        curveChasing = false;
+        return;
+      }
+      if (cur > target + 0.07) {
+        if (!v.seeking) v.currentTime = 0;
+        if (!v.paused) v.pause();
+        requestAnimationFrame(step);
+        return;
+      }
+      if (target - cur > 0.05) {
+        const gap = target - cur;
+        v.playbackRate = Math.min(16, Math.max(1, gap * 10));
+        if (v.paused) v.play().catch(() => {});
+        requestAnimationFrame(step);
+        return;
+      }
+      if (!v.paused) v.pause();
+      curveChasing = false;
+      updateModelCollapse();
+    };
+    requestAnimationFrame(step);
   }
 
   /* Generative AI tag: matches the columns' leftward pan exactly (same
@@ -6208,9 +6303,16 @@
   function updateModelCollapse() {
     if (!sModelCollapseEl) return;
     const p = parseFloat(sModelCollapseEl.style.getPropertyValue('--p')) || 0;
-    const t = Math.min(1, Math.max(0, (p - 0.68) / 0.12));
+    const { playEnd, fallEnd, boxStart } = modelCollapseMarks();
+    const dur = curveVideo && curveVideo.duration;
+    const videoDone = !curveVideo || (dur && curveVideo.currentTime >= dur - 0.08);
+    const fallSpan = Math.max(0.04, fallEnd - playEnd);
+    const t = videoDone ? Math.min(1, Math.max(0, (p - playEnd) / fallSpan)) : 0;
     const angle = (t <= 0 ? 0 : easeOutBack(t)) * 45;
     sModelCollapseEl.style.setProperty('--collapse-angle', angle.toFixed(2));
+    const boxSpan = 0.08;
+    const box = (videoDone && t >= 0.98) ? Math.min(1, Math.max(0, (p - boxStart) / boxSpan)) : 0;
+    sModelCollapseEl.style.setProperty('--conclude', box.toFixed(4));
   }
 
   /* ---------- johnniac-track: sticky photo sits outside the scrub
