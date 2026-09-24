@@ -20,6 +20,7 @@
     --anim-delay: 0.1s;        /* entry animation delay */
     --stagger: 150ms;          /* per-item offset in the dataset gallery */
     --lede-beat: 160vh;        /* one sticky dwell beat for plain lede sections */
+    --section-copy: 32px;      /* body copy in each section; boxed captions stay smaller */
 
     --bg: #050A0A;
     --ink: #FFFFFF;
@@ -55,10 +56,38 @@
   }
 
   /* ---------- shared layout ---------- */
-  .copy-col { padding-left: 12vw; max-width: calc(12vw + 480px); }
+  .copy-col { padding-left: 12vw; max-width: calc(12vw + 30 * var(--section-copy)); }
 
-  .lede { font-size: 18px; font-weight: 400; max-width: 30em; }
-  .subtext { font-size: 13.5px; color: var(--ink-dim); max-width: 34em; }
+  .lede { font-size: 32px; font-weight: 400; max-width: 30em; }
+  .subtext { font-size: 15.5px; color: var(--ink-dim); max-width: 34em; }
+
+  /* ---------- text utility classes ---------- */
+  .subheading {
+    font-size: clamp(16px, 2vw, 22px);
+    font-weight: 500;
+    line-height: 1.3;
+    max-width: 34em;
+  }
+  .text-knockout {
+    display: inline;
+    padding: 0.1em 0.25em;
+    background: var(--warm);
+    color: #000;
+    font-size: inherit;
+    font-weight: 600;
+    line-height: inherit;
+  }
+  .text-highlight {
+    color: var(--warm);
+    font-size: inherit;
+    font-weight: 600;
+  }
+
+  @media (max-width: 800px) {
+    :root { --section-copy: 18px; }
+    .lede { font-size: 18px; }
+    .subheading { font-size: clamp(14px, 4vw, 16px); }
+  }
 
   /* ---------- pinned scrub sections ----------
      JS writes --p (0 → 1) onto each [data-scrub] as it scrolls through.
@@ -138,7 +167,7 @@
   .s-ai-flood.lede-hold > .lede-hold-pin {
     align-content: start;
     padding-block: 0;
-    padding-top: calc(100vh - min(30vw, 382px) * 535 / 382);
+    padding-top: calc(100vh - min(30vw, 500px) * 535 / 382);
   }
 
   /* ---------- scroll-linked reveal (vs. [data-reveal]'s fixed-duration transition) ----------
@@ -222,7 +251,7 @@
     max-width: 92%;
     margin: 0;
     transform: translate(-50%, -50%) translateZ(var(--z, -1000px));
-    font-size: clamp(18px, 2.4vw, 26px);
+    font-size: clamp(18px, 2.4vw, var(--section-copy));
     font-weight: 400;
     color: var(--ink);
     text-align: center;
@@ -242,6 +271,25 @@
   .zoom-item.nudge-left-300 { position: relative; left: -300px; }
   .zoom-item.nudge-160 { position: relative; top: 160px; }
   .zoom-item.nudge-240 { position: relative; top: 240px; }
+  .s-intro .intro-title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    margin: 0;
+    width: min(16ch, 90vw);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(40px, 6.2vw, 84px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    text-align: center;
+    pointer-events: none;
+    opacity: calc(1 - clamp(0, (var(--p) - 0.015) / 0.07, 1));
+  }
+  .s-intro .intro-title span { display: block; }
   .s-intro .scroll-hint {
     position: absolute;
     left: 50%;
@@ -327,7 +375,7 @@
   .step {
     position: absolute; inset: 0;
     display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
-    align-items: center; gap: 4vw; padding: 0 8vw 12vh 12vw;
+    align-items: center; gap: 4vw; padding: 240px 8vw 12vh 12vw;
     /* + --exit only ever moves the *last* step (t-k==0 there once --t is pinned at 3);
        earlier steps are already fully exited (d > 1) by the time --exit turns on. */
     --d: calc(var(--t) - var(--k) + var(--exit));
@@ -347,7 +395,7 @@
     --on: clamp(0, (var(--d) + 0.001) * 1000, 1);
     opacity: calc(var(--step-gate) * var(--on) * (1 - var(--overtaken)));
   }
-  .step h3 { font-size: 17px; font-weight: 500; margin-bottom: 10px; }
+  .step h3 { font-size: clamp(16px, 2vw, 20px); font-weight: 500; margin-bottom: 10px; }
   .step .media {
     position: relative;
     justify-self: start;
@@ -356,7 +404,7 @@
     transform-origin: center center;
     /* diagonal stack for upcoming cards only (--behind); once overtaken, hard-cut */
     transform:
-      translate(calc(var(--behind) * 22%), calc(var(--behind) * -10%))
+      translate(calc(var(--behind) * 22%), calc(var(--behind) * 10%))
       scale(calc(1 - var(--behind) * 0.25));
     opacity: calc(
       var(--step-gate)
@@ -406,7 +454,7 @@
      centered PDF below, instead of left-anchored like the other sections. */
   .proposal-intro {
     text-align: center;
-    max-width: 480px;
+    max-width: 960px;
     margin-inline: auto;
     opacity: var(--intro-show);
     transform: translateY(calc((1 - var(--intro-show)) * 14px));
@@ -441,21 +489,34 @@
   }
   .callout {
     position: absolute; top: 50%; width: min(20vw, 240px);
-    background: var(--gray-panel); border-radius: 6px;
-    padding: 22px 24px; display: flex; flex-direction: column; gap: 12px;
+    background: #00a7b7;
+    padding: 24px 26px; display: flex; flex-direction: column; gap: 12px;
+    box-shadow: 0 8px 18px rgba(20, 30, 40, 0.13);
     --fade-in: clamp(0, calc((var(--pdf-p) - var(--in-start)) / (var(--hold-start) - var(--in-start))), 1);
     --fade-out: clamp(0, calc((var(--out-end) - var(--pdf-p)) / (var(--out-end) - var(--hold-end))), 1);
     --fp: min(var(--fade-in), var(--fade-out));
     opacity: var(--fp);
     transform: translateY(calc(-50% + (1 - var(--fp)) * 14px));
   }
-  .callout-left { left: 1vw; }
-  .callout-right { right: 1vw; }
-  .callout-quote { font-style: italic; color: var(--ink-dim); font-size: 13.5px; line-height: 1.6; }
-  .callout-prompt {
-    font-family: 'Fira Code', ui-monospace, Menlo, monospace;
-    font-size: 13.5px; line-height: 1.6; color: var(--ink);
+  .callout::after {
+    content: "";
+    position: absolute;
+    left: 28%;
+    bottom: -22px;
+    width: 32px;
+    height: 28px;
+    background: inherit;
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    filter: drop-shadow(4px 5px 3px rgba(20, 30, 40, 0.10));
   }
+  .callout-left { left: calc(1vw + 100px); }
+  .callout-right { right: calc(1vw + 100px); }
+  .callout-right::after {
+    left: auto;
+    right: 28%;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+  .callout-quote { font-style: italic; color: #fff; font-size: 20px; line-height: 1.6; }
 
   /* ============================================================
      2 · PROPOSAL LEAD — pin the researchers photo centered, dwell,
@@ -611,7 +672,7 @@
     z-index: 2;
     max-width: 28em;
     margin: 0;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     opacity: calc(var(--lede) * (1 - var(--clear)));
@@ -636,11 +697,11 @@
     pointer-events: none;
     opacity: calc(var(--terms) * (1 - var(--clear)));
   }
-  .naming-candidate.c1 { --x: 20vw; top: 32vh; }
-  .naming-candidate.c2 { --x: 48vw; top: 44vh; }
-  .naming-candidate.c3 { --x: 58vw; top: 26vh; max-width: 18em; }
-  .naming-candidate.c4 { --x: 34vw; top: 20vh; max-width: 16em; }
-  .naming-candidate.c5 { --x: 12vw; top: 42vh; max-width: 14em; }
+  .naming-candidate.c1 { --x: 20vw; top: calc(30vh + 150px); }
+  .naming-candidate.c2 { --x: 74vw; top: calc(46vh + 150px); }
+  .naming-candidate.c3 { --x: 58vw; top: calc(26vh + 150px); max-width: 18em; }
+  .naming-candidate.c4 { --x: 34vw; top: calc(20vh + 150px); max-width: 16em; }
+  .naming-candidate.c5 { --x: 12vw; top: calc(56vh + 150px); max-width: 14em; }
   /* AI starts as a gray term twin, grows, then rises to dock at the top */
   .naming-ai {
     position: absolute;
@@ -694,7 +755,7 @@
     pointer-events: none;
   }
   .naming-copy {
-    max-width: 28em;
+    max-width: 42em;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -702,7 +763,7 @@
   .naming-outro,
   .naming-prompt {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
@@ -786,7 +847,7 @@
   }
   .rule-lines { padding-left: 12vw; max-width: 34em; display: flex; flex-direction: column; gap: 48px; }
   .rline {
-    font-size: clamp(21px, 2.8vw, 24px); font-weight: 400; line-height: 1.4;
+    font-size: clamp(32px, 4vw, 40px); font-weight: 400; line-height: 1.4;
     --fadeIn: clamp(0, calc((var(--p) - var(--ls)) / (var(--le) - var(--ls))), 1);
     --lp: min(var(--fadeIn), var(--fp));
     opacity: var(--lp);
@@ -844,7 +905,7 @@
   .s-datasets .datasets-intro {
     padding-left: 12vw;
     margin-bottom: 4vh;
-    max-width: calc(12vw + 480px);
+    max-width: calc(12vw + 960px);
   }
   .dataset-track {
     display: flex;
@@ -894,26 +955,31 @@
      6 · AI KINDS — Figma 315:295 → 320:431 → 321:476 → 321:486
        1. two blurbs alone
        2. example boxes: outline + label (--ex-box), then bullets (--ex-1/2/3)
-       3. Predictive / Generative lime tags (--tags)
-       4. columns pan left; left column exits by p=0.7; Generative AI
+       3. Predictive / Generative lime tags (--tags), then a hold beat
+       4. columns pan left; left column exits; Generative AI
           grows (--focus / --pan); focus copy reveals under the
           generative body text (--copy)
      ============================================================ */
   .s-ai-kinds {
-    height: calc(var(--section-gap) * 3.8);
-    /* example boxes: outline + label, then each bullet — doubled scroll runway */
-    --ex-box: clamp(0, (var(--p) - 0.05) / 0.10, 1);
-    --ex-1: clamp(0, (var(--p) - 0.18) / 0.08, 1);
-    --ex-2: clamp(0, (var(--p) - 0.30) / 0.08, 1);
-    --ex-3: clamp(0, (var(--p) - 0.42) / 0.08, 1);
-    --tags: clamp(0, (var(--p) - 0.54) / 0.10, 1);
-    /* pan + gen grow */
-    --focus: clamp(0, (var(--p) - 0.68) / 0.12, 1);
+    /* taller so titles can hold a beat before the pan */
+    height: calc(var(--section-gap) * 4.4);
+    /* blurb reveals: "Some AI..." first, then "Other AI..." */
+    --blurb-1: clamp(0, var(--p) / 0.08, 1);
+    --blurb-2: clamp(0, (var(--p) - 0.10) / 0.08, 1);
+    /* example boxes: outline + label, then each bullet */
+    --ex-box: clamp(0, (var(--p) - 0.18) / 0.10, 1);
+    --ex-1: clamp(0, (var(--p) - 0.28) / 0.08, 1);
+    --ex-2: clamp(0, (var(--p) - 0.36) / 0.08, 1);
+    --ex-3: clamp(0, (var(--p) - 0.44) / 0.08, 1);
+    /* Predictive / Generative titles land, then hold a beat before the pan */
+    --tags: clamp(0, (var(--p) - 0.52) / 0.10, 1);
+    /* pan + gen grow — starts after the title hold */
+    --focus: clamp(0, (var(--p) - 0.72) / 0.12, 1);
     --pan: var(--focus);
     /* focus copy under the generative body text once the pan lands */
-    --copy: clamp(0, (var(--p) - 0.80) / 0.08, 1);
-    /* final beat: the “LOT more examples” line */
-    --more: clamp(0, (var(--p) - 0.90) / 0.08, 1);
+    --copy: clamp(0, (var(--p) - 0.86) / 0.08, 1);
+    /* final beat: the "LOT more examples" line */
+    --more: clamp(0, (var(--p) - 0.94) / 0.06, 1);
   }
   .s-ai-kinds .pin {
     background: #2a2a2a;
@@ -984,15 +1050,15 @@
   }
   .ai-kinds-focus-lead {
     margin: 0;
-    font-size: 18px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--ink);
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--warm);
     max-width: 28em;
   }
   .ai-kinds-focus-more {
     margin: calc(var(--more) * 24px) 0 0;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: var(--ink);
@@ -1059,10 +1125,18 @@
   }
   .ai-kinds-blurb {
     margin: 0;
-    font-size: 18px;
-    font-weight: 400;
-    line-height: 1.5;
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 500;
+    line-height: 1.3;
     color: var(--ink);
+  }
+  .ai-kinds-col-left .ai-kinds-blurb {
+    opacity: var(--blurb-1);
+    transform: translateY(calc((1 - var(--blurb-1)) * 16px));
+  }
+  .ai-kinds-col-right .ai-kinds-blurb {
+    opacity: var(--blurb-2);
+    transform: translateY(calc((1 - var(--blurb-2)) * 16px));
   }
   .ai-kinds-outgoing {
     display: flex;
@@ -1152,6 +1226,7 @@
     position: relative;
     z-index: 5;
     padding-left: 12vw;
+    max-width: calc(12vw + 540px);
     --in: clamp(0, var(--p) / 0.05, 1);
     opacity: calc(var(--in) * var(--old-out));
   }
@@ -1410,11 +1485,30 @@
      ============================================================ */
   .s-training-gaps {
     background: var(--purple);
-    min-height: 100vh;
+    height: calc(100vh + var(--lede-beat) * 3);
     box-sizing: border-box;
+    /* staggered reveal timing */
+    --tg-1: clamp(0, var(--p) / 0.15, 1);
+    --tg-2: clamp(0, (var(--p) - 0.25) / 0.15, 1);
+    --tg-3: clamp(0, (var(--p) - 0.50) / 0.15, 1);
+  }
+  .s-training-gaps .pin {
     display: grid;
-    align-content: center;
-    padding-block: 8vh;
+    align-content: start;
+    padding-top: 18vh;
+    padding-bottom: 8vh;
+  }
+  .s-training-gaps .training-gaps-copy > *:nth-child(1) { 
+    opacity: var(--tg-1, 0); 
+    transform: translateY(calc((1 - var(--tg-1, 0)) * 16px)); 
+  }
+  .s-training-gaps .training-gaps-copy > *:nth-child(2) { 
+    opacity: var(--tg-2, 0); 
+    transform: translateY(calc((1 - var(--tg-2, 0)) * 16px)); 
+  }
+  .s-training-gaps .training-gaps-copy > *:nth-child(3) { 
+    opacity: var(--tg-3, 0); 
+    transform: translateY(calc((1 - var(--tg-3, 0)) * 16px)); 
   }
   .training-gaps-layout {
     /* clears the sticky building's own column (12vw page margin + its width + gap) */
@@ -1422,7 +1516,7 @@
     padding-right: 12vw;
   }
   .training-gaps-copy {
-    max-width: 30em;
+    max-width: calc(30 * var(--section-copy));
     display: flex;
     flex-direction: column;
     gap: 3vh;
@@ -1446,12 +1540,31 @@
      ============================================================ */
   .s-human-labor {
     background: var(--purple);
-    min-height: 100vh;
+    height: calc(100vh + var(--lede-beat) * 3);
     box-sizing: border-box;
+    position: relative;
+    /* staggered reveal timing */
+    --hl-1: clamp(0, var(--p) / 0.15, 1);
+    --hl-2: clamp(0, (var(--p) - 0.25) / 0.15, 1);
+    --hl-3: clamp(0, (var(--p) - 0.50) / 0.15, 1);
+  }
+  .s-human-labor .pin {
     display: grid;
     align-content: start;
-    padding-block: 0;
-    position: relative;
+    padding-top: 18vh;
+    padding-bottom: 0;
+  }
+  .s-human-labor .human-labor-copy > *:nth-child(1) { 
+    opacity: var(--hl-1, 0); 
+    transform: translateY(calc((1 - var(--hl-1, 0)) * 16px)); 
+  }
+  .s-human-labor .human-labor-copy > *:nth-child(2) { 
+    opacity: var(--hl-2, 0); 
+    transform: translateY(calc((1 - var(--hl-2, 0)) * 16px)); 
+  }
+  .s-human-labor .human-labor-copy > *:nth-child(3) { 
+    opacity: var(--hl-3, 0); 
+    transform: translateY(calc((1 - var(--hl-3, 0)) * 16px)); 
   }
   .human-labor-layout {
     position: relative;
@@ -1462,7 +1575,7 @@
     min-height: calc(min(30vw, 382px) * 535 / 382);
   }
   .human-labor-copy {
-    max-width: 28em;
+    max-width: calc(28 * var(--section-copy));
     display: flex;
     flex-direction: column;
     gap: 3vh;
@@ -1491,7 +1604,7 @@
     min-height: calc(min(30vw, 382px) * 535 / 382);
   }
   .ai-flood-copy {
-    max-width: 28em;
+    max-width: calc(28 * var(--section-copy));
   }
 
   /* ============================================================
@@ -1508,8 +1621,6 @@
     --clear: clamp(0, (var(--p) - 0.16) / 0.1, 1);
     --rise: clamp(0, (var(--p) - 0.2) / 0.16, 1);
     --reveal: clamp(0, (var(--p) - 0.4) / 0.12, 1);
-    /* after the media is in, hold a beat then crossfade pre → post curve */
-    --curve: clamp(0, (var(--p) - 0.54) / 0.12, 1);
     /* after hinge collapse finishes, black conclude box slides up */
     --conclude: clamp(0, (var(--p) - 0.82) / 0.1, 1);
     --title-size: clamp(40px, 4.4vw, 64px);
@@ -1543,7 +1654,7 @@
   .model-collapse-lede {
     position: relative;
     z-index: 2;
-    max-width: 28em;
+    max-width: 56em;
     display: flex;
     flex-direction: column;
     gap: 3vh;
@@ -1604,46 +1715,60 @@
     letter-spacing: -0.02em;
     white-space: nowrap;
   }
-  /* post-dock reveal: copy left + bell-curve media right (Figma 382:436) */
+  /* post-dock reveal: full-bleed bell-curve video, one sentence over it at a time (Figma 750:47) */
   .model-collapse-reveal {
     position: absolute;
-    left: 12vw;
-    right: 8vw;
-    top: calc(12vh + var(--title-size) * 1.6 + 6vh);
-    bottom: 8vh;
+    left: 0;
+    right: 0;
+    top: calc(var(--title-top) + var(--title-size) * 0.55);
+    bottom: 0;
     z-index: 3;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    gap: 4vw;
-    align-items: start;
     opacity: var(--reveal);
-    transform: translateY(calc((1 - var(--reveal)) * 20px));
     pointer-events: none;
   }
   .model-collapse-copy {
-    max-width: 28em;
-    display: flex;
-    flex-direction: column;
-    gap: 3vh;
+    position: absolute;
+    left: 12vw;
+    top: 3vh;
+    width: min(939px, 66vw);
+    z-index: 4;
+    margin: 0;
+  }
+  .model-collapse-copy .lede {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    max-width: none;
+    color: #fff;
+  }
+  .model-collapse-copy .lede:nth-child(1) {
+    --sin: clamp(0, (var(--p) - 0.40) / 0.06, 1);
+    --sout: clamp(0, (var(--p) - 0.58) / 0.05, 1);
+    opacity: calc(var(--sin) * (1 - var(--sout)));
+  }
+  .model-collapse-copy .lede:nth-child(2) {
+    --sin: clamp(0, (var(--p) - 0.64) / 0.06, 1);
+    --sout: clamp(0, (var(--p) - 0.80) / 0.04, 1);
+    opacity: calc(var(--sin) * (1 - var(--sout)));
   }
   .model-collapse-media {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1762 / 1148;
-    overflow: hidden;
-    background: transparent;
-    border: none;
-  }
-  .model-collapse-media img {
     position: absolute;
     inset: 0;
+    overflow: hidden;
+    background: #000;
+  }
+  .model-collapse-media video {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center bottom;
     display: block;
-  }
-  .model-collapse-media .curve-post {
-    opacity: var(--curve);
   }
   /* black conclude box — contamination copy slides up after hinge */
   .model-collapse-conclude {
@@ -1748,7 +1873,7 @@
   }
   .optout-copy .lede {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -1939,7 +2064,7 @@
   .beat--dark { background: #000; color: var(--ink); }
   .beat--warm { background: var(--warm); color: #000; }
   .beat-copy {
-    max-width: 28em;
+    max-width: 56em;
     display: flex;
     flex-direction: column;
     gap: 3vh;
@@ -2359,16 +2484,23 @@
   .nearby-copy {
     position: absolute;
     left: calc(8.33% + 3.6vw);
-    top: 48.5%;
-    transform: translateY(-50%);
+    top: 38%;
     width: min(346px, 34vw);
     z-index: 4;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #000;
   }
   .nearby-copy em { font-style: italic; }
+  .s-dc-nearby .subtext {
+    position: absolute;
+    left: calc(8.33% + 3.6vw);
+    top: calc(38% + 7em);
+    width: min(346px, 34vw);
+    z-index: 4;
+    color: #000;
+  }
   .nearby-piece {
     position: absolute;
     overflow: hidden;
@@ -2488,7 +2620,7 @@
   .nearby-sound {
     position: absolute;
     left: calc(8.33% + 3.6vw);
-    top: calc(48.5% + 5.4em);
+    top: calc(38% + 14em);
     z-index: 6;
     display: flex;
     align-items: center;
@@ -2573,7 +2705,7 @@
     width: min(420px, 28vw);
     margin: 0;
     z-index: 5;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #000;
@@ -2597,6 +2729,7 @@
     z-index: 3;
   }
   .comm-box p + p { margin-top: 1em; }
+  .comm-box .subheading { margin-bottom: 0.6em; }
   .comm-photo {
     border: 1px solid #000;
     overflow: hidden;
@@ -2613,7 +2746,7 @@
      Tops are relative to the vertically centered .comm-layout. */
   .comm-box--grid {
     left: var(--comm-left);
-    top: 8%;
+    top: calc(8% + 150px);
     width: min(280px, 20vw);
     --delay: 0.04;
     --dur: 0.26;
@@ -2653,7 +2786,7 @@
   }
   .comm-photo--gov {
     left: var(--comm-left);
-    top: 55%;
+    top: calc(55% + 150px);
     width: min(280px, 20vw);
     height: 36%;
     --delay: 0.18;
@@ -2815,11 +2948,11 @@
     position: absolute;
     left: 11.94%;
     top: 21.19%;
-    width: 31.11%;
-    max-width: 448px;
+    width: 62.22%;
+    max-width: 896px;
     margin: 0;
     z-index: 6;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -2910,7 +3043,7 @@
   /* Content on the internet — 3×3 building grid in AI-flood end state */
   .bbm-internet-wrap {
     left: 16.74%;
-    top: 32.63%;
+    top: calc(32.63% + 50px);
     width: 38.33%;
     height: 37.29%;
     /* sits in front of the labor aerial that tucks under it */
@@ -2975,12 +3108,12 @@
   }
   .bbm-internet .cell:nth-child(1)::after { left: 29%; top: 31%; }
   .bbm-internet .cell:nth-child(9)::after { left: 29%; top: 31%; }
-  .bbm-label--internet { left: 23.13%; top: 29.98%; }
+  .bbm-label--internet { left: 23.13%; top: calc(29.98% + 50px); }
 
   /* Early automata — overlapping bordered frames (493:342) */
   .bbm-automata {
-    left: 47.5%;
-    top: 17.58%;
+    left: calc(47.5% + 150px);
+    top: calc(17.58% + 200px);
     width: 21.6%;
     height: 31.46%;
     z-index: 4;
@@ -3013,13 +3146,13 @@
     z-index: 2;
   }
   /* clear of automata shots + researchers */
-  .bbm-label--automata { left: 52%; top: 51.8%; }
+  .bbm-label--automata { left: calc(52% + 150px); top: calc(51.8% + 200px); }
 
   /* AI researchers (493:281) — landscape frame so the group photo isn't cropped */
   .bbm-researchers {
-    left: 71.5%;
-    top: 33.58%;
-    width: 26.67%;
+    left: 78.17%;
+    top: calc(41.08% + 50px);
+    width: 20%;
     height: auto;
     aspect-ratio: 3 / 2;
     overflow: hidden;
@@ -3033,7 +3166,7 @@
     object-fit: cover;
     object-position: center center;
   }
-  .bbm-label--researchers { left: 85.14%; top: 63.5%; }
+  .bbm-label--researchers { left: 85.14%; top: calc(63.5% + 50px); }
 
   /* Labor for data centers — behind the people-building grid */
   .bbm-labor {
@@ -3332,10 +3465,10 @@
     position: absolute;
     left: calc(8.33% + 3.6vw);
     top: 21%;
-    width: min(448px, 36vw);
+    width: min(896px, 72vw);
     margin: 0;
     z-index: 2;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -3476,10 +3609,10 @@
     position: absolute;
     left: var(--ask-gutter);
     top: 18%;
-    width: min(448px, 36vw);
+    width: min(896px, 72vw);
     margin: 0;
     z-index: 3;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -3848,7 +3981,7 @@
     align-self: flex-start;
     width: min(448px, 100%);
     margin: 0 0 3.5vh;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.5;
     color: #fff;
@@ -3948,7 +4081,7 @@
   .voice-thanks.is-visible { display: flex; }
   .voice-thanks p {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--section-copy);
     font-weight: 400;
     line-height: 1.45;
     color: #fff;
@@ -4144,6 +4277,11 @@
       transform: none;
       width: min(346px, 86vw);
     }
+    .s-dc-nearby .subtext {
+      left: 7vw;
+      top: calc(8vh + 8em);
+      width: min(346px, 86vw);
+    }
     .nearby-piece img { object-fit: cover; }
     /* keep Figma crop ratios (1440×900 stage); height follows width so pieces aren't stretched */
     .nearby-piece--speakers {
@@ -4191,7 +4329,7 @@
     }
     .nearby-sound {
       left: 7vw;
-      top: calc(8vh + 92px);
+      top: calc(8vh + 16em);
       font-size: 12px;
       gap: 8px;
       padding: 8px 10px;
@@ -4223,6 +4361,7 @@
   /* ---------- top / bottom framing ---------- */ 
   @media (max-width: 800px) {
     .s-intro .zoom-field { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(7, 1fr); }
+    .s-intro .intro-title { font-size: clamp(36px, 11vw, 56px); width: min(14ch, 88vw); }
     .copy-col { padding-inline: 7vw; max-width: none; }
     /* s-internet: reuse the intro copy column for phase-2 text + graph */
     .s-internet .intro {
@@ -4277,7 +4416,7 @@
     .step .media {
       height: 32vh; width: min(100%, 280px); order: -1; justify-self: end;
       transform:
-        translate(calc(var(--behind) * 14%), calc(var(--behind) * -8%))
+        translate(calc(var(--behind) * 14%), calc(var(--behind) * 8%))
         scale(calc(1 - var(--behind) * 0.22));
     }
     .s-datasets {
@@ -4384,8 +4523,10 @@
     .proposal-intro { max-width: none; margin-inline: 0; padding-inline: 7vw; }
     .pdf-viewport { width: 86vw; height: 40vh; padding: 3vh 5vw; }
     .callout { width: 75%; padding: 14px 16px; gap: 8px; }
-    .callout-left { left: 2vw; }
-    .callout-right { right: 2vw; }
+    .callout-left { left: calc(2vw + 40px); }
+    .callout-right { right: calc(2vw + 40px); }
+    .callout::after { width: 24px; height: 20px; bottom: -16px; }
+    .callout-quote { font-size: 14px; }
     .training-gaps-layout {
       padding-left: 7vw;
       padding-right: 7vw;
@@ -4442,10 +4583,12 @@
       white-space: normal;
     }
     .model-collapse-reveal {
-      left: 7vw; right: 7vw;
-      top: calc(10vh + var(--title-size) * 1.8 + 4vh);
-      grid-template-columns: 1fr;
-      gap: 3vh;
+      left: 0; right: 0;
+      top: calc(var(--title-top) + var(--title-size) * 0.7);
+    }
+    .model-collapse-copy {
+      left: 7vw;
+      width: min(939px, 86vw);
     }
     .model-collapse-conclude {
       left: 7vw;
@@ -4503,7 +4646,7 @@
         <div class="ph" data-img-slot data-label="AI everywhere — image 6"><img src="assets/intro/smart-edit.png" alt="Photo editor selecting a surfer in the waves with a Remove Object tool" loading="lazy"></div>
       </div>
       <div class="zoom-item word" style="grid-row: 2; grid-column: 4;" data-zoom-item="0.400,0.460,0.600,0.660" data-editable>facial recognition</div>
-      <p class="zoom-item center-hold" data-zoom-item="0.28,0.38,1,1" data-editable>Lately, it feels like AI is suddenly appearing everywhere.</p>
+      <p class="zoom-item center-hold" data-zoom-item="0.28,0.38,1,1" data-editable>How did we get here?</p>
       <!-- wave 5 -->
       <div class="zoom-item img size-wide nudge-140 nudge-left-300" style="grid-row: 1; grid-column: 2;" data-zoom-item="0.420,0.480,0.620,0.680">
         <div class="ph" data-img-slot data-label="AI everywhere — image 7"><img src="assets/intro/inventor-workshop.png" alt="Young inventor reaching toward a glowing machine in a cluttered workshop" loading="lazy"></div>
@@ -4524,6 +4667,7 @@
       </div>
       <div class="zoom-item word" style="grid-row: 2; grid-column: 3;" data-zoom-item="0.680,0.740,0.880,0.940" data-editable>AI-generated art</div>
     </div>
+    <h1 class="intro-title" data-editable>AI is everywhere.<span>Learn why.</span></h1>
     <p class="scroll-hint">begin scrolling</p>
   </div>
 </section>
@@ -4532,6 +4676,10 @@
 <section id="s-explosion" class="flow lede-hold">
   <div class="lede-hold-pin copy-col">
     <p class="lede" data-scroll-reveal data-editable>You may wonder where this explosion of technology came from.</p>
+  </div>
+</section>
+<section id="s-explosion-2" class="flow lede-hold">
+  <div class="lede-hold-pin copy-col">
     <p class="lede" data-scroll-reveal data-editable>Ideas about artificial intelligence are in fact older than you think.</p>
   </div>
 </section>
@@ -4541,7 +4689,7 @@
   <div class="pin">
     <div class="intro">
       <p class="lede" data-editable>Long before computers, cultures around the world imagined artificial beings, mechanical minds, and machines that could speak, write, or serve.</p>
-      <p class="lede outro" data-editable>None of these predicted modern AI exactly but together they show that the dream of a machine that thinks, creates, or serves has followed humans across centuries and cultures.</p>
+      <p class="lede outro" data-editable>None of these predicted modern AI exactly but together they show that the dream of such machines has followed humans across centuries and cultures.</p>
     </div>
 
     <div class="step" style="--k: 0;">
@@ -4583,7 +4731,6 @@
   <div class="pin">
     <div class="proposal-lead-layout">
       <div class="proposal-lead-copy">
-        <p class="lede" data-editable>The kind of AI that we know and talk about today was started over 100 years ago.</p>
         <p class="lede proposal-lead-second" data-editable>In 1955, a small group of researchers wrote a proposal to study how machines might reason, use language, and solve problems normally reserved for people.</p>
       </div>
       <div class="proposal-lead-photo">
@@ -4632,23 +4779,18 @@
 
       <div class="callout callout-left" style="--in-start: 0.03; --hold-start: 0.06; --hold-end: 0.15; --out-end: 0.18;">
         <p class="callout-quote" data-editable>&#8220;Every aspect of learning or any other feature of intelligence can in principle be so precisely described that a machine can be made to simulate it.&#8221;</p>
-        <p class="callout-prompt" data-editable>Do you think every aspect of human creativity can be described precisely enough for a machine to simulate it?</p>
       </div>
       <div class="callout callout-right" style="--in-start: 0.235; --hold-start: 0.265; --hold-end: 0.355; --out-end: 0.385;">
         <p class="callout-quote" data-editable>&#8220;A large part of human thought consists of manipulating words according to rules of reasoning and rules of conjecture.&#8221;</p>
-        <p class="callout-prompt" data-editable>If writing captions or crafting stories is just rules to be replicated, what does that mean for your own creative process?</p>
       </div>
       <div class="callout callout-left" style="--in-start: 0.44; --hold-start: 0.47; --hold-end: 0.56; --out-end: 0.59;">
         <p class="callout-quote" data-editable>&#8220;The difference between creative thinking and unimaginative competent thinking lies in the injection of some randomness.&#8221;</p>
-        <p class="callout-prompt" data-editable>Is creativity just controlled randomness? Is that all it is when AI does it &#8212; is that all it is when you do it?</p>
       </div>
       <div class="callout callout-right" style="--in-start: 0.645; --hold-start: 0.675; --hold-end: 0.765; --out-end: 0.795;">
         <p class="callout-quote" data-editable>&#8220;One ordinarily provides the machine with a set of rules to cover each contingency which may arise&#8230; One expects the machine to follow this set of rules slavishly and to exhibit no originality or common sense.&#8221;</p>
-        <p class="callout-prompt" data-editable>Does a machine that follows rules &#8220;slavishly,&#8221; with no originality or common sense, sound like any AI tool you&#8217;ve used?</p>
       </div>
       <div class="callout callout-left" style="--in-start: 0.85; --hold-start: 0.88; --hold-end: 0.97; --out-end: 1;">
         <p class="callout-quote" data-editable>&#8220;I propose to study the relation of language to intelligence&#8230; The human mind apparently uses language as its means of handling complicated phenomena.&#8221;</p>
-        <p class="callout-prompt" data-editable>The people who decided what AI should do didn&#8217;t look like most of the people it would affect &#8212; what does that leave out?</p>
       </div>
     </div>
   </div>
@@ -4659,7 +4801,7 @@
 <section id="s-naming" class="s-naming" data-scrub>
   <div class="pin">
     <div class="naming-stage">
-      <p class="naming-lede" data-editable>There were many terms researchers used to describe these ideas. Some of these  were already established fields of study. 
+      <p class="naming-lede" data-editable>There are many terms researchers were already using to describe these ideas. Some of these were even established fields of study. 
       </p>
       <div class="naming-field">
         <div class="naming-crosshair" aria-hidden="true"></div>
@@ -4675,7 +4817,6 @@
         <div class="naming-reveal">
           <div class="naming-copy">
             <p class="naming-outro" data-editable>Of all the options, the term that gained the most attention was the one that compared machines to <strong>human minds. </strong></p>
-            <p class="naming-prompt" data-editable>Do you think that using a different name for this technology would make us treat it any differently?</p>
           </div>
           <div class="naming-frames">
             <div class="naming-frame" style="--i: 0;">
@@ -4743,7 +4884,11 @@
 <section id="s-rules-after" class="flow lede-hold">
   <div class="lede-hold-pin copy-col">
     <p class="lede" data-scroll-reveal data-editable>Then researchers tried something different.</p>
-    <p class="lede" data-scroll-reveal data-editable>Without using rules they &#8220;fed&#8221; the machine millions of examples and let it figure out the patterns instead of following fixed rules. This approach is called machine learning and is still how a lot of AI works today.</p>
+  </div>
+</section>
+<section id="s-rules-after-2" class="flow lede-hold">
+  <div class="lede-hold-pin copy-col">
+    <p class="lede" data-scroll-reveal data-editable>Without using fixed rules they &#8220;fed&#8221; the machine millions of examples and let it figure out the patterns. This approach is called machine learning and is still how a lot of AI works today.</p>
   </div>
 </section>
 
@@ -4801,8 +4946,7 @@
           <p class="ai-kinds-tag-slot" aria-hidden="true">Generative AI</p>
           <p class="ai-kinds-blurb" data-editable>Other AI uses patterns to generate brand-new things, like text, images, and video.</p>
           <div class="ai-kinds-focus-copy">
-            <p class="ai-kinds-focus-lead" data-editable>Let&#8217;s focus on this generative kind of AI which powers tools like ChatGPT.</p>
-            <p class="ai-kinds-focus-more" data-editable>To make generative AI, you need a&nbsp;LOT more examples than those data sets.</p>
+            <p class="ai-kinds-focus-lead" data-editable>Let&#8217;s focus on this generative kind of AI which powers tools like ChatGPT. To make generative AI, you need a&nbsp;LOT more examples than those data sets.</p>
           </div>
           <div class="ai-kinds-examples">
             <p class="label" data-editable>Examples:</p>
@@ -4855,7 +4999,7 @@
     <div class="pin">
       <div class="intro">
         <p class="lede" data-editable>The internet solved that problem.</p>
-        <p class="lede" data-editable>Every post, comment, photo, and video made by real people became potential training material.</p>
+        <p class="subheading" data-editable>Every post, comment, photo, and video made by real people became potential training material.</p>
         <p class="subtext" data-editable>This was important for GPT 3.5: the model that rapidly accelerated ChatGPT&#8217;s popularity</p>
       </div>
 
@@ -4905,36 +5049,34 @@
       </div>
 
       <div class="internet-outro">
-        <p class="lede" data-editable>in addition to other things in its giant collection of human-created content.</p>
+        <p class="subheading" data-editable>in addition to other things in its giant collection of human-created content.</p>
         <div class="internet-outro-graph ph" data-img-slot data-label="graph — most common training sources for GPT-2"><img src="assets/training/top-trained-sites.png" alt="Chart of the top web domains in LLM training data and their share of tokens" loading="lazy"></div>
         <p class="subtext" data-editable>Top domains for training in 2023. Current LLM models still scrape platforms like these. </p>
       </div>
     </div>
   </section>
 
-  <!-- 8 · Training gaps: normal-flow section, building lives in the shared sticky track
-       above — see .s-training-gaps CSS for how --reveal crossfades + shrinks 2 cells. -->
-  <section id="s-training-gaps" class="s-training-gaps lede-hold">
-    <div class="lede-hold-pin">
+  <!-- 8 · Training gaps: staggered reveal — lede, then subtext, then graph (all stay in place) -->
+  <section id="s-training-gaps" class="s-training-gaps" data-scrub>
+    <div class="pin">
       <div class="training-gaps-layout">
         <div class="training-gaps-copy">
-          <p class="lede" data-scroll-reveal data-editable>Some languages, cultures, and communities are represented more in training data than others.</p>
-          <p class="subtext" data-scroll-reveal data-editable>Common Crawl&#8217;s crawling process prioritizes pages on <em>popular</em> websites, which means smaller websites and sites in non-English languages are not as represented.</p>
+          <p class="lede" data-editable>Some languages, cultures, and communities are represented more in training data than others.</p>
+          <p class="subtext" data-editable>Common Crawl&#8217;s crawling process prioritizes pages on <em>popular</em> websites, which means smaller websites and sites in non-English languages are <span class="text-knockout">not as represented.</span></p>
           <div class="training-gaps-graph ph" data-img-slot data-label="graph — node and link diagram"><img src="assets/training/languages.png" alt="Bubble chart of language representation in training data, with English at 40.6 percent" loading="lazy"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 9 · Human labor: purple full-viewport beat (Figma 382:286). Building stays sticky
-       via the shared track; outline frames + body copy + statistic note. -->
-  <section id="s-human-labor" class="s-human-labor lede-hold">
-    <div class="lede-hold-pin">
+  <!-- 9 · Human labor: staggered reveal — lede 1, lede 2, then subheading (all stay in place) -->
+  <section id="s-human-labor" class="s-human-labor" data-scrub>
+    <div class="pin">
       <div class="human-labor-layout">
         <div class="human-labor-copy">
-          <p class="lede" data-scroll-reveal data-editable>It takes more than data to train these models.</p>
-          <p class="lede" data-scroll-reveal data-editable>Behind the scenes, millions of people help prepare data, review outputs, and improve models.</p>
-          <p class="subtext" data-scroll-reveal data-editable>Many receive little pay and difficult working conditions as companies race to conduct training.</p>
+          <p class="lede" data-editable>It takes more than data to train these models.</p>
+          <p class="subheading" data-editable>Behind the scenes, millions of people help prepare data, review outputs, and improve models.</p>
+          <p class="subheading" style="color: var(--warm);" data-editable>Many receive little pay and difficult working conditions as companies race to conduct training.</p>
         </div>
       </div>
     </div>
@@ -4946,7 +5088,7 @@
     <div class="lede-hold-pin">
       <div class="ai-flood-layout">
         <div class="ai-flood-copy">
-          <p class="lede" data-scroll-reveal data-editable>And as you know, the internet has been filling up with writing and images made by AI, not people.</p>
+          <p class="lede" data-scroll-reveal data-editable>But the lately, the internet has been filling up with writing and images made by AI, not people.</p>
         </div>
       </div>
     </div>
@@ -4961,7 +5103,7 @@
     <div class="model-collapse-stage">
       <div class="model-collapse-crosshair" aria-hidden="true"></div>
       <div class="model-collapse-lede">
-        <p class="lede" data-editable>When AI models increasingly get trained on other AI-generated things instead of real content, their quality can erode.</p>
+        <p class="lede" data-editable>When AI models get trained on other AI-generated things instead of real content, their quality can erode.</p>
         <p class="lede" data-editable>Researchers call this model collapse.</p>
       </div>
       <div class="model-collapse-hinge">
@@ -4974,8 +5116,7 @@
           <p class="lede" data-editable>This further impacts whoever was already underrepresented in the data to begin with.</p>
         </div>
         <div class="model-collapse-media">
-          <img class="curve-pre" src="assets/training/bell-curve-pre.png" alt="Bell curve of common versus niche styles, with unique hats at the tails" loading="lazy">
-          <img class="curve-post" src="assets/training/bell-curve-post.png" alt="Collapsed bell curve where uncommon styles have disappeared" loading="lazy">
+          <video class="curve-video" src="assets/training/bell-curve.mp4" muted playsinline preload="auto" aria-label="Bell curve of common versus uncommon styles collapsing toward what shows up most often"></video>
         </div>
       </div>
       <div class="model-collapse-conclude">
@@ -5138,19 +5279,19 @@
     <div class="dc-chapter-flow">
       <div class="dc-box-hold">
         <div class="dc-box">
-          <p data-editable>Servers generate a lot of heat. To keep them from failing, data centers pump water through cooling systems that absorb that heat and release it as steam through cooling towers.</p>
+          <p data-editable><span class="text-knockout">Servers generate a lot of heat.</span> To keep them from failing, data centers pump water through cooling systems that absorb that heat and release it as steam through cooling towers.</p>
           <p data-editable>A large data center can consume up to 5 million gallons of water per day, roughly equivalent to the daily water use of a town of 10,000 to 50,000 people.</p>
         </div>
       </div>
       <div class="dc-box-hold">
         <div class="dc-box dc-box--tight">
-          <p data-editable>This water usage most directly impacts locals. In The Dalles, Oregon, Google built its first data center in 2006. By 2024, a third of the entire city's water supply went to Google's three local data center sites.</p>
+          <p data-editable><span class="text-knockout">This water usage most directly impacts locals.</span> In The Dalles, Oregon, Google built its first data center in 2006. By 2024, a third of the entire city's water supply went to Google's three local data center sites.</p>
         </div>
       </div>
       <div class="dc-box-hold">
         <div class="dc-box dc-box--tight">
           <p data-editable>Beyond cooling, indirect water consumption from the power plants that supply electricity can represent up to 75% of a data center's total water use.</p>
-          <p data-editable>To decrease water usage, some new approaches are being developed. For example, immersion cooling submerges servers in a non-conductive liquid, which gets rid of the need for water-based cooling. These technologies are being worked on and are not yet adopted widely.</p>
+          <p data-editable><span class="text-knockout">There are new approaches being developed to decrease water usage.</span> For example, immersion cooling submerges servers in a non-conductive liquid, which gets rid of the need for water-based cooling. These technologies are being worked on and are not yet adopted widely.</p>
         </div>
       </div>
     </div>
@@ -5170,8 +5311,8 @@
       </div>
       <div class="dc-box-hold">
         <div class="dc-box dc-box--tight">
-          <p data-editable>Data centers can require amounts of power similar to a medium-sized city, and accounted for nearly 4.4% of U.S. annual electricity in 2023, a figure expected to grow dramatically as AI demand increases.</p>
-          <p data-editable>Since that electricity comes from the existing grid, data centers compete with homes, schools, and hospitals for power. Some companies are investing in on-site solar and wind; others purchase renewable energy credits without changing how they actually draw from the grid.</p>
+          <p data-editable><span class="text-knockout">Data centers can require amounts of power similar to a medium-sized city,</span> and accounted for nearly 4.4% of U.S. annual electricity in 2023, a figure expected to grow dramatically as AI demand increases.</p>
+          <p data-editable><span class="text-highlight">Since that electricity comes from the existing grid, data centers compete with homes, schools, and hospitals for power.</span> Some companies are investing in on-site solar and wind; others purchase renewable energy credits without changing how they actually draw from the grid.</p>
         </div>
       </div>
     </div>
@@ -5186,14 +5327,14 @@
     <div class="dc-chapter-flow">
       <div class="dc-box-hold">
         <div class="dc-box dc-box--tight">
-          <p data-editable>Before a single server is installed, a data center needs approval from local government: land use permits, environmental impact assessments, noise level reviews, and confirmation that the local grid and water systems can handle the load.</p>
-          <p data-editable>Zoning reviews must evaluate whether the local grid and water systems can support such loads, especially in areas with old or limited infrastructure.</p>
+          <p data-editable><span class="text-knockout">Before a single server is installed, a data center needs approval from local government:</span> land use permits, environmental impact assessments, noise level reviews, and confirmation that the local grid and water systems can handle the load.</p>
+          <p data-editable><span class="text-highlight">Zoning reviews are intended to evaluate whether the local grid and water systems can support such loads,</span> especially in areas with old or limited infrastructure.</p>
         </div>
       </div>
       <div class="dc-box-hold">
         <div class="dc-box dc-box--tight">
-          <p data-editable>Companies often approach local governments with offers that are hard to refuse, like investment in water or road infrastructure, property tax revenue, and promises of jobs.</p>
-          <p data-editable>Google invested almost $29 million into updating The Dalles' water system in exchange for a 92% discount on its property taxes for 15 years. These deals shape what communities get and what they give up.</p>
+          <p data-editable><span class="text-knockout">Companies often approach local governments with offers that are hard to refuse,</span> like investment in water or road infrastructure, property tax revenue, and promises of jobs.</p>
+          <p data-editable>Google invested almost $29 million into updating The Dalles' water system in exchange for a 92% discount on its property taxes for 15 years. <span class="text-highlight">These deals shape what communities get and what they give up.</span></p>
         </div>
       </div>
     </div>
@@ -5208,7 +5349,7 @@
     <div class="dc-chapter-flow">
       <div class="dc-box-hold">
         <div class="dc-box dc-box--tight">
-          <p data-editable>Building and running a data center requires skilled workers: electricians, HVAC technicians, network engineers, construction crews, and security staff. The construction phase brings a surge of temporary jobs to an area. But once a facility is operational, most of the work is automated.</p>
+          <p data-editable>Building and running a data center requires skilled workers: electricians, HVAC technicians, network engineers, construction crews, and security staff. <span class="text-highlight">The construction phase brings a surge of temporary jobs to an area.</span> But once a facility is operational, most of the work is automated.</p>
         </div>
       </div>
     </div>
@@ -5276,7 +5417,8 @@
         <img src="assets/datacenter/nearby/mailbox.png" alt="Mailbox">
       </div>
 
-      <p class="nearby-copy" data-editable>When community well-being isn&#8217;t prioritized, the introduction of a data center can be <em>jarring</em>.</p>
+      <p class="nearby-copy" data-editable>This is what it's like to live near a data center.</p>
+      <p class="subtext" data-editable>When community well-being isn&#8217;t prioritized, the introduction of a data center can be <em>jarring</em>.</p>
 
       <button type="button" class="nearby-sound" id="nearby-sound-toggle" aria-pressed="false">
         <span class="nearby-sound-mark" aria-hidden="true"></span>
@@ -5307,6 +5449,7 @@
         <p class="comm-lede" data-editable>So communities are fighting back.</p>
 
         <div class="comm-item comm-box comm-box--grid">
+          <p class="subheading" data-editable>Legislation</p>
           <p data-editable>Since 2025, at least 18 states have passed or introduced laws requiring data centers to pay their own electricity grid costs instead of passing them onto residents. Oregon, Texas, Oklahoma, and South Dakota have all signed this protection into law.</p>
         </div>
 
@@ -5315,6 +5458,7 @@
         </div>
 
         <div class="comm-item comm-box comm-box--halt">
+          <p class="subheading" data-editable>Democracy in Action</p>
           <p data-editable>Some communities have halted data center construction entirely. In Warrenton, Virginia, every town council member who voted yes on an Amazon data center subsequently lost re-election. Throughout the country, at least $64 billion of data center projects have been blocked or delayed amid local opposition.</p>
         </div>
 
@@ -5323,6 +5467,7 @@
         </div>
 
         <div class="comm-item comm-box comm-box--lancaster">
+          <p class="subheading" data-editable>Community Benefit Agreements</p>
           <p data-editable>In Lancaster, Pennsylvania, residents negotiated a legally binding agreement called a &#8220;community benefit agreement&#8221; before a data center could break ground.</p>
           <p data-editable>This agreement included strict noise limits, 100% renewable energy, a hard cap of 20,000 gallons of water per day (compared to the previous tenant&#8217;s 100,000&#8211;125,000), and a $20 million contribution to the city&#8217;s sustainability and economic development funds.</p>
         </div>
@@ -5332,6 +5477,7 @@
         </div>
 
         <div class="comm-item comm-box comm-box--tribal">
+          <p class="subheading" data-editable>Tribal Sovereignty</p>
           <p data-editable>Tribal nations are asserting their own terms. The Seminole Nation voted 24&#8211;0 to permanently ban data center construction after a startup tried to bypass community consent.</p>
           <p data-editable>In Tulsa and Oklahoma City, city officials voted to pause all incoming data center development until 2027.</p>
         </div>
@@ -5504,7 +5650,7 @@
 <section id="s-many-involved" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>And we need many more people involved to define what it becomes</p>
+      <p class="lede" data-scroll-reveal data-editable>and we need many more people to define what it could be.</p>
     </div>
   </div>
 </section>
@@ -5569,7 +5715,7 @@
 <section id="s-map-unfinished" class="beat beat--dark lede-hold">
   <div class="lede-hold-pin">
     <div class="beat-copy">
-      <p class="lede" data-scroll-reveal data-editable>This map is still being filled out by researchers, by companies, by lawmakers, and by people like the students who developed stances on where they didn&#8217;t want this technology involved with their creative process.</p>
+      <p class="lede" data-scroll-reveal data-editable> Stances like these are still being formed by researchers, by companies, by lawmakers, and by people like the students who want a say in how this technology interacts with their creative process.</p>
     </div>
   </div>
 </section>
@@ -5752,6 +5898,26 @@
       }
       s.querySelectorAll('[data-zoom-item]').forEach(el => updateZoomItem(el, p));
       if (s.classList.contains('s-ai-kinds')) updateAiKindsFlight(s);
+      if (s.id === 's-model-collapse') scrubCurveVideo(p);
+    }
+  }
+
+  /* bell-curve video: frame follows scroll through the model-collapse reveal */
+  const curveVideo = document.querySelector('#s-model-collapse .curve-video');
+  if (curveVideo) {
+    curveVideo.pause();
+    curveVideo.addEventListener('loadedmetadata', () => {
+      const section = document.getElementById('s-model-collapse');
+      const p = parseFloat(section?.style.getPropertyValue('--p')) || 0;
+      scrubCurveVideo(p);
+    });
+  }
+  function scrubCurveVideo(p) {
+    if (!curveVideo || !curveVideo.duration || !isFinite(curveVideo.duration)) return;
+    const t = Math.min(1, Math.max(0, (p - 0.4) / 0.6));
+    const time = Math.min(Math.max(0, curveVideo.duration - 0.04), t * curveVideo.duration);
+    if (Math.abs(curveVideo.currentTime - time) > 0.03) {
+      curveVideo.currentTime = time;
     }
   }
 
@@ -5771,8 +5937,8 @@
     if (!stage || !gen || !slot || !cols || !left) return;
 
     const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
-    const tags = aiKindsProgress(p, 0.54, 0.10);
-    const focus = aiKindsProgress(p, 0.68, 0.12);
+    const tags = aiKindsProgress(p, 0.52, 0.10);
+    const focus = aiKindsProgress(p, 0.72, 0.12);
     const cs = getComputedStyle(stage);
     const toY = parseFloat(cs.paddingTop) || 0;
 
@@ -6656,6 +6822,7 @@
     io.observe(pin || section);
   })();
 </script>
+<script src="controls.js" defer></script>
 
 </body>
 </html>
