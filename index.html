@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XBHCC2PCM6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-XBHCC2PCM6');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>History — Sandbox</title>
@@ -886,9 +895,11 @@
      stay smaller + dimmed with title only. No horizontal travel.
      ============================================================ */
   .s-datasets {
-    height: calc(var(--section-gap) * 2.4);
+    /* card scrub, one beat on Pima, then the other cards scroll off, then the question fades across two beats */
+    height: calc(var(--section-gap) * 2.4 + var(--lede-beat) * 3 + 100vh);
     --cards: 2;                          /* last card index (3 cards → 0..2) */
-    --focus: calc(var(--p) * var(--cards));
+    --focus: 0;                          /* JS holds this at 2 once Pima is in focus */
+    --q: 0;
     --gap: 12.5px;
     --card-w: 270px;
     --card-h: 260px;
@@ -922,7 +933,7 @@
     display: flex;
     align-items: center;
     gap: var(--gap);
-    height: calc(var(--card-h-on) + 5.5em);
+    height: calc(var(--card-h-on) + 9em);
     padding-left: 12vw;
     padding-right: 8vw;
   }
@@ -958,8 +969,23 @@
   .dataset-card .desc {
     display: block;
     opacity: var(--prox);
-    max-height: calc(var(--prox) * 3em);
+    max-height: calc(var(--prox) * 6em);
     overflow: hidden;
+  }
+  .datasets-leave {
+    transform: translateY(calc(var(--leave, 0px) * -1));
+  }
+  .s-datasets .pin > .datasets-question {
+    position: absolute;
+    left: 12vw;
+    top: 50%;
+    transform: translateY(-50%);
+    width: min(640px, 36vw);
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+    opacity: var(--q);
   }
 
   /* ============================================================
@@ -4469,11 +4495,15 @@
       max-width: none;
       font-size: 15px;
     }
+    .s-datasets .pin > .datasets-question {
+      left: 7vw;
+      width: min(640px, 86vw);
+    }
     .dataset-track {
       /* on mobile, pan so the focused card sits in the viewport center */
       padding-left: 0;
       padding-right: 0;
-      height: calc(var(--card-h-on) + 7em);
+      height: calc(var(--card-h-on) + 11em);
       width: max-content;
       transform: translateX(calc(50vw - var(--card-w-on) / 2 - var(--focus) * var(--slot)));
       will-change: transform;
@@ -4926,20 +4956,20 @@
 <!-- 5 · Datasets: stationary row — scroll focuses/enlarges each card -->
 <section id="s-datasets" class="s-datasets" data-scrub>
   <div class="pin">
-    <p class="lede datasets-intro" data-editable>This type of machine learning started with datasets, many of which contained information about people.</p>
+    <p class="lede datasets-intro datasets-leave" data-editable>This type of machine learning started with datasets, many of which contained information about people.</p>
     <div class="dataset-track">
-      <figure class="dataset-card" style="--i: 0;">
+      <figure class="dataset-card datasets-leave" style="--i: 0;">
         <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="MNIST handwritten digits"><img src="assets/datasets/mnist.png" alt="Grid of handwritten digit samples from the MNIST dataset" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
         <figcaption>
           <span class="name" data-editable>MNIST</span>
           <span class="desc" data-editable>Handwritten digits used to train early image classifiers.</span>
         </figcaption>
       </figure>
-      <figure class="dataset-card" style="--i: 1;">
-        <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="Iris dataset visual"><img src="assets/datasets/iris.jpg" alt="Purple iris flower in bloom" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
+      <figure class="dataset-card datasets-leave" style="--i: 1;">
+        <div class="media"><div class="ph" data-img-slot data-pixel-focus data-label="ImageNet dataset visual"><img src="assets/datasets/imagenet.jpg" alt="Overhead view of three people with object-detection boxes labeling helmets, vests, and a safety violation" loading="lazy"><canvas aria-hidden="true"></canvas></div></div>
         <figcaption>
-          <span class="name" data-editable>Iris</span>
-          <span class="desc" data-editable>Flower measurements for sorting species by pattern.</span>
+          <span class="name" data-editable>ImageNet</span>
+          <span class="desc" data-editable>The dataset that powered the deep learning revolution, built on uncompensated labor and unconsented images at massive scale.</span>
         </figcaption>
       </figure>
       <figure class="dataset-card" style="--i: 2;">
@@ -4950,6 +4980,7 @@
         </figcaption>
       </figure>
     </div>
+    <p class="lede datasets-question" data-editable>What happens when people&#8217;s data are used in ways they never agreed to?</p>
   </div>
 </section>
 
@@ -5852,7 +5883,7 @@
       <p>IBM, &#8220;Examining Synthetic Data: The Promise, Risks and Realities,&#8221; ibm.com</p>
       <p>IOPscience, &#8220;The Environmental Footprint of Data Centers in the United States,&#8221; iopscience.iop.org</p>
       <p>John McCarthy, &#8220;Review of <em>The Question of Artificial Intelligence</em> (ed. Brian Bloomfield),&#8221; Stanford University, www-formal.stanford.edu</p>
-      <p>Kaggle, &#8220;Iris Flower Dataset&#8221;</p>
+      <p>Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei, &#8220;ImageNet: A Large-Scale Hierarchical Image Database,&#8221; IEEE Conference on Computer Vision and Pattern Recognition, 2009</p>
       <p>Kaggle, &#8220;Pima Indians Diabetes Database&#8221;</p>
       <p>Kapor Foundation, &#8220;The Unequal Burden of Data Centers,&#8221; kaporfoundation.org</p>
       <p>KOSU, &#8220;Tulsa Will Pause New Data Center Construction for 9 Months After Council Vote,&#8221; by Phillip Jackson of Tulsa Flyer (originally published on Tulsa Flyer; also carried by NPR)</p>
@@ -5943,7 +5974,33 @@
       s.querySelectorAll('[data-zoom-item]').forEach(el => updateZoomItem(el, p));
       if (s.classList.contains('s-ai-kinds')) updateAiKindsFlight(s);
       if (s.id === 's-model-collapse') scrubCurveVideo(p);
+      if (s.id === 's-datasets') updateDatasetsHold(s, p, range, vh);
     }
+  }
+
+  /* datasets: cards travel across the original scrub, Pima sticks for one beat,
+     then the intro and the other cards scroll off with the page. The question
+     fades in across the next two beats once only Pima is left. */
+  function ledeBeatPx(vh) {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--lede-beat').trim();
+    if (raw.endsWith('vh')) return (parseFloat(raw) || 0) * vh / 100;
+    return parseFloat(raw) || 0;
+  }
+  function updateDatasetsHold(section, p, range, vh) {
+    const beat = ledeBeatPx(vh);
+    const exitPx = vh;
+    const tail = beat * 3 + exitPx;
+    const travel = Math.max(1, range - tail);
+    const scrolled = p * range;
+    const focus = Math.min(2, (scrolled / travel) * 2);
+    section._datasetFocus = focus;
+    section.style.setProperty('--focus', focus.toFixed(4));
+    const stickEnd = travel + beat;
+    const exitEnd = stickEnd + exitPx;
+    const leave = Math.min(exitPx, Math.max(0, scrolled - stickEnd));
+    section.style.setProperty('--leave', leave.toFixed(1) + 'px');
+    const q = Math.min(1, Math.max(0, (scrolled - exitEnd) / (beat * 2)));
+    section.style.setProperty('--q', q.toFixed(4));
   }
 
   /* bell-curve video: hold the first frame for 2 scroll beats after the
@@ -6209,7 +6266,8 @@
     const hold = parseFloat(getComputedStyle(card).getPropertyValue('--hold')) || 0;
     PixelFocus.register(slot, () => {
       const p = parseFloat(section.style.getPropertyValue('--p')) || 0;
-      const d = p * cards - i;
+      const focus = section._datasetFocus != null ? section._datasetFocus : p * cards;
+      const d = focus - i;
       // d < 0: card hasn't been reached yet — pixelate based on how far off it still is.
       // d >= 0: card has already been focused and passed — stays fully resolved instead of
       // re-pixelating as it shrinks back out of frame (Math.max(0, -d) collapses to 0 here).

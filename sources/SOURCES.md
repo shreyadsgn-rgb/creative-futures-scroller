@@ -11,7 +11,7 @@
 - IBM, "Examining Synthetic Data: The Promise, Risks and Realities," ibm.com
 - IOPscience, "The Environmental Footprint of Data Centers in the United States," iopscience.iop.org
 - John McCarthy, "Review of *The Question of Artificial Intelligence* (ed. Brian Bloomfield)," Stanford University, www-formal.stanford.edu
-- Kaggle, "Iris Flower Dataset"
+- Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei, "ImageNet: A Large-Scale Hierarchical Image Database," IEEE Conference on Computer Vision and Pattern Recognition, 2009
 - Kaggle, "Pima Indians Diabetes Database"
 - Kapor Foundation, "The Unequal Burden of Data Centers," kaporfoundation.org
 - KOSU, "Tulsa Will Pause New Data Center Construction for 9 Months After Council Vote," by Phillip Jackson of Tulsa Flyer (originally published on Tulsa Flyer; also carried by NPR)

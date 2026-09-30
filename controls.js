@@ -2,7 +2,7 @@
    controls.js — shared dev control panel for section sandboxes
    ------------------------------------------------------------
    Usage:  <script src="controls.js" defer></script>
-   Toggle: the "dev" button (bottom-right) or the ` (backtick) key.
+   Toggle: the ` (backtick) key. No button is drawn on the page.
 
    Sliders write live to CSS custom properties on :root.
    "Save" does NOT persist anything — it prints the current values
@@ -19,6 +19,11 @@
    ============================================================ */
 (function () {
   'use strict';
+
+  /* Published pages hide the panel. Local previews and ?dev=1 still show it. */
+  const host = location.hostname;
+  const local = host === 'localhost' || host === '127.0.0.1' || host === '';
+  if (!local && !/[?&]dev=1(?:&|$)/.test(location.search)) return;
 
   const CONTROLS = window.DEV_CONTROLS || [
     { prop: '--section-gap',     label: 'Section gap',     min: 100, max: 800, step: 10,   unit: 'vh' },
@@ -297,13 +302,7 @@
     else document.execCommand('copy');
   });
 
-  /* ---------- toggle button + keyboard shortcut ---------- */
-  const toggle = document.createElement('button');
-  toggle.id = 'devtoggle';
-  toggle.type = 'button';
-  toggle.textContent = '◐ dev';
-  toggle.addEventListener('click', () => { panel.hidden = !panel.hidden; });
-
+  /* ---------- keyboard shortcut (no on-page button) ---------- */
   document.addEventListener('keydown', e => {
     if (e.key !== '`') return;
     const t = e.target;
@@ -313,5 +312,4 @@
   });
 
   document.body.appendChild(panel);
-  document.body.appendChild(toggle);
 })();
