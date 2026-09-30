@@ -903,9 +903,10 @@
     --q: 0;
     --gap: 12.5px;
     --card-w: 270px;
-    --card-h: 260px;
+    --card-h: min(260px, calc(var(--card-h-on) * 0.7));
     --card-w-on: 352px;
-    --card-h-on: 402px;
+    /* keep the enlarged card plus its caption inside the pinned screen */
+    --card-h-on: min(402px, calc(100vh - 18vh - 20em));
   }
   .s-datasets .pin {
     align-content: start;
@@ -4478,9 +4479,9 @@
     }
     .s-datasets {
       --card-w: 58vw;
-      --card-h: 56vw;
+      --card-h: min(56vw, calc(var(--card-h-on) * 0.75));
       --card-w-on: 78vw;
-      --card-h-on: min(88vw, 52vh);
+      --card-h-on: min(88vw, 42vh);
       --gap: 14px;
       --slot: calc(var(--card-w-on) + var(--gap));
     }
