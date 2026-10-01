@@ -3882,9 +3882,10 @@
   .ask-note {
     position: absolute;
     right: var(--ask-gutter);
-    top: calc(26% - 2.2em);
+    top: auto;
     left: auto;
-    bottom: auto;
+    /* sit on the bottom edge of the chart, which starts at 26% */
+    bottom: calc(100% - 26% - min(756px, 72vh) + 10px);
     transform: none;
     width: auto;
     max-width: min(448px, 50vw);
